@@ -51,6 +51,11 @@ python community.py  [--seed] [--num_members] [--num_turns] [--num_abilities] [-
 - **gui**: Activates the simulator with a graphical user interface (GUI).
 - **gi**: Specifies the number of players from each group in the community. [i] ranges from 1-10, with $\sum_{i=1}^{10} g_{i} = $`num_members`. If the sum is less than `num_members`, the remaining players will be from team 0 by default. The sum cannot exceed the specified `num_members`.
 
+## Example Usage
+
+```bash
+python .\community.py --num_members 40 --num_turns 100 --num_abilities 8 --g1 20 --gui --log
+```
 
 ## Submission
 
