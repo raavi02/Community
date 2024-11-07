@@ -47,7 +47,7 @@ python community.py  [--seed] [--num_members] [--num_turns] [--num_abilities] [-
 - **seed_task_difficulty**: Separate seed for task difficulty generation (optional).
 - **group_task_distribution**: Group number whose task difficulty distribution function will be used.
 - **group_abilities_distribution**: Group number whose ability distribution function will be used.
-- **log**: If this flag is present, print statements won't appear on the console and will be saved to the `log/` folder.
+- **log**: If this flag is present, print statements won't appear on the console and will be saved to the `log-results/` folder.
 - **gui**: Activates the simulator with a graphical user interface (GUI).
 - **gi**: Specifies the number of players from each group in the community. [i] ranges from 1-10, with $\sum_{i=1}^{10} g_{i} = $`num_members`. If the sum is less than `num_members`, the remaining players will be from team 0 by default. The sum cannot exceed the specified `num_members`.
 
