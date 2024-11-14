@@ -552,10 +552,10 @@ def create_gui(community, run_simulation_func, task_difficulty_distribution, num
         step_button.config(state="disabled")
         run_all_button.config(state="disabled")
 
-    step_button = ttk.Button(control_frame, text="Step", command=run_turn)
+    step_button = ttk.Button(task_frame, text="Step", command=run_turn)
     step_button.pack(side=tk.LEFT, padx=5)
 
-    run_all_button = ttk.Button(control_frame, text="Run Entire Simulation", command=run_entire_simulation)
+    run_all_button = ttk.Button(task_frame, text="Run Entire Simulation", command=run_entire_simulation)
     run_all_button.pack(side=tk.LEFT, padx=5)
 
     def on_closing(root):
