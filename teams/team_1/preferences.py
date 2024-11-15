@@ -12,9 +12,6 @@ def phaseIpreferences(player, community, global_random):
     list_choices.append([0, min(partner_id + 1, num_members - 1)])
     return list_choices
 
-
-
-
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
     bids = []
@@ -23,7 +20,7 @@ def phaseIIpreferences(player, community, global_random):
     num_abilities = len(player.abilities)
     for i, task in enumerate(community.tasks):
         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
-        if energy_cost >= 10:
+        if energy_cost > 0:
             continue
         bids.append(i)
     return bids
