@@ -3,11 +3,14 @@ import itertools
 global strong_players 
 global remaining
 
+strong_players = set()
+
 def phaseIpreferences(player, community, global_random):
+    global strong_players
     '''Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
 
-    strong_players = set()
+
     all_players = set(range(len(community.members)))
     
     for p in community.members:
@@ -49,13 +52,25 @@ def phaseIpreferences(player, community, global_random):
 
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
+    global strong_players 
     bids = []
+
+    # If a player is strong, bid for all tasks as they can perform all
+    if player.id in strong_players:
+        for i, task in enumerate(community.tasks):
+            print(f"Adding the {i}th task")
+            bids.append(i)
+        return bids
+
+    # Assign remaining tasks as long as energy loss is 0
     if player.energy < 0:
         return bids
+    
     num_abilities = len(player.abilities)
+
     for i, task in enumerate(community.tasks):
         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
-        if energy_cost >= 10:
+        if energy_cost > 0:
             continue
         bids.append(i)
     return bids
