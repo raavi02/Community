@@ -27,13 +27,15 @@ def phaseIpreferences(player, community, global_random):
     partner_choices = []
 
     # Find good partnerships for the particular player
-    for p1, p2 in partnerships:
-        if player.id == p1 or player.id == p2:
+    for p1_id, p2_id in partnerships:
+        if player.id == p1_id or player.id == p2_id:
+            p1 = community.members[p1_id]
+            p2 = community.members[p2_id]
             joint_abilities = [max(a1, a2) for a1, a2 in zip(p1.abilities, p2.abilities)]
             for task_id in range(len(community.tasks)):
                 # check if the partnership has greater ability than the task in all dimensions
                 if all(joint_abilities[i] >= community.tasks[task_id][i] for i in range(len(t))):
-                    partner_choices.append([p1, p2, task_id]) if player.id == p1 else partner_choices.append([p2, p1, task_id])
+                    partner_choices.append([p1_id, p2_id, task_id]) if player.id == p1_id else partner_choices.append([p2_id, p1_id, task_id])
 
     # Get the partnership bid by partnering with the weakest partner
     sorted_partner_choices = sorted(
@@ -41,7 +43,7 @@ def phaseIpreferences(player, community, global_random):
         key=lambda x: sum(community.members[x[1]].abilities)
     )
     
-    remaining_players -= set(sorted_partner_choices[0][0], sorted_partner_choices[0][1])
+    remaining_players -= set([sorted_partner_choices[0][0], sorted_partner_choices[0][1]])
 
     return [[sorted_partner_choices[0][2], sorted_partner_choices[0][1]]]
 
