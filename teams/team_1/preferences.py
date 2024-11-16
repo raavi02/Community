@@ -8,14 +8,18 @@ def phaseIpreferences(player, community, global_random):
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
 
     strong_players = set()
-    all_players = set(community.members.id)
-
-    # Find the set of strong players
+    all_players = set(range(len(community.members)))
+    
     for p in community.members:
+        # assume the player can do all tasks perfectly until proven otherwise
+        is_strong_player = True
         for t in community.tasks:
-            # check if the player has greater ability than the task in all dimensions
-            if all(p.abilities[i] >= t[i] for i in range(len(t))):
-                strong_players.add(p.id)
+            # check if the player can perform the task perfectly
+            if not all(p.abilities[i] >= t[i] for i in range(len(t))):
+                is_strong_player = False
+                break
+        if is_strong_player:
+            strong_players.add(p.id)
 
     # Form all possible partnerships from the remaining players
     remaining_players = all_players - strong_players
