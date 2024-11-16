@@ -1,3 +1,5 @@
+import itertools
+
 global strong_players 
 global remaining
 
@@ -6,29 +8,38 @@ def phaseIpreferences(player, community, global_random):
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
 
     strong_players = set()
-    all_players = set(community.members)
+    all_players = set(community.members.id)
+
+    # Find the set of strong players
     for p in community.members:
         for t in community.tasks:
             # check if the player has greater ability than the task in all dimensions
             if all(p.abilities[i] >= t[i] for i in range(len(t))):
-                strong_players.add(p)
+                strong_players.add(p.id)
 
-    # calculate the difference between all players and good players
-    partnerships = all_players - strong_players
+    # Form all possible partnerships from the remaining players
+    remaining_players = all_players - strong_players
+    partnerships = list(itertools.combinations(remaining_players, 2))
+    partner_choices = []
 
-    # check possible partnerships and only assign the partnerships to bids if they can do tasks without losing energy
-    # if they cannot, add them to remaining players (remaining = all players - good players - partnerships)
+    # Find good partnerships for the particular player
+    for p1, p2 in partnerships:
+        if player.id == p1 or player.id == p2:
+            joint_abilities = [max(a1, a2) for a1, a2 in zip(p1.abilities, p2.abilities)]
+            for task_id in range(len(community.tasks)):
+                # check if the partnership has greater ability than the task in all dimensions
+                if all(joint_abilities[i] >= community.tasks[task_id][i] for i in range(len(t))):
+                    partner_choices.append([p1, p2, task_id]) if player.id == p1 else partner_choices.append([p2, p1, task_id])
 
-    list_choices = []
-    if player.energy < 0:
-        return list_choices
-    num_members = len(community.members)
-    partner_id = num_members - player.id - 1
-    list_choices.append([0, partner_id])
-    if len(community.tasks) > 1:
-        list_choices.append([1, partner_id])
-    list_choices.append([0, min(partner_id + 1, num_members - 1)])
-    return list_choices
+    # Get the partnership bid by partnering with the weakest partner
+    sorted_partner_choices = sorted(
+        partner_choices,
+        key=lambda x: sum(community.members[x[1]].abilities)
+    )
+    
+    remaining_players -= set(sorted_partner_choices[0][0], sorted_partner_choices[0][1])
+
+    return [[sorted_partner_choices[0][2], sorted_partner_choices[0][1]]]
 
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
