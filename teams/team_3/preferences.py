@@ -5,7 +5,7 @@ def phaseIpreferences(player, community, global_random):
     list_choices = []
 
     # if energy is low, skip partnering
-    if player.energy < 0:  # TODO improve this logic
+    if player.energy < 2:  # TODO improve this logic
         return list_choices
 
     num_abilities = len(player.abilities)
@@ -45,7 +45,7 @@ def phaseIIpreferences(player, community, global_random):
     bids = []
 
     # if energy is low, skip volunteering
-    if player.energy < 0:
+    if player.energy < 2:
         return bids
 
     num_abilities = len(player.abilities)
@@ -56,8 +56,7 @@ def phaseIIpreferences(player, community, global_random):
             max(task[j] - player.abilities[j], 0) for j in range(num_abilities)
         )
 
-        if energy_cost < 2:
+        if energy_cost < 4:
             bids.append(i)
 
     return bids
-
