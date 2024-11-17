@@ -47,7 +47,6 @@ def phaseIIpreferences(player, community, global_random):
     for i, task in enumerate(community.tasks):
         energy_cost = sum(max(task[j] - player.abilities[j], 0) for j in range(num_abilities))
         
-        # prioritize tasks with manageable energy costs
         if energy_cost < 2:
             bids.append(i)
     
