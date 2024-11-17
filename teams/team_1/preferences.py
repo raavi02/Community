@@ -33,9 +33,17 @@ def phaseIpreferences(player, community, global_random):
         if player.id == p1_id or player.id == p2_id:
             p1, p2 = community.members[p1_id], community.members[p2_id]
             joint_abilities = [max(a1, a2) for a1, a2 in zip(p1.abilities, p2.abilities)]
+            num_abilities = len(joint_abilities)
             for task_id in range(len(community.tasks)):
-                # check if the partnership has greater ability than the task in all dimensions
-                if all(joint_abilities[i] >= community.tasks[task_id][i] for i in range(len(t))):
+                # compute the energy cost of the task
+                energy_cost = 0
+                i = 0
+                while energy_cost <= 0 and i < num_abilities:
+                    if joint_abilities[i] < community.tasks[task_id][i]:
+                        energy_cost += community.tasks[task_id][i] - joint_abilities[i]
+                    i += 1
+                
+                if i == num_abilities - 1 and energy_cost <= 0:
                     partner_choices.append([task_id, p2_id]) if player.id == p1_id else partner_choices.append([task_id, p1_id])
     
     # Get the partnership bid by partnering with the weakest partner
