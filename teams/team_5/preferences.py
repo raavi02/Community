@@ -53,5 +53,5 @@ def phaseIIpreferences(player, community, global_random):
 
     # Sorting by benefit-to-energy ratio and returning top tasks
     task_scores.sort(key=lambda x: -x[1])
-    bids = [task_id for task_id, _ in task_scores[:3]]  # Bidding for top 3 tasks
+    bids = [task_id for task_id, _ in task_scores[:10]]  # Bidding for top 10 tasks
     return bids
