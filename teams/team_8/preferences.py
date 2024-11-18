@@ -46,12 +46,14 @@ def phaseIpreferences(player, community, global_random):
         # OR
         # 2. The solo energy cost is at least 1.5 times the teamwork energy cost,
         # which means solo work is prohibitively expensive, meaing teamwork is more favorable.
-        if best_partner and (min_W_team <= 0.7 * W_solo or W_solo >= 1.5 * min_W_team):
+        if (min_W_team <= 0.6*W_solo 
+            or W_solo >= 1.5 * min_W_team
+            ):
             preferences.append([task_index, best_partner])
         else:
             return []
         
-
+    #print("Player ", player.id, "'s preference is: ", preferences)
     return preferences
 
 
