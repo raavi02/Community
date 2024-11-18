@@ -52,6 +52,8 @@ def optimal_assignment(tasks, members):
             cost_matrix[i][j] = sum(
                 [max(task[k] - member.abilities[k], 0) for k in range(num_abilities)]
             )
+            if member.energy - cost_matrix[i][j] < 0:
+                cost_matrix[i][j] += 1e9
 
     row_indices, col_indices = linear_sum_assignment(cost_matrix)
 
