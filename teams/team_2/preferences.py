@@ -8,7 +8,7 @@ def create_cost_matrix(player, community):
         task_costs = []
         for member in community.members:
             # Compute the element-wise maximum of abilities
-            max_abilities = [max(i, j) for i, j in zip(player.abilities, member.abilities)]
+            max_abilities = [max(i, j) if member.energy >= 0 else float("inf") for i, j in zip(player.abilities, member.abilities)]
             # Compute the delta and absolute values
             delta = [abs(max_val - req) for max_val, req in zip(max_abilities, task)]
             # Total cost is the sum of deltas
@@ -17,6 +17,15 @@ def create_cost_matrix(player, community):
         cost_matrix.append(task_costs)
     cost_matrix = np.array(cost_matrix)
     return cost_matrix
+
+
+
+def best_partner(task: np.ndarray):
+    for partner_id in range(len(task)):
+        if task[partner_id] == task.min():
+            return partner_id
+
+    raise Exception("All arrays have a minimum value")
 
 
 def phaseIpreferences(player, community, global_random):
@@ -33,10 +42,25 @@ def phaseIpreferences(player, community, global_random):
     # list_choices.append([0, min(partner_id + 1, num_members - 1)])
 
     cost_matrix = create_cost_matrix(player, community)
-    row_ind, col_ind = linear_sum_assignment(cost_matrix)
-    list_choices = [(row, col) for row, col in zip(row_ind, col_ind)]
-    total_cost = cost_matrix[row_ind, col_ind].sum()
-    return list_choices
+
+    best_partner_for_task = [(task_id, best_partner(cost_matrix[task_id]), cost_matrix[task_id].min()) for task_id in range(len(cost_matrix))]
+    best_partner_for_task.sort(key=lambda x: x[2])
+
+    requested_partners = []
+
+    # to incentivice players to not request pairing up with the best member in the community, 
+    # we require that they at least request 5 different partners
+    potential_partners = set()
+    curr_idx = 0
+    while len(potential_partners) < 5 and curr_idx < len(best_partner_for_task):
+        task_id, partner_id, cost = best_partner_for_task[curr_idx]
+        if partner_id not in potential_partners:
+            requested_partners.append([task_id, partner_id])
+            potential_partners.add(partner_id)
+
+        curr_idx += 1
+
+    return requested_partners
 
 
 
