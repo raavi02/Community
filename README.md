@@ -69,7 +69,7 @@ To submit the code for each deliverable, open a pull request to merge your propo
    
 2. `phaseIIpreferences(player, community, global_random)`: This function defines your strategy for bidding on tasks in phase II. It should return a list of task indices from `community.tasks` that the player chooses to bid on during phase II in a turn.
 
-**distributions.py**
+**distributions_{easy/med/hard}.py**
 
 1. `ability_distribution(num_abilities, seed, player_id, global_random)`: This function defines the ability distribution for a player, given the number of abilities and the player ID. For a given seed, the function should output the same list of abilities across runs to ensure reproducibility. Refer to the sample in the `team_0` folder for guidance.
 
