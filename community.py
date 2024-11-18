@@ -113,7 +113,6 @@ class CommunityActions:
             # print(global_task_generation_id)
             try:
                 task_distri = task_distribution(community.num_abilities, seed_task_difficulty, global_task_generation_id, global_random)
-            except Exception:
             except Exception as e:
                 print(e)
                 print(f"Unable to use given task distribution function. Using the default task distribution function.")
@@ -181,6 +180,7 @@ class CommunityActions:
                 num_calls_prefI += 1
                 t1_stop = process_time()
                 time_prefI += t1_stop - t1_start
+            except Exception:
             except Exception as e:
                 print(e)
                 num_calls_prefI += 1
