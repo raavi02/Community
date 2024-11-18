@@ -113,7 +113,8 @@ class CommunityActions:
             # print(global_task_generation_id)
             try:
                 task_distri = task_distribution(community.num_abilities, seed_task_difficulty, global_task_generation_id, global_random)
-            except:
+            except Exception as e:
+                print(e)
                 print(f"Unable to use given task distribution function. Using the default task distribution function.")
                 task_distri = default_task_difficulty_distribution(community.num_abilities, seed_task_difficulty, global_task_generation_id, global_random)
             global_task_generation_id += 1
@@ -180,6 +181,8 @@ class CommunityActions:
                 t1_stop = process_time()
                 time_prefI += t1_stop - t1_start
             except Exception:
+            except Exception as e:
+                print(e)
                 num_calls_prefI += 1
                 print(f"Error getting partnership preferences for player {player.id} from group {player.group}. Assuming no preferences.")
             if pref is not None:
@@ -230,7 +233,8 @@ class CommunityActions:
                 t1_stop = process_time()
                 num_calls_prefII += 1
                 time_prefII += t1_stop - t1_start
-            except:
+            except Exception as e:
+                print(e)
                 print(f"Error getting individual preferences for player {player.id} from group {player.group}. Assuming no preferences.")
                 num_calls_prefII += 1
             # if tasksVolunteered:
@@ -314,7 +318,8 @@ def run_simulation(num_abilities: int, num_players: int, player_distribution, nu
         for _ in range(count):
             try:
                 distri = ability_distribution(num_abilities, seed_ability, j, global_random)
-            except:
+            except Exception as e:
+                print(e)
                 print("Unable to use the given ability distribution function. Using the default ability distribution function.")
                 distri = default_ability_distribution(num_abilities, seed_ability, j, global_random)
             assert  min(distri) >= 0 and max(distri) <= 10, "Ability distribution should be between [0, 10]"
@@ -625,7 +630,8 @@ if __name__ == "__main__":
 
     try:
         ability_distribution = import_class_from_file(f'teams/team_{ability_team}', file_name, function_name_ability)
-    except:
+    except Exception as e:
+        print(e)
         ability_distribution = import_class_from_file(f'teams/team_0', file_name, function_name_ability)
         print(f"Import from team {ability_team} failed. Using default ability distribution")
 
@@ -637,7 +643,9 @@ if __name__ == "__main__":
         task_difficulty_distribution = import_class_from_file(f'teams/team_{task_difficulty_distribution_team}',
                                                               file_name, function_name_task_difficulty)
 
-    except:
+
+    except Exception as e:
+        print(e)
         task_difficulty_distribution = import_class_from_file(f'teams/team_0', file_name, function_name_task_difficulty)
         print(
             f"Import from team {task_difficulty_distribution_team} failed. Using default task difficulty distribution")
