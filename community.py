@@ -180,9 +180,7 @@ class CommunityActions:
                 num_calls_prefI += 1
                 t1_stop = process_time()
                 time_prefI += t1_stop - t1_start
-            except Exception:
-            except Exception as e:
-                print(e)
+            except:
                 num_calls_prefI += 1
                 print(f"Error getting partnership preferences for player {player.id} from group {player.group}. Assuming no preferences.")
             if pref is not None:
