@@ -9,6 +9,9 @@ import importlib.util
 import sys
 import functools
 import io
+# group 2 needs this package, and if only imported in our file, the simulator will catch the exception and play default
+# therefore, we import it here to ensure a ModuleNotFound crash, so that the error won't go unnoticed
+import scipy as _ 
 import tkinter as tk
 from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
@@ -177,6 +180,7 @@ class CommunityActions:
                 num_calls_prefI += 1
                 t1_stop = process_time()
                 time_prefI += t1_stop - t1_start
+            except Exception:
             except Exception as e:
                 print(e)
                 num_calls_prefI += 1
