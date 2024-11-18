@@ -25,10 +25,6 @@ def phaseIpreferences(player: Member, community: Community, global_random):
     list_choices = []
     avg_abilities, avg_energy = community_statistics(community)
 
-    # if energy is low, skip partnering
-    if player.energy < max(2, avg_energy * 0.25):  # TODO improve this logic
-        return list_choices
-
     num_abilities = len(player.abilities)
 
     # iterate over all tasks
@@ -77,6 +73,9 @@ def phaseIIpreferences(player, community, global_random):
         )
 
         if energy_cost < player.energy:
-            bids.append(i)
+            bids.append((i, energy_cost))
+
+    bids.sort(key=lambda x: x[1])
+    bids = [bid[0] for bid in bids]
 
     return bids
