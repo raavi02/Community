@@ -39,16 +39,6 @@ def phaseIpreferences(player, community, global_random):
                 energy_cost = calculate_energy_cost(joint_abilities, task)
                 if energy_cost <= 0:
                     partner_choices.append([task_id, p2_id] if player.id == p1_id else [task_id, p1_id])
-
-    # Get the partnership bid by partnering with the weakest partner
-    # sorted_partner_choices = sorted(
-    #     partner_choices,
-    #     key=lambda x: sum(community.members[x[1]].abilities)
-    # )
-    
-    # remaining_players -= set([sorted_partner_choices[0][0], sorted_partner_choices[0][1]])
-
-    # return [[sorted_partner_choices[0][2], sorted_partner_choices[0][1]]]
     
     return partner_choices
 
@@ -62,16 +52,13 @@ def phaseIIpreferences(player, community, global_random):
         for task_id, task in enumerate(community.tasks):
             bids.append(task_id)
         return bids
-
-    # Assign remaining tasks as long as energy loss is 0
-    if player.energy < 0:
-        return bids
     
     num_abilities = len(player.abilities)
 
     for task_id, task in enumerate(community.tasks):
         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
-        if energy_cost <= 2 or (energy_cost <= 4 and player.energy >= 8):
+        # volunteering logic
+        if player.energy - energy_cost  >= -10:
             bids.append(task_id)
     
     return bids
