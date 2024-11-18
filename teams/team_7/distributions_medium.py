@@ -1,8 +1,6 @@
 import random
 
-# todo: create a list of abilities and tasks where everyone is a specialist and every task is specialized (only 0 and single value between 6 and 10)
-
-def ability_distribution(num_abilities: int, seed, player_id) -> list[int]:
+def ability_distribution(num_abilities: int, seed, player_id, global_random) -> list[int]:
     """
     Creates list of abilities for single player
     Returns:
@@ -13,7 +11,7 @@ def ability_distribution(num_abilities: int, seed, player_id) -> list[int]:
     return get_uniform_dist(seed, player_id, num_abilities, min_ability, max_ability)
 
 
-def task_difficulty_distribution(num_abilities: int, seed, task_generation_id) -> list[int]:
+def task_difficulty_distribution(num_abilities: int, seed, task_generation_id, global_random) -> list[int]:
 
     min_difficulty = 6
     max_difficulty = 10

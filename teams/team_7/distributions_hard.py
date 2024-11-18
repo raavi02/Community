@@ -1,23 +1,27 @@
 import random
 
-def ability_distribution(num_abilities: int, seed, player_id) -> list[int]:
+# Specialists: each player and task require level 10 in a single ability.
+
+def ability_distribution(num_abilities: int, seed, player_id, global_random) -> list[int]:
     """
     Creates list of abilities for single player
     Returns:
         abilities (List): List of integers the length of the number of abilities
     """
-    min_ability = 0
-    max_ability = 4
-    return get_uniform_dist(seed, player_id, num_abilities, min_ability, max_ability)
+    return get_specialist_dist(seed, player_id, num_abilities)
 
 
-def task_difficulty_distribution(num_abilities: int, seed, task_generation_id) -> list[int]:
-
-    min_difficulty = 6
-    max_difficulty = 10
-    return get_uniform_dist(seed, task_generation_id, num_abilities, min_difficulty, max_difficulty)
+def task_difficulty_distribution(num_abilities: int, seed, task_generation_id, global_random) -> list[int]:
+    return get_specialist_dist(seed, task_generation_id, num_abilities)
 
 
-def get_uniform_dist(seed, id, num_abilities, low, high):
+def get_specialist_dist(seed, id, num_abilities):
+    # Initialize abilities
+    abilities = [0] * num_abilities
+
+    # Select random ability to require specialist level requirements
     random_generator = random.Random(seed + id)
-    return [random_generator.randint(low, high) for _ in range(num_abilities)]
+    specialist_ability_index = random_generator.randint(0, num_abilities - 1)
+    abilities[specialist_ability_index] = 10
+
+    return abilities

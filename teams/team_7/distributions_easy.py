@@ -1,6 +1,6 @@
 import random
 
-def ability_distribution(num_abilities: int, seed, player_id) -> list[int]:
+def ability_distribution(num_abilities: int, seed, player_id, global_random) -> list[int]:
     """
     Creates list of abilities for single player
     Returns:
@@ -10,8 +10,7 @@ def ability_distribution(num_abilities: int, seed, player_id) -> list[int]:
     max_ability = 10
     return get_uniform_dist(seed, player_id, num_abilities, min_ability, max_ability)
 
-
-def task_difficulty_distribution(num_abilities: int, seed, task_generation_id) -> list[int]:
+def task_difficulty_distribution(num_abilities: int, seed, task_generation_id, global_random) -> list[int]:
 
     min_difficulty = 0
     max_difficulty = 3
