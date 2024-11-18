@@ -19,6 +19,8 @@ def phaseIpreferences(player, community, global_random):
 def phaseIIpreferences(player, community, global_random):
     # Too tired to work
     rest_threshold = 2
+
+    # Todo check for tasks that cost no energy and still volunteer for that task
     if player.energy < rest_threshold:
         return []
 
