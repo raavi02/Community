@@ -76,5 +76,7 @@ def phaseIIpreferences(player, community, global_random):
         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
         if energy_cost >= 10:
             continue
-        bids.append(i)
-    return bids
+        bids.append((i, energy_cost))
+
+    bids.sort(key=lambda x: (x[1], -sum(community.tasks[x[0]])))
+    return [b[0] for b in bids[:5]]
