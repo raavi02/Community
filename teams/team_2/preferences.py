@@ -48,11 +48,12 @@ def phaseIpreferences(player, community, global_random):
 
     requested_partners = []
 
-    # to incentivice players to not request pairing up with the best member in the community, 
+    # to incentivize players to not request pairing up with the best member in the community, 
     # we require that they at least request 5 different partners
+    PARTNER_REQUEST_AMOUNT = 5
     potential_partners = set()
     curr_idx = 0
-    while len(potential_partners) < 5 and curr_idx < len(best_partner_for_task):
+    while len(potential_partners) < PARTNER_REQUEST_AMOUNT and curr_idx < len(best_partner_for_task):
         task_id, partner_id, cost = best_partner_for_task[curr_idx]
         if partner_id not in potential_partners:
             requested_partners.append([task_id, partner_id])
