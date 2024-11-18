@@ -58,7 +58,7 @@ def phaseIIpreferences(player, community, global_random):
     for task_id, task in enumerate(community.tasks):
         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
         # volunteering logic
-        if player.energy - energy_cost  >= -10:
+        if player.energy - energy_cost  > -10:
             bids.append(task_id)
     
     return bids
