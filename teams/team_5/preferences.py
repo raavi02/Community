@@ -17,7 +17,7 @@ def phaseIpreferences(player, community, global_random):
     for i, task in enumerate(community.tasks):
         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(player.abilities))])
         if energy_cost ==0 :
-            print("Can take tasks individually Task: ",task, " Player: ",player.abilities)
+            print("Can take individuals Task: ",task, " Player: ",player.abilities)
             return list_choices
         
 
