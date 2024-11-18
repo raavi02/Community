@@ -31,7 +31,7 @@ def phaseIpreferences(player, community, global_random):
     exhausted_penalty = 0.5
     spent_energy = 0
     # Finding compatible partners for top priority tasks
-    for task_id, _ in task_priorities[:2]:
+    for task_id, _ in task_priorities:
         best_partner = None
         min_cost = float('inf')
         task_energy = -1
@@ -55,6 +55,7 @@ def phaseIpreferences(player, community, global_random):
             return list_choices
         if best_partner is not None:
             list_choices.append([task_id, best_partner])
+
     return list_choices
           
        
