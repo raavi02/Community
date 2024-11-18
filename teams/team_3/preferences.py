@@ -17,7 +17,7 @@ def phaseIpreferences(player, community, global_random):
 
         # find the best partner to minimize energy cost
         for partner in community.members:
-            if partner.id == player.id or partner.energy < 0:
+            if partner.id == player.id or partner.energy < 2:
                 continue
 
             # calculate potential energy cost with this partner
