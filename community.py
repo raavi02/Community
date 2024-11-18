@@ -18,11 +18,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import numpy as np
-#from teams.team_0.distributions import ability_distribution as default_ability_distribution
-#from teams.team_0.distributions import task_difficulty_distribution as default_task_difficulty_distribution
-
-from teams.team_7.easy_distributions import ability_distribution as default_ability_distribution
-from teams.team_7.easy_distributions import task_difficulty_distribution as default_task_difficulty_distribution
+from teams.team_0.distributions import ability_distribution as default_ability_distribution
+from teams.team_0.distributions import task_difficulty_distribution as default_task_difficulty_distribution
 
 global_task_generation_id = 0
 time_prefI = 0
