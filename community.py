@@ -20,7 +20,6 @@ from matplotlib.figure import Figure
 import numpy as np
 from teams.team_0.distributions import ability_distribution as default_ability_distribution
 from teams.team_0.distributions import task_difficulty_distribution as default_task_difficulty_distribution
-
 global_task_generation_id = 0
 time_prefI = 0
 num_calls_prefI = 0
@@ -114,6 +113,7 @@ class CommunityActions:
             # print(global_task_generation_id)
             try:
                 task_distri = task_distribution(community.num_abilities, seed_task_difficulty, global_task_generation_id, global_random)
+            except Exception:
             except Exception as e:
                 print(e)
                 print(f"Unable to use given task distribution function. Using the default task distribution function.")
