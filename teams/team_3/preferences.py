@@ -45,7 +45,7 @@ def phaseIIpreferences(player, community, global_random):
     bids = []
 
     # if energy is low, skip volunteering
-    if player.energy < 2:
+    if player.energy < 3:
         return bids
 
     num_abilities = len(player.abilities)
