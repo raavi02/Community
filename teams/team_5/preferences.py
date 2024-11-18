@@ -3,6 +3,7 @@ import scipy.optimize as opt
 import random
 import math
 from scipy.optimize import linear_sum_assignment
+tired_players=[]
 def phaseIpreferences(player, community, global_random):
     '''Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
@@ -12,6 +13,14 @@ def phaseIpreferences(player, community, global_random):
     if player.energy < 0:
         return list_choices
     
+    #also check if they can take on individual tasks
+    for i, task in enumerate(community.tasks):
+        energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(player.abilities))])
+        if energy_cost ==0 :
+            print("Can take individuals Task: ",task, " Player: ",player.abilities)
+            return list_choices
+        
+
     # We're prioritizing tasks based on energy cost
     task_priorities = sorted(
         [(i, sum([max(task[j] - player.abilities[j], 0) for j in range(len(task))]))
@@ -65,12 +74,12 @@ def phaseIIpreferences(player, community, global_random):
         if energy_cost <= 0: #If it doesn't cost energy, do it.
             bids.append(i)
             continue
-
+        
+      
         if player.energy - (energy_cost + spent_energy) > -10: #If I am alive, I am gonna work.
             spent_energy += energy_cost
             bids.append(i)
             continue
-        
 
         # Tasks with higher unmet abilities and lower energy cost are prioritized
         # benefit = sum(task) - energy_cost
