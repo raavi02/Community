@@ -1,11 +1,32 @@
-def phaseIpreferences(player, community, global_random):
+from community import Member, Community
+
+
+def community_statistics(community: Community):
+    num_members = len(community.members)
+    num_abilities = len(community.members[0].abilities)
+
+    total_energy = 0
+    avg_abilties = [0] * num_abilities
+
+    for member in community.members:
+        total_energy += member.energy
+        for i, ability in enumerate(member.abilities):
+            avg_abilties[i] += ability
+
+    avg_abilties = [ab / num_members for ab in avg_abilties]
+    avg_energy = total_energy / num_members
+    return avg_abilties, avg_energy
+
+
+def phaseIpreferences(player: Member, community: Community, global_random):
     """Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id
     """
     list_choices = []
+    avg_abilities, avg_energy = community_statistics(community)
 
     # if energy is low, skip partnering
-    if player.energy < 2:  # TODO improve this logic
+    if player.energy < max(2, avg_energy * 0.25):  # TODO improve this logic
         return list_choices
 
     num_abilities = len(player.abilities)
@@ -15,13 +36,17 @@ def phaseIpreferences(player, community, global_random):
         best_partner = None
         min_energy_cost = float("inf")
 
+        solo_cost = sum(
+            max(task[i] - player.abilities[i], 0) for i in range(num_abilities)
+        )
+
         # find the best partner to minimize energy cost
         for partner in community.members:
             if partner.id == player.id or partner.energy < 2:
                 continue
 
             # calculate potential energy cost with this partner
-            energy_cost = (
+            pair_cost = (
                 sum(
                     max(task[i] - max(player.abilities[i], partner.abilities[i]), 0)
                     for i in range(num_abilities)
@@ -29,8 +54,8 @@ def phaseIpreferences(player, community, global_random):
                 / 2
             )  # TODO figure out better potential energy function
 
-            if energy_cost < min_energy_cost:
-                min_energy_cost = energy_cost
+            if pair_cost < min_energy_cost and pair_cost < solo_cost * 0.6:
+                min_energy_cost = pair_cost
                 best_partner = partner.id
 
         # add this task-partner combo if it's beneficial
@@ -43,11 +68,6 @@ def phaseIpreferences(player, community, global_random):
 def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
     bids = []
-
-    # if energy is low, skip volunteering
-    if player.energy < 3:
-        return bids
-
     num_abilities = len(player.abilities)
 
     # evaluate each task for solo completion
@@ -56,7 +76,7 @@ def phaseIIpreferences(player, community, global_random):
             max(task[j] - player.abilities[j], 0) for j in range(num_abilities)
         )
 
-        if energy_cost < 4:
+        if energy_cost < player.energy:
             bids.append(i)
 
     return bids
