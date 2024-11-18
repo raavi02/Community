@@ -69,20 +69,16 @@ def phaseIpreferences(player, community, global_random):
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
     bids = []
-    if player.energy < 0:
-        return bids
+
     num_abilities = len(player.abilities)
     for i, task in enumerate(community.tasks):
         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
-        if energy_cost >= 10:
-            continue
-        bids.append((i, energy_cost))
+        if player.energy - energy_cost >= 0:
+            bids.append((i, energy_cost))
 
 
     # request tasks which give me the lowest penalty
     # split ties by which task is objectively harder 
     # aka more suitable for me
     bids.sort(key=lambda x: (x[1], -sum(community.tasks[x[0]])))
-    # for now, we seem to perform best when just returning the single best task
-    # this should probably be changed to the best 3 or so tasks when we get more clever
-    return [b[0] for b in bids[:1]]
+    return [b[0] for b in bids[:3]]
