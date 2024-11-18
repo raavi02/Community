@@ -2,7 +2,7 @@ import numpy as np
 import scipy.optimize as opt
 import random
 import math
-from scipy.optimize import linear_sum_assignment
+# from scipy.optimize import linear_sum_assignment
 
 def phaseIpreferences(player, community, global_random):
     '''Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
@@ -15,7 +15,6 @@ def phaseIpreferences(player, community, global_random):
     #     return list_choices 
     
     cost0_tasks = set()
-    print(cost0_tasks)
 
     #If any member can complete the task using 0 energy, then exclude it from our list
     for i, task in enumerate(community.tasks):
@@ -86,12 +85,17 @@ def phaseIIpreferences(player, community, global_random):
 
     #If any member can complete the task using 0 energy, then exclude it from our list
     for i, task in enumerate(community.tasks):
+        energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(player.abilities))])
+        if energy_cost == 0:
+            bids.append(i)
+        
         for member in community.members:
+            if member.id == player.id: #Skip over self
+                continue
+
             energy_cost = sum([max(task[j] - member.abilities[j], 0) for j in range(len(member.abilities))])
 
             if energy_cost == 0:
-                if member.id == player.id:
-                    bids.append(i)
                 # print(f"IT COSTS Member{member.id} Nothing to perform Task{i}")
                 cost0_tasks.add(i)
                 break
