@@ -20,10 +20,12 @@ def phaseIpreferences(player, community, global_random):
     )
 
     exhausted_penalty = 0.5
+    spent_energy = 0
     # Finding compatible partners for top priority tasks
     for task_id, _ in task_priorities[:2]:
         best_partner = None
         min_cost = float('inf')
+        task_energy = -1
         for partner in community.members:
             if partner.id == player.id:
                 continue
@@ -36,6 +38,12 @@ def phaseIpreferences(player, community, global_random):
             if comparison_metric < min_cost and (partner.energy - energy_cost) > -10 and (player.energy - energy_cost) > -10: # Make sure ourself and our partner will not become incapacitated after performing the task
                 min_cost = comparison_metric
                 best_partner = partner.id
+                task_energy = energy_cost
+
+        spent_energy += task_energy
+        
+        if (player.energy - spent_energy) > -10:
+            return list_choices
         if best_partner is not None:
             list_choices.append([task_id, best_partner])
     return list_choices
