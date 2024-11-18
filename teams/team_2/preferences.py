@@ -78,5 +78,11 @@ def phaseIIpreferences(player, community, global_random):
             continue
         bids.append((i, energy_cost))
 
+
+    # request tasks which give me the lowest penalty
+    # split ties by which task is objectively harder 
+    # aka more suitable for me
     bids.sort(key=lambda x: (x[1], -sum(community.tasks[x[0]])))
-    return [b[0] for b in bids[:5]]
+    # for now, we seem to perform best when just returning the single best task
+    # this should probably be changed to the best 3 or so tasks when we get more clever
+    return [b[0] for b in bids[:1]]
