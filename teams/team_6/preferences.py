@@ -49,9 +49,7 @@ def optimal_assignment(tasks, members):
 
     for i, task in enumerate(tasks):
         for j, member in enumerate(members):
-            cost_matrix[i][j] = sum(
-                [max(task[k] - member.abilities[k], 0) for k in range(num_abilities)]
-            )
+            cost_matrix[i][j] = get_energy_cost(task, member.abilities)
             if member.energy - cost_matrix[i][j] < 0:
                 cost_matrix[i][j] += 1e9
 
@@ -63,3 +61,7 @@ def optimal_assignment(tasks, members):
     )
 
     return assignments, total_cost
+
+
+def get_energy_cost(task, abilities):
+    return sum([max(task[k] - abilities[k], 0) for k in range(len(abilities))])
