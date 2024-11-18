@@ -46,7 +46,9 @@ python community.py  [--seed] [--num_members] [--num_turns] [--num_abilities] [-
 - **seed_ability**: Separate seed for ability generation (optional).
 - **seed_task_difficulty**: Separate seed for task difficulty generation (optional).
 - **group_task_distribution**: Group number whose task difficulty distribution function will be used.
+- **task_distribution_difficulty**: Difficulty level of tasks. One of easy, med or hard.
 - **group_abilities_distribution**: Group number whose ability distribution function will be used.
+- **abilities_distribution_difficulty**: Difficulty level for the abilities. One of easy, med or hard.
 - **log**: If this flag is present, print statements won't appear on the console and will be saved to the `log-results/` folder.
 - **gui**: Activates the simulator with a graphical user interface (GUI).
 - **gi**: Specifies the number of players from each group in the community. [i] ranges from 1-10, with $\sum_{i=1}^{10} g_{i} = $`num_members`. If the sum is less than `num_members`, the remaining players will be from team 0 by default. The sum cannot exceed the specified `num_members`.
@@ -67,7 +69,7 @@ To submit the code for each deliverable, open a pull request to merge your propo
    
 2. `phaseIIpreferences(player, community, global_random)`: This function defines your strategy for bidding on tasks in phase II. It should return a list of task indices from `community.tasks` that the player chooses to bid on during phase II in a turn.
 
-**distributions.py**
+**distributions_{easy/med/hard}.py**
 
 1. `ability_distribution(num_abilities, seed, player_id, global_random)`: This function defines the ability distribution for a player, given the number of abilities and the player ID. For a given seed, the function should output the same list of abilities across runs to ensure reproducibility. Refer to the sample in the `team_0` folder for guidance.
 
