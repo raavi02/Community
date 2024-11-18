@@ -28,13 +28,15 @@ def phaseIIpreferences(player, community, global_random):
         player_index = community.members.index(player)
         assignments, total_cost = optimal_assignment(community.tasks, community.members)
 
-        print(total_cost)
         best_task = assignments.get(player_index)
-
-        if best_task is not None:
-            return [best_task]
-        else:
+        if best_task is None:
             return []
+
+        best_task_cost = get_energy_cost(community.tasks[best_task], player.abilities)
+        if player.energy - best_task_cost < 0:
+            return []
+
+        return [best_task]
     except Exception as e:
         print(e)
         return bids
