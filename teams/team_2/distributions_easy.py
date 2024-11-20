@@ -19,12 +19,15 @@ def ability_distribution(
 def task_difficulty_distribution(
     num_abilities: int, seed, task_generation_id, global_random
 ) -> list[int]:
-    local_random_task = random.Random(seed + task_generation_id)
-    difficulties = [0] * num_abilities
-    random_integers = local_random_task.sample(range(num_abilities), 3)
-    for i in random_integers:
-        difficulties[i] = local_random_task.randint(2, 10)
-    return difficulties
+    # 0.7 is a bit less easy
+    # lam = 0.7
+    lam = 1
+    local_random_ability = random.Random(seed + task_generation_id)
+    # Max is to prevent 0 or negative values
+    return [
+        max(1, min(5, math.floor(local_random_ability.expovariate(lam))))
+        for _ in range(num_abilities)
+    ]
 
 
 if __name__ == "__main__":
@@ -32,7 +35,18 @@ if __name__ == "__main__":
 
     abilities = []
     for seed in range(100_000):
-        abilities.extend(ability_distribution(num, seed + 100_000, 0, 0))
+        abs = ability_distribution(num, seed, 0, 0)
+        # print(abs)
+        abilities.extend(abs)
 
     print(f"avg: {sum(abilities) / len(abilities)}")
-    print(f"max: {max(abilities)}")
+    print(f"min: {min(abilities)}, max: {max(abilities)}")
+
+    tasks = []
+    for seed in range(100_000):
+        task = task_difficulty_distribution(num, seed, 0, 0)
+        # print(abs)
+        tasks.extend(task)
+
+    print(f"avg: {sum(tasks) / len(tasks)}")
+    print(f"min: {min(tasks)}, max: {max(tasks)}")

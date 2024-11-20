@@ -6,12 +6,11 @@ def ability_distribution(
 ) -> list[int]:
     local_random_ability = random.Random(seed + player_id)
 
-    avg_ability = local_random_ability.randint(2, 8)
+    avg_ability = local_random_ability.randint(3, 6)
     spot = local_random_ability.randint(0, num_abilities - 1)
 
     abilities = [
-        avg_ability - 1 if idx == spot else 8 - avg_ability
-        for idx in range(num_abilities)
+        avg_ability if idx == spot else 7 - avg_ability for idx in range(num_abilities)
     ]
 
     return abilities
@@ -22,12 +21,11 @@ def task_difficulty_distribution(
 ) -> list[int]:
     local_random_ability = random.Random(seed + task_generation_id)
 
-    avg_ability = local_random_ability.randint(2, 6)
+    avg_ability = local_random_ability.randint(4, 8)
     spot = local_random_ability.randint(0, num_abilities - 1)
 
     abilities = [
-        avg_ability + 1 if idx == spot else 10 - avg_ability + 1
-        for idx in range(num_abilities)
+        avg_ability if idx == spot else 12 - avg_ability for idx in range(num_abilities)
     ]
 
     return abilities
