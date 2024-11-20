@@ -5,8 +5,13 @@ def ability_distribution(num_abilities: int, seed, player_id, global_random) -> 
 
 def task_difficulty_distribution(num_abilities: int, seed, task_generation_id, global_random) -> list[int]:
     local_random_task = random.Random(seed + task_generation_id)
-    difficulties = [0] * num_abilities
-    random_integers = local_random_task.sample(range(num_abilities), 3)
-    for i in random_integers:
-        difficulties[i] = local_random_task.randint(2, 10)
+
+    random_choice = local_random_task.random()
+    if random_choice > 0.7:
+        difficulties = [7 for _ in range(num_abilities)]    # hard task
+    elif random_choice > 0.4:
+        difficulties = [4 for _ in range(num_abilities)]    # medium task
+    else:
+        difficulties = [1 for _ in range(num_abilities)]    # easy task
+
     return difficulties
