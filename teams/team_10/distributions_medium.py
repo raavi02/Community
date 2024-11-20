@@ -7,8 +7,8 @@ def ability_distribution(num_abilities: int, seed, player_id, global_random) -> 
 def task_difficulty_distribution(num_abilities: int, seed, task_generation_id, global_random) -> list[int]:
     """
     Generate task difficulties with specified probabilities:
-    - 5/20 chance of a super-hard task (10 10 10 10 10)
-    - 5/20 chance of a hard task (9 9 9 9 9)
+    - 1/20 chance of a super-hard task (10 10 10 10 10)
+    - 1/20 chance of a hard task (9 9 9 9 9)
     - Otherwise, random normal difficulties between 5 and 8
     """
     local_random_task = random.Random(seed + task_generation_id)
