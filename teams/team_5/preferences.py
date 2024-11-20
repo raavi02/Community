@@ -2,6 +2,14 @@ import numpy as np
 import scipy.optimize as opt
 import random
 import math
+from scipy.optimize import linear_sum_assignment
+
+# List of things to implement (Feel free to add to it)
+#TODO: Finding the weakest players (Dummy players only? Or we include weak players too)
+#TODO: Determine when a player should rest
+#TODO: Minimize the number of pairs a player volunteers for (Currently we are volunteering for a lot)
+
+tired_players=[]
 # from scipy.optimize import linear_sum_assignment
 
 def phaseIpreferences(player, community, global_random):
@@ -34,7 +42,6 @@ def phaseIpreferences(player, community, global_random):
     )
 
     exhausted_penalty = 0.5
-    spent_energy = 0
     # Finding compatible partners for top priority tasks
     for task_id, _ in task_priorities:
         if task_id in cost0_tasks:
@@ -42,7 +49,6 @@ def phaseIpreferences(player, community, global_random):
 
         best_partner = None
         min_cost = float('inf')
-        task_energy = -1
         for partner in community.members:
             if partner.id == player.id:
                 continue
