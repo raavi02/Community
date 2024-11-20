@@ -18,8 +18,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import numpy as np
-from teams.team_0.distributions import ability_distribution as default_ability_distribution
-from teams.team_0.distributions import task_difficulty_distribution as default_task_difficulty_distribution
+from teams.team_0.distributions_easy import ability_distribution as default_ability_distribution
+from teams.team_0.distributions_easy import task_difficulty_distribution as default_task_difficulty_distribution
 global_task_generation_id = 0
 time_prefI = 0
 num_calls_prefI = 0
@@ -180,7 +180,7 @@ class CommunityActions:
                 num_calls_prefI += 1
                 t1_stop = process_time()
                 time_prefI += t1_stop - t1_start
-            except Exception:
+            # except Exception:
             except Exception as e:
                 print(e)
                 num_calls_prefI += 1
@@ -584,10 +584,10 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=42, help='Seed for entire simulation')
     parser.add_argument('--seed_ability', type=int, default=42, help='Seed for ability distribution randomness')
     parser.add_argument('--seed_task_difficulty', type=int, default=42, help='Seed for task difficulty randomness')
-    parser.add_argument('--group_task_distribution', type=int, default=0, choices=range(0, 11),
-                        help='Task distribution of group selected')
-    parser.add_argument('--group_abilities_distribution', type=int, default=0, choices=range(0, 11),
-                        help='Ability distribution of group selected')
+    parser.add_argument('--group_task_distribution', type=int, default=0, choices=range(0, 11), help='Task distribution of group selected')
+    parser.add_argument('--task_distribution_difficulty', type=str, default='easy', choices=['easy', 'medium', 'hard'], help='Easy (e), medium (m) or hard difficulty')
+    parser.add_argument('--group_abilities_distribution', type=int, default=0, choices=range(0, 11), help='Ability distribution of group selected')
+    parser.add_argument('--abilities_distribution_difficulty', type=str, default='easy', choices=['easy', 'medium', 'hard'], help='Easy (e), medium (m) or hard difficulty')
     parser.add_argument('--log', action='store_true', help='Log the results to a txt in folder')
     parser.add_argument('--gui', action='store_true', help='Run the simulation with GUI')
     for i in range(1, 11):
@@ -627,31 +627,28 @@ if __name__ == "__main__":
     file_name = "distributions"
     function_name_ability = "ability_distribution"
     function_name_task_difficulty = "task_difficulty_distribution"
+    task_difficulty = args.task_distribution_difficulty
 
     try:
-        ability_distribution = import_class_from_file(f'teams/team_{ability_team}', file_name, function_name_ability)
+        ability_distribution = import_class_from_file(f'teams/team_{ability_team}', file_name + f'_{args.abilities_distribution_difficulty}', function_name_ability)
     except Exception as e:
         print(e)
-        ability_distribution = import_class_from_file(f'teams/team_0', file_name, function_name_ability)
+        ability_distribution = import_class_from_file(f'teams/team_0', file_name + '_easy', function_name_ability)
         print(f"Import from team {ability_team} failed. Using default ability distribution")
 
     if args.log:
-        ability_distribution = create_logged_function(ability_distribution,
-                                                      f"./log-results/team_{ability_team}_ability")
+        ability_distribution = create_logged_function(ability_distribution,f"./log-results/team_{ability_team}_ability")
 
     try:
-        task_difficulty_distribution = import_class_from_file(f'teams/team_{task_difficulty_distribution_team}',
-                                                              file_name, function_name_task_difficulty)
-
+        task_difficulty_distribution = import_class_from_file(f'teams/team_{task_difficulty_distribution_team}', file_name + f'_{args.task_distribution_difficulty}', function_name_task_difficulty)
 
     except Exception as e:
         print(e)
-        task_difficulty_distribution = import_class_from_file(f'teams/team_0', file_name, function_name_task_difficulty)
+        task_difficulty_distribution = import_class_from_file(f'teams/team_0', file_name + '_easy', function_name_task_difficulty)
         print(
             f"Import from team {task_difficulty_distribution_team} failed. Using default task difficulty distribution")
     if args.log:
-        task_difficulty_distribution = create_logged_function(task_difficulty_distribution,
-                                                              f"./log-results/team_{task_difficulty_distribution_team}_taskdistribution")
+        task_difficulty_distribution = create_logged_function(task_difficulty_distribution,f"./log-results/team_{task_difficulty_distribution_team}_taskdistribution")
     # total_tasks_completed = run_simulation(num_abilities, num_members, player_distribution, num_turns,
                                            # ability_distribution, task_difficulty_distribution)
     if args.gui:

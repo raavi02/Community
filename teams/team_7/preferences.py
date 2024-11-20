@@ -17,12 +17,7 @@ def phaseIpreferences(player, community, global_random):
 
 # Individual Round
 def phaseIIpreferences(player, community, global_random):
-    # Too tired to work
-    rest_threshold = 2
-    if player.energy < rest_threshold:
-        return []
 
-    # Determine which tasks to volunteer for
     bids = []
     sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
     bids = get_all_possible_tasks(bids, sorted_tasks, player)
