@@ -1,5 +1,3 @@
-import pulp
-
 def phaseIpreferences(player, community, global_random):
     """
     Phase I Preferences: Determine task and partner preferences for the player.
