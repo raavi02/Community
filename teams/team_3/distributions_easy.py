@@ -6,7 +6,7 @@ def ability_distribution(
 ) -> list[int]:
     local_random_ability = random.Random(seed + player_id)
     return [
-        int(local_random_ability.betavariate(alpha=2, beta=6) * 10)
+        int(local_random_ability.betavariate(alpha=8, beta=2) * 10)
         for _ in range(num_abilities)
     ]
 
@@ -18,6 +18,6 @@ def task_difficulty_distribution(
     difficulties = [0] * num_abilities
     for i in range(num_abilities):
         difficulties[i] = int(
-            min(max(local_random_task.normalvariate(mu=5, sigma=1.5), 0), 10)
+            min(max(local_random_task.normalvariate(mu=4, sigma=1), 0), 10)
         )
     return difficulties
