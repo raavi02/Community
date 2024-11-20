@@ -1,5 +1,3 @@
-import pulp
-
 def phaseIpreferences(player, community, global_random):
     """
     Phase I Preferences: Determine task and partner preferences for the player.
@@ -41,17 +39,15 @@ def phaseIpreferences(player, community, global_random):
                 best_partner = partner.id
 
         # Choose the team work option if:
-        # 1. The teamwork energy cost <= 70% of the solo energy cost,
-        # which indicates that teamwork is significantly more efficient than solo work.
-        # OR
-        # 2. The solo energy cost is at least 1.5 times the teamwork energy cost,
+        # The solo energy cost is at least 1.5 times the teamwork energy cost,
         # which means solo work is prohibitively expensive, meaing teamwork is more favorable.
-        if (min_W_team <= 0.6*W_solo 
-            or W_solo >= 1.5 * min_W_team
+        if (
+            W_solo >= 1.5 * min_W_team
+            # and player.energy - min_W_team >= 0
+            # and partner.energy - min_W_team >= 0
             ):
             preferences.append([task_index, best_partner])
-        else:
-            return []
+
         
     #print("Player ", player.id, "'s preference is: ", preferences)
     return preferences

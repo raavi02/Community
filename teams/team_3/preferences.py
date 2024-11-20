@@ -55,7 +55,7 @@ def phaseIpreferences(player: Member, community: Community, global_random):
                 best_partner = partner.id
 
         # add this task-partner combo if it's beneficial
-        if best_partner is not None and min_energy_cost < player.energy:
+        if best_partner is not None:
             list_choices.append([task_index, best_partner])
 
     return list_choices
