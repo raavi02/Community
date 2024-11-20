@@ -14,3 +14,14 @@ def task_difficulty_distribution(num_abilities: int, seed, task_generation_id, g
     for i in random_integers:
         difficulties[i] = local_random_task.randint(2, 10)
     return difficulties
+
+
+if __name__ == "__main__":
+    num = 3
+
+    abilities = []
+    for seed in range(100_000):
+        abilities.extend(ability_distribution(num, seed + 100_000, 0, 0))
+
+    print(f"avg: {sum(abilities) / len(abilities)}")
+    print(f"max: {max(abilities)}")
