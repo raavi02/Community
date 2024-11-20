@@ -3,6 +3,12 @@ import scipy.optimize as opt
 import random
 import math
 from scipy.optimize import linear_sum_assignment
+
+# List of things to implement (Feel free to add to it)
+#TODO: Finding the weakest players (Dummy players only? Or we include weak players too)
+#TODO: Determine when a player should rest
+#TODO: Minimize the number of pairs a player volunteers for (Currently we are volunteering for a lot)
+
 tired_players=[]
 def phaseIpreferences(player, community, global_random):
     '''Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
