@@ -5,8 +5,6 @@ from itertools import combinations
 
 # Global static variables
 WEAKNESS_THRESHOLD = 5          # Percentile threshold for weakest player
-LOWEST_COST_THRESHOLD = 90     # Percentile threshold for volunteering
-
 
 # Set up logging
 logging.basicConfig(
