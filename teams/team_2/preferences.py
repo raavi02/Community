@@ -1,6 +1,104 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class TaskScorerNN(nn.Module):
+    def __init__(self, task_feature_size, player_state_size, hidden_size):
+        super(TaskScorerNN, self).__init__()
+        self.fc1 = nn.Linear(task_feature_size + player_state_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, 1)  # Outputs a single score for a task
+
+    def forward(self, task_features, player_state):
+        # Concatenate task features and player state
+        combined = torch.cat([task_features if task_features.ndim > 1 else task_features.view(-1), player_state], dim=-1)
+        x = F.relu(self.fc1(combined))
+        x = F.relu(self.fc2(x))
+        score = self.fc3(x)  # Outputs score
+        return score
+    
+
+class RestDecisionNN(nn.Module):
+    def __init__(self, input_size, hidden_size):
+        super(RestDecisionNN, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, 1)  # Single output for rest score
+
+    def forward(self, features):
+        x = F.relu(self.fc1(features))
+        score = self.fc2(x)
+        return score
+    
+def decide_action(task_features, player_state, task_scorer, rest_decider, k, max_tasks=100):
+    """
+    Decides whether to perform a task or rest.
+    
+    Args:
+        task_features (list): List of features for each task.
+        player_state (object): Current state of the player.
+        task_scorer (nn.Module): Neural network scoring tasks.
+        rest_decider (nn.Module): Neural network deciding rest.
+        k (int): Number of top tasks to consider.
+        max_tasks (int): Maximum number of tasks the model can handle.
+        
+    Returns:
+        action (int): 0 to len(task_features)-1 for tasks, len(task_features) for rest.
+    """
+    player_state_tensor = torch.tensor(player_state, dtype=torch.float32)
+    
+    task_vectors = [torch.tensor(task, dtype=torch.float32) for task_id, task in task_features]
+
+    task_scores = torch.tensor([
+        task_scorer(task_vector, player_state_tensor)
+        for task_vector in task_vectors
+    ])
+
+
+    
+    # Pad task scores to max_tasks with 0 if fewer tasks are available
+    if len(task_scores) < max_tasks:
+        # 1 for rest
+        padding = torch.zeros(max_tasks - len(task_scores) + 1)
+        task_scores = torch.cat([task_scores, padding])
+    
+    # Select top k scores (valid tasks only)
+    num_available_tasks = len(task_features)
+    top_k_scores, top_k_indices = torch.topk(task_scores[:num_available_tasks], min(k, num_available_tasks))
+    
+    # Aggregate features for rest decision
+    rest_input = torch.cat([
+        torch.mean(top_k_scores).unsqueeze(0),  # Mean score of top k tasks
+        torch.tensor(player_state)  # Add player and community features
+    ])
+    
+    # Score rest action
+    rest_score = rest_decider(rest_input).item()
+    
+    # Combine task scores and rest score
+    combined_scores = task_scores.clone()
+    combined_scores[max_tasks] = rest_score  # Append rest score after valid tasks
+    num_available_tasks = task_scores.size(0)
+
+    # Find the action with the highest score
+    action = torch.argmax(combined_scores).item()
+
+    # If rest is chosen, return []
+    if action == max_tasks:
+        return []
+    # Exclude rest and pick the argmax among the top k tasks
+    top_k_scores, top_k_indices = torch.topk(task_scores, k=k)
+    # Making sure we dont select any tasks already done
+    return [i for i in top_k_indices.tolist() if i < len(task_vectors)]
+
+
+def count_tired_exhausted(community):
+    tired = len([m for m in community.members if -10 < m.energy < 0])
+    exh = len([m for m in community.members if -10 > m.energy])
+    return tired, exh
+
 
 def create_cost_matrix(player, community):
     cost_matrix = []
@@ -87,5 +185,27 @@ def phaseIIpreferences(player, community, global_random):
     # request tasks which give me the lowest penalty
     # split ties by which task is objectively harder
     # aka more suitable for me
+    bids_unsorted = bids.copy()
     bids.sort(key=lambda x: (x[1], -sum(community.tasks[x[0]])))
-    return [b[0] for b in bids[:3]]
+    # return [b[0] for b in bids[:3]]
+
+    # NN part
+    # Initialize
+    if not hasattr(player, "turn"):
+        player.turn = 1
+        player.num_tasks = len(community.members) * 2
+        # This should contain the params for decision, such as player.energy, etc
+        player.params = [len(community.members), len(community.tasks), player.turn, player.energy, min(player.energy, 0)**2, 0, 0]
+        # Hardcoded as 1, to be only the cost of the task - this can be changed.
+        task_feature_size = 1
+        player.taskNN = TaskScorerNN(task_feature_size=task_feature_size, player_state_size=len(player.params), hidden_size=64)
+        player.restNN = RestDecisionNN(input_size=len(player.params) + task_feature_size, hidden_size=64)
+    else:
+        player.turn += 1
+        tired, exh = count_tired_exhausted(community)
+        player.params = [len(community.members), len(community.tasks), player.turn, player.energy, min(player.energy, 0)**2, tired, exh]
+
+    task_features = bids_unsorted
+    action = decide_action(task_features, player.params, player.taskNN, player.restNN, k=3, max_tasks=player.num_tasks)
+    return action
+    
