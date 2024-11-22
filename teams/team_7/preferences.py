@@ -24,6 +24,59 @@ def phaseIIpreferences(player, community, global_random):
 
     return bids
 
+# todo workshop this name
+def get_team_size_strategy(player, community):
+    """
+    This function calculates a person's cost matrix for performing every task alone or partnered and then returns a preference to work alone or in partnerships.
+    :param player:
+    :param community:
+    :return:
+    """
+
+    partnered_abilities = get_possible_partnerships(player, community)
+    penalty_matrix = calculate_penalty_matrix(partnered_abilities, tasks)
+
+    # [ 1 0 4 8 0 2 ]
+    # [ 0 0 2 4 0 1 ]
+    # [ 1 0 4 8 0 2 ]
+
+    # Fre
+
+    return penalty_matrix
+
+def get_possible_partnerships(player, community):
+    partnered_abilities = [player.abilities] + [[max(p, q) for p, q in zip(player.abilities, partner.abilities)] for partner in community.members]
+    return partnered_abilities
+
+
+def calculate_penalty_matrix(partnered_abilities, tasks):
+    """
+    Calculate the penalty matrix for given players and tasks.
+
+    Args:
+    - team_abilities: A 2D list or array where each row represents a player, or partnerships, abilities. Index 0 is the individual player. Index 1 to N represents the partnerships between the player and
+    - tasks: A 2D list or array where each row represents a task's requirements.
+
+    Returns:
+    - A 2D numpy array containing the penalties for each player-task pair.
+    """
+    partnered_abilities = np.array(partnered_abilities)
+    tasks = np.array(tasks)
+    penalty_matrix = []
+
+    for i, team in partnered_abilities:
+        penalties = []
+        for task in tasks:
+            # Calculate energy expended as the sum of positive differences split between two partners
+            penalty = np.sum(np.maximum(0, task - team)) / 2
+            # First value is individual completing the task
+            if i == 0:
+                penalty = penalty * 2
+            penalties.append(penalty)
+        penalty_matrix.append(penalties)
+
+    return np.array(penalty_matrix)
+
 
 def get_all_possible_tasks(bids, sorted_tasks, player):
     for task_index, task in sorted_tasks:
