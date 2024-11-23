@@ -1,51 +1,62 @@
 # Partnership Round
 def phaseIpreferences(player, community, global_random):
-    # Too tired to be a good teammate
-    if player.energy < 0:
+    if player.energy <= 0:
         return []
 
-    # Returns a list of [task_index, partner_id]
-    preferences = []
-    sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
+    partner_bids = get_partner_bids(player, community)
+    return partner_bids
 
-    # Iterate over all tasks
-    for task_index, task in sorted_tasks:
-        # Get best partner for the task
-        preferences = get_best_partner(preferences, task, task_index, player, community)
-
-    return preferences
 
 # Individual Round
 def phaseIIpreferences(player, community, global_random):
+    if player.energy <= 0:
+        return []
 
-    bids = []
-    sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
-    bids = get_all_possible_tasks(bids, sorted_tasks, player)
+    solo_bids = get_all_possible_tasks(community, player)
+    return solo_bids
 
-    return bids
 
-# todo workshop this name
-def get_team_size_strategy(player, community):
+def get_partner_bids(player, community):
     """
     This function calculates a person's cost matrix for performing every task alone or partnered and then returns a preference to work alone or in partnerships.
-    :param player:
-    :param community:
-    :return:
+
+    :return solo_preferences:
+            partnered_preferences:
     """
-
     partnered_abilities = get_possible_partnerships(player, community)
-    penalty_matrix = calculate_penalty_matrix(partnered_abilities, tasks)
+    penalty_matrix = calculate_penalty_matrix(partnered_abilities, community.tasks)
+    partner_bids = []
 
-    # [ 1 0 4 8 0 2 ]
-    # [ 0 0 2 4 0 1 ]
-    # [ 1 0 4 8 0 2 ]
+    # Iterate over each column (penalties for single task)
+    do_task_alone_cutoff = min(2, player.energy)
+    for task_index, column in enumerate(penalty_matrix.T):
+        solo_penalty = column[0]
 
-    # Fre
+        # Do not partner if the task alone has (1) no penalty alone or (2) is "easy enough".
+        if (solo_penalty == 0) or (solo_penalty <= do_task_alone_cutoff):
+            continue
 
-    return penalty_matrix
+        # Partner with anyone where the task penalty is below median difficulty for that task.
+        do_task_partnered_cutoff = round(np.median(np.array(column[1:])))
+        for offset_player_index, penalty in column[1:]:
+            if (penalty == 0) or (penalty <= do_task_partnered_cutoff):
+                # Remember that the player_abilities index for partnered abilities started at 1 not 0.
+                # To get the original partner id we need to reset adn use the community members object.
+                partner_id = community.members[offset_player_index - 1].id
+                partner_bids.append([task_index, partner_id])
+
+    return partner_bids
+
 
 def get_possible_partnerships(player, community):
-    partnered_abilities = [player.abilities] + [[max(p, q) for p, q in zip(player.abilities, partner.abilities)] for partner in community.members]
+    """
+    :return: [2D array] containing a partnership's combined ability level.
+        Row 0 is for the player's solo abilities.
+        Row 1:N is for the combo player/partner abilities.
+    """
+    partnered_abilities = np.array(
+        [player.abilities] + [[int(max(p, q)) for p, q in zip(player.abilities, partner.abilities)] for
+                              partner in community.members])
     return partnered_abilities
 
 
@@ -58,66 +69,87 @@ def calculate_penalty_matrix(partnered_abilities, tasks):
     - tasks: A 2D list or array where each row represents a task's requirements.
 
     Returns:
-    - A 2D numpy array containing the penalties for each player-task pair.
+    - A 2D numpy array containing the penalties for each partner-task pair.
     """
-    partnered_abilities = np.array(partnered_abilities)
-    tasks = np.array(tasks)
+
     penalty_matrix = []
 
-    for i, team in partnered_abilities:
-        penalties = []
+    for i, abilities in partnered_abilities:
+        row_penalties = []
         for task in tasks:
             # Calculate energy expended as the sum of positive differences split between two partners
-            penalty = np.sum(np.maximum(0, task - team)) / 2
-            # First value is individual completing the task
+            penalty = np.sum(np.maximum(0, task - abilities)) / 2
+            # First value is individual completing the task so it is not shared
             if i == 0:
                 penalty = penalty * 2
-            penalties.append(penalty)
-        penalty_matrix.append(penalties)
+            row_penalties.append(penalty)
+        penalty_matrix.append(row_penalties)
 
     return np.array(penalty_matrix)
 
 
-def get_all_possible_tasks(bids, sorted_tasks, player):
+def get_all_possible_tasks(community, player):
+    """
+    Volunteer for all tasks that keep your energy level above 0.
+    """
+    solo_bids = []
+    sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
+
     for task_index, task in sorted_tasks:
         # Volunteer for all tasks that will keep your energy above 0.
         energy_cost = sum(max(task[i] - player.abilities[i], 0) for i in range(len(task)))
         if energy_cost <= player.energy:
             bids.append(task_index)
 
-    return bids
+    return solo_bids
 
 
-def get_best_partner(preferences, task, task_index, player, community):
-    # Find a partner with complementary skills and sufficient energy
-    best_partner = None
-    min_energy_cost = float('inf')
+"""
+Retired Helper Functions 
+"""
 
-    for partner in community.members:
-        # Skip invalid partners
-        if partner.id == player.id or partner.energy < 0:
-            continue
 
-        # Compute combined abilities
-        combined_abilities = [
-            max(player.abilities[i], partner.abilities[i]) for i in range(len(task))
-        ]
+def get_best_partner(preferences, tasks, task_index, player, community):
+    """
+    Volunteer for every task with the minimum penalty partner.
+    """
 
-        # Compute energy cost per partner for the task
-        energy_cost = sum(
-            max(task[i] - combined_abilities[i], 0) for i in range(len(task))
-        ) / 2
+    # Returns a list of [task_index, partner_id]
+    preferences = []
+    sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
 
-        # Finding best partner for the task.
-        if (
-                energy_cost < min_energy_cost
-                and energy_cost <= player.energy
-                and energy_cost <= partner.energy
-        ):
-            min_energy_cost = energy_cost
-            best_partner = partner.id
+    # Iterate over all tasks
+    for task_index, task in sorted_tasks:
 
-    if best_partner is not None:
-        preferences.append([task_index, best_partner])
+        # Find a partner with complementary skills and sufficient energy
+        best_partner = None
+        min_energy_cost = float('inf')
+
+        for partner in community.members:
+            # Skip invalid partners
+            if partner.id == player.id or partner.energy < 0:
+                continue
+
+            # Compute combined abilities
+            combined_abilities = [
+                max(player.abilities[i], partner.abilities[i]) for i in range(len(task))
+            ]
+
+            # Compute energy cost per partner for the task
+            energy_cost = sum(
+                max(task[i] - combined_abilities[i], 0) for i in range(len(task))
+            ) / 2
+
+            # Finding best partner for the task.
+            if (
+                    energy_cost < min_energy_cost
+                    and energy_cost <= player.energy
+                    and energy_cost <= partner.energy
+            ):
+                min_energy_cost = energy_cost
+                best_partner = partner.id
+
+        if best_partner is not None:
+            preferences.append([task_index, best_partner])
 
     return preferences
