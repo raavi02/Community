@@ -1,6 +1,8 @@
+import numpy as np
+
 # Partnership Round
 def phaseIpreferences(player, community, global_random):
-    if player.energy <= 0:
+    if player.energy <= 5:
         return []
 
     partner_bids = get_partner_bids(player, community)
@@ -9,9 +11,6 @@ def phaseIpreferences(player, community, global_random):
 
 # Individual Round
 def phaseIIpreferences(player, community, global_random):
-    if player.energy <= 0:
-        return []
-
     solo_bids = get_all_possible_tasks(community, player)
     return solo_bids
 
@@ -36,9 +35,9 @@ def get_partner_bids(player, community):
         if (solo_penalty == 0) or (solo_penalty <= do_task_alone_cutoff):
             continue
 
-        # Partner with anyone where the task penalty is below median difficulty for that task.
-        do_task_partnered_cutoff = round(np.median(np.array(column[1:])))
-        for offset_player_index, penalty in column[1:]:
+        # Partner with anyone where the task penalty is bottom 5% of penalty difficulty for that task.
+        do_task_partnered_cutoff = round(np.percentile(np.array(column[1:]), 5))
+        for offset_player_index, penalty in enumerate(column[1:]):
             if (penalty == 0) or (penalty <= do_task_partnered_cutoff):
                 # Remember that the player_abilities index for partnered abilities started at 1 not 0.
                 # To get the original partner id we need to reset adn use the community members object.
@@ -73,8 +72,7 @@ def calculate_penalty_matrix(partnered_abilities, tasks):
     """
 
     penalty_matrix = []
-
-    for i, abilities in partnered_abilities:
+    for i, abilities in enumerate(partnered_abilities):
         row_penalties = []
         for task in tasks:
             # Calculate energy expended as the sum of positive differences split between two partners
@@ -99,7 +97,7 @@ def get_all_possible_tasks(community, player):
         # Volunteer for all tasks that will keep your energy above 0.
         energy_cost = sum(max(task[i] - player.abilities[i], 0) for i in range(len(task)))
         if energy_cost <= player.energy:
-            bids.append(task_index)
+            solo_bids.append(task_index)
 
     return solo_bids
 
