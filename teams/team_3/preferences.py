@@ -1,4 +1,3 @@
-import sys
 from community import Member, Community
 
 
@@ -19,7 +18,7 @@ def community_statistics(community: Community):
     return avg_abilties, avg_energy
 
 
-def player_score(community: Community) -> dict[int:int]:
+def player_score(community: Community) -> list[int]:
     members = {member.id: 0 for member in community.members}
 
     for member in community.members:
@@ -91,12 +90,7 @@ def phaseIpreferences(player: Member, community: Community, global_random):
         return list_choices
 
     members = player_score(community)
-    index = 0
-
-    for i, mem in enumerate(members):
-        if mem == player.id:
-            index = i
-            break
+    index = members.index(player.id)
 
     best_partner = members[len(members) - 1 - index]
     best_task, pair_delta = calculate_minimum_delta_pair(
@@ -114,9 +108,9 @@ def phaseIpreferences(player: Member, community: Community, global_random):
 
     player_delta = player_cost + player_waste
 
-    list_choices.append([best_task, best_partner])
-    # if pair_delta < player_delta:
-    #     list_choices.append([best_task, best_partner])
+    # list_choices.append([best_task, best_partner])
+    if pair_delta < player_delta * 2.5:
+        list_choices.append([best_task, best_partner])
 
     return list_choices
 
@@ -127,10 +121,18 @@ def phaseIIpreferences(player, community, global_random):
     num_abilities = len(player.abilities)
     best_task, _ = calculate_minimum_delta_individual(player, community)
 
-    if best_task == -1 or player.energy < 2:
+    if best_task == -1:
         return []
 
-    return [best_task]
+    energy_cost = sum(
+        max(community.tasks[best_task][j] - player.abilities[j], 0)
+        for j in range(num_abilities)
+    )
+
+    if energy_cost < player.energy:
+        bids.append(best_task)
+
+    return bids
 
     # if delta < 3:
     #     return [best_task]
