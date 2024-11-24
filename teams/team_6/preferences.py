@@ -12,12 +12,13 @@ def phaseIpreferences(player, community, global_random):
     list_choices = []
 
     if PHASE_1_ASSIGNMENTS:
+        partner_loss_threshold = 0
         assignments, total_cost = assign_phase1(community.tasks, community.members)
 
         for assignment in assignments:
-            for task in community.tasks:
-                if task == assignment[1]:
-                    if player.id in assignment[0]:
+            if player.id in assignment[0] and assignment[2] <= partner_loss_threshold:
+                for task in community.tasks:
+                    if task == assignment[1]:
                         if player.id == assignment[0][0]:
                             list_choices.append(
                                 [community.tasks.index(task), assignment[0][1]]
@@ -82,7 +83,8 @@ def assign_phase1(tasks, members):
         member1_idx, member2_idx = partnerships[partnership_idx]
         member1 = members[member1_idx]
         member2 = members[member2_idx]
-        assignments.append(([member1.id, member2.id], tasks[task_idx]))
+        loss = cost_matrix[task_idx, partnership_idx]
+        assignments.append(([member1.id, member2.id], tasks[task_idx], loss))
 
     total_cost = sum(
         cost_matrix[row_indices[i], col_indices[i]] for i in range(len(row_indices))
@@ -117,6 +119,13 @@ def loss_phase1(task, player1, player2):
         for k in range(len(task))
     )
     cost += max(0, cost - player1.energy - player2.energy) / 2
+    cost += sum(
+        max(max(player1.abilities[k], player2.abilities[k]) - task[k], 0)
+        for k in range(len(task))
+    )
+    cost += sum(
+        abs(player1.abilities[k] - player2.abilities[k]) for k in range(len(task))
+    )
     return cost
 
 
