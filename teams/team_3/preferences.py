@@ -129,26 +129,7 @@ def phaseIIpreferences(player, community, global_random):
         for j in range(num_abilities)
     )
 
-    if energy_cost < player.energy:
+    if energy_cost <= player.energy:
         bids.append(best_task)
-
-    return bids
-
-    # if delta < 3:
-    #     return [best_task]
-
-    return []
-    # evaluate each task for solo completion
-    for i, task in enumerate(community.tasks):
-
-        energy_cost = sum(
-            max(task[j] - player.abilities[j], 0) for j in range(num_abilities)
-        )
-
-        if energy_cost < player.energy:
-            bids.append((i, energy_cost))
-
-    bids.sort(key=lambda x: x[1])
-    bids = [bid[0] for bid in bids]
 
     return bids
