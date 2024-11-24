@@ -7,14 +7,9 @@ def phaseIpreferences(player, community, global_random):
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id
     """
     list_choices = []
-    if player.energy < 0:
-        return list_choices
-    num_members = len(community.members)
-    partner_id = num_members - player.id - 1
-    list_choices.append([0, partner_id])
-    if len(community.tasks) > 1:
-        list_choices.append([1, partner_id])
-    list_choices.append([0, min(partner_id + 1, num_members - 1)])
+
+    assignments, total_cost = assign_phase1(community.tasks, community.members)
+
     return list_choices
 
 
@@ -45,6 +40,43 @@ def phaseIIpreferences(player, community, global_random):
         return bids
 
 
+def assign_phase1(tasks, members):
+    num_tasks = len(tasks)
+    num_members = len(members)
+
+    partnerships = []
+    for i in range(num_members):
+        for j in range(i + 1, num_members):
+            partnerships.append((i, j))
+    num_partnerships = len(partnerships)
+
+    cost_matrix = np.zeros((num_tasks, num_partnerships))
+
+    for i, task in enumerate(tasks):
+        for j, (member1_idx, member2_idx) in enumerate(partnerships):
+            member1 = members[member1_idx]
+            member2 = members[member2_idx]
+            cost_matrix[i][j] = loss_func(
+                task, np.maximum(member1.abilities, member2.abilities), 0
+            )
+
+    row_indices, col_indices = linear_sum_assignment(cost_matrix)
+
+    assignments = {}
+    for task_idx, partnership_idx in zip(row_indices, col_indices):
+        member1_idx, member2_idx = partnerships[partnership_idx]
+        task = tasks[task_idx]
+        member1 = members[member1_idx]
+        member2 = members[member2_idx]
+        assignments[member1_idx] = (task, member1, member2)
+
+    total_cost = sum(
+        cost_matrix[row_indices[i], col_indices[i]] for i in range(len(row_indices))
+    )
+
+    return assignments, total_cost
+
+
 def assign_phase2(tasks, members):
     num_tasks = len(tasks)
     num_members = len(members)
@@ -63,6 +95,10 @@ def assign_phase2(tasks, members):
     )
 
     return assignments, total_cost
+
+
+def loss_phase1(player1, player2, task):
+    return loss_func(task, np.maximum(player1.abilities, player2.abilities), 0)
 
 
 def loss_func(task, abilities, current_energy):
