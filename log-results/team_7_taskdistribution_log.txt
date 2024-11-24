@@ -1,0 +1,960 @@
+2024-11-18 18:42:03,608 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,608 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,608 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,623 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,623 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,623 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,651 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:03,655 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:42:52,425 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,454 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,461 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,467 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,467 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,467 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,467 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,467 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,467 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,467 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,467 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,467 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,468 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,468 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,468 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,468 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:33,468 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
+2024-11-18 18:43:56,410 - ./log-results/team_7_taskdistribution - INFO - Function task_difficulty_distribution output:
+me
+
