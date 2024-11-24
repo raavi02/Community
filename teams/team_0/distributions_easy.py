@@ -1,5 +1,5 @@
 import random
-print("easy")
+# print("easy")
 def ability_distribution(num_abilities: int, seed, player_id, global_random) -> list[int]:
     local_random_ability = random.Random(seed + player_id)
     return [local_random_ability.randint(0, 10) for _ in range(num_abilities)]
