@@ -53,8 +53,33 @@ def phaseIIpreferences(player, community, global_random):
         # Volunteering logic
         if player.energy - energy_cost >= 0:
             bids.append(task_id)
+
+    # Find extremely difficult tasks
+    diff_tasks = findDifficultTasks(community)
+    if len(diff_tasks) > 0:
+        print("Difficult Tasks:")
+        for task_id, difficulty in diff_tasks:
+            pass
+            #print(f"Task ID: {task_id}, Difficulty: {difficulty}")
     
     return bids
+
+def findDifficultTasks(community):
+    difficult_tasks = []
+
+    for task_id, task in enumerate(community.tasks):
+    
+        # Calculate the energy cost for the worst-case player (lowest abilities)
+        max_energy_loss = max([
+            sum([max(task[j] - player.abilities[j], 0) for j in range(len(task))])
+            for player in community.members
+        ])
+
+        # Check if this task would reduce all players' energy below -20
+        if all(player.energy - max_energy_loss < -20 for player in community.members):
+            difficult_tasks.append((task_id, max_energy_loss))
+
+    return difficult_tasks
 
 def isValidForPartnership(player, community, task):
     if player.energy <= 0:
@@ -71,5 +96,7 @@ def isValidForPartnership(player, community, task):
     #         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(task))])
     #         if energy_cost == 0:
     #             return False
+
+    # sacrificing strategy
     
     return True
