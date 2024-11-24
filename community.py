@@ -507,7 +507,7 @@ def create_gui(community, run_simulation_func, task_difficulty_distribution, num
         member_tree.delete(*member_tree.get_children())
         for member in community.members:
             status = "Incapacitated" if member.incapacitated else "Active"
-            if member.energy < 0 and member.energy>=-10:
+            if member.energy < 0 and member.energy> -10:
                 status = "Tired"
             formatted_abilities = ", ".join(f"{ability:2d}" for ability in member.abilities)
             member_tree.insert("", "end", values=(member.id, member.group, f"{member.energy:.1f}", formatted_abilities, status))
