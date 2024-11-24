@@ -45,7 +45,7 @@ def phaseIIpreferences(player, community, global_random):
         if best_task is None:
             return []
 
-        best_task_cost = loss_func(
+        best_task_cost = loss_phase2(
             community.tasks[best_task], player.abilities, player.energy
         )
         if player.energy - best_task_cost < wait_energy_threshold:
@@ -73,9 +73,7 @@ def assign_phase1(tasks, members):
         for j, (member1_idx, member2_idx) in enumerate(partnerships):
             member1 = members[member1_idx]
             member2 = members[member2_idx]
-            cost_matrix[i][j] = loss_func(
-                task, np.maximum(member1.abilities, member2.abilities), 0
-            )
+            cost_matrix[i][j] = loss_phase1(task, member1, member2)
 
     row_indices, col_indices = linear_sum_assignment(cost_matrix)
 
@@ -101,7 +99,7 @@ def assign_phase2(tasks, members):
 
     for i, task in enumerate(tasks):
         for j, member in enumerate(members):
-            cost_matrix[i][j] = loss_func(task, member.abilities, member.energy)
+            cost_matrix[i][j] = loss_phase2(task, member.abilities, member.energy)
 
     row_indices, col_indices = linear_sum_assignment(cost_matrix)
 
@@ -113,11 +111,16 @@ def assign_phase2(tasks, members):
     return assignments, total_cost
 
 
-def loss_phase1(player1, player2, task):
-    return loss_func(task, np.maximum(player1.abilities, player2.abilities), 0)
+def loss_phase1(task, player1, player2):
+    cost = sum(
+        max(task[k] - max(player1.abilities[k], player2.abilities[k]), 0)
+        for k in range(len(task))
+    )
+    cost += max(0, cost - player1.energy - player2.energy) / 2
+    return cost
 
 
-def loss_func(task, abilities, current_energy):
+def loss_phase2(task, abilities, current_energy):
     cost = sum([max(task[k] - abilities[k], 0) for k in range(len(abilities))])
     cost += max(0, cost - current_energy)
     return cost
