@@ -5,6 +5,8 @@ from itertools import combinations
 
 # Global static variables
 WEAKNESS_THRESHOLD = 5          # Percentile threshold for weakest player
+PAIRING_ADVANTAGE = 3         # Advantage of pairing over individual work
+
 
 # Set up logging
 logging.basicConfig(
@@ -53,10 +55,22 @@ def phaseIpreferences(player, community, global_random):
         # Easier tasks (energy required < 10)
         # Volunteer to partner as long as energy >= task cost
         else:
+            best_decision = (None, np.inf)  # (partner_id, cost)
             for assignment in list_of_ranked_assignments[t]:
-                if player.id in assignment[0] and None not in assignment[0] and player.energy >= assignment[1]:
-                    partner_id = assignment[0][0] if player.id == assignment[0][1] else assignment[0][1]
-                    list_choices.append([t, partner_id])
+                if player.id in assignment[0] and player.energy >= assignment[1]:
+                    if None not in assignment[0]:
+                        # Paired assignment
+                        partner_id = assignment[0][0] if player.id == assignment[0][1] else assignment[0][1]
+                        if best_decision[0] is not None and assignment[1] < best_decision[1]:
+                            best_decision = (partner_id, assignment[1])
+                        elif best_decision[0] is None and assignment[1] + PAIRING_ADVANTAGE < best_decision[1]:
+                            best_decision = (partner_id, assignment[1])
+                    else:
+                        # Individual assignment
+                        if assignment[1] < best_decision[1] + PAIRING_ADVANTAGE:
+                            best_decision = (None, assignment[1])
+            if best_decision[0] is not None:
+                list_choices.append([t, best_decision[0]])
 
     return list_choices
 
@@ -89,7 +103,7 @@ def phaseIIpreferences(player, community, global_random):
 
     return bids
 
-
+# @profile
 def calculate_cost_matrix(community):
     """
     Calculates the cost matrices for individual members and pairs based on abilities and tasks.
@@ -115,7 +129,7 @@ def calculate_cost_matrix(community):
 
     return cost_matrix_individual, cost_matrix_pairs
 
-
+# @profile
 def get_ranked_assignments(community, cost_matrix_individual, cost_matrix_pairs):
     """
     Rank assignments of paired and individual workers for each task based on the cost matrices.
@@ -138,7 +152,7 @@ def get_ranked_assignments(community, cost_matrix_individual, cost_matrix_pairs)
 
     return list_of_ranked_assignments
 
-
+# @profile
 def is_weakest_player(player, community):
     sum_of_abilities = []
     
