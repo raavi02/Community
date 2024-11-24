@@ -2,13 +2,30 @@ from scipy.optimize import linear_sum_assignment
 import numpy as np
 
 
+PHASE_1_ASSIGNMENTS = False
+
+
 def phaseIpreferences(player, community, global_random):
     """Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id
     """
     list_choices = []
 
-    assignments, total_cost = assign_phase1(community.tasks, community.members)
+    if PHASE_1_ASSIGNMENTS:
+        assignments, total_cost = assign_phase1(community.tasks, community.members)
+
+        for assignment in assignments:
+            for task in community.tasks:
+                if task == assignment[1]:
+                    if player.id in assignment[0]:
+                        if player.id == assignment[0][0]:
+                            list_choices.append(
+                                [community.tasks.index(task), assignment[0][1]]
+                            )
+                        else:
+                            list_choices.append(
+                                [community.tasks.index(task), assignment[0][0]]
+                            )
 
     return list_choices
 
@@ -62,13 +79,12 @@ def assign_phase1(tasks, members):
 
     row_indices, col_indices = linear_sum_assignment(cost_matrix)
 
-    assignments = {}
+    assignments = []
     for task_idx, partnership_idx in zip(row_indices, col_indices):
         member1_idx, member2_idx = partnerships[partnership_idx]
-        task = tasks[task_idx]
         member1 = members[member1_idx]
         member2 = members[member2_idx]
-        assignments[member1_idx] = (task, member1, member2)
+        assignments.append(([member1.id, member2.id], tasks[task_idx]))
 
     total_cost = sum(
         cost_matrix[row_indices[i], col_indices[i]] for i in range(len(row_indices))
