@@ -27,7 +27,7 @@ def phaseIIpreferences(player, community, global_random):
     try:
         wait_energy_threshold = 0
         player_index = community.members.index(player)
-        assignments, total_cost = optimal_assignment(community.tasks, community.members)
+        assignments, total_cost = assign_phase2(community.tasks, community.members)
 
         best_task = assignments.get(player_index)
         if best_task is None:
@@ -45,7 +45,7 @@ def phaseIIpreferences(player, community, global_random):
         return bids
 
 
-def optimal_assignment(tasks, members):
+def assign_phase2(tasks, members):
     num_tasks = len(tasks)
     num_members = len(members)
 
