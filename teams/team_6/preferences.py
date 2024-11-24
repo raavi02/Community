@@ -25,7 +25,7 @@ def phaseIIpreferences(player, community, global_random):
         return bids
 
     try:
-        energy_threshold = 0
+        wait_energy_threshold = 0
         player_index = community.members.index(player)
         assignments, total_cost = optimal_assignment(community.tasks, community.members)
 
@@ -33,8 +33,10 @@ def phaseIIpreferences(player, community, global_random):
         if best_task is None:
             return []
 
-        best_task_cost = loss_func(community.tasks[best_task], player.abilities, player.energy)
-        if player.energy - best_task_cost < energy_threshold:
+        best_task_cost = loss_func(
+            community.tasks[best_task], player.abilities, player.energy
+        )
+        if player.energy - best_task_cost < wait_energy_threshold:
             return []
 
         return [best_task]
@@ -43,7 +45,7 @@ def phaseIIpreferences(player, community, global_random):
         return bids
 
 
-def optimal_assignment(tasks, members, energy_threshold=0):
+def optimal_assignment(tasks, members):
     num_tasks = len(tasks)
     num_members = len(members)
 
@@ -52,8 +54,6 @@ def optimal_assignment(tasks, members, energy_threshold=0):
     for i, task in enumerate(tasks):
         for j, member in enumerate(members):
             cost_matrix[i][j] = loss_func(task, member.abilities, member.energy)
-            if member.energy - cost_matrix[i][j] < energy_threshold:
-                cost_matrix[i][j] += 1e6
 
     row_indices, col_indices = linear_sum_assignment(cost_matrix)
 
