@@ -97,7 +97,7 @@ def phaseIpreferences(player: Member, community: Community, global_random):
 
     player_delta = player_cost + player_waste
 
-    if pair_delta < player_delta * 2.5:
+    if pair_delta < player_delta * 1.5:
         list_choices.append([best_task, best_partner])
 
     return list_choices
