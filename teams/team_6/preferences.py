@@ -2,7 +2,35 @@ from scipy.optimize import linear_sum_assignment
 import numpy as np
 
 
-PHASE_1_ASSIGNMENTS = False
+PHASE_1_ASSIGNMENTS = True
+
+def exists_good_match(tasks, player_abilities, each_difference = 1, total_difference = None, penalty_tolerance = 0, return_multiple_tasks = False):
+    # go through all the tasks and check if there is a task whose difficulty in each category is less than the player's ability in that category by each_tolerance
+    no_of_abilities = len(player_abilities)
+    current_index = -1
+    penalty_suffered = -1
+    if total_difference == None:
+        total_difference = no_of_abilities * each_difference
+    
+    returned_tasks = []
+    for task in tasks:
+        if all( abs(player_abilities[i] - task[i]) <= each_difference for i in range(no_of_abilities)) and sum([abs(player_abilities[i] - task[i]) for i in range(no_of_abilities)]) <= total_difference:
+            penalty = 0
+            for i in range(no_of_abilities):
+                if player_abilities[i] < task[i]:
+                    penalty += task[i] - player_abilities[i]
+            if penalty <= penalty_tolerance:
+                returned_tasks.append(task)
+                if penalty_suffered == -1 or penalty < penalty_suffered:
+                    penalty_suffered = penalty
+                    current_index = tasks.index(task)
+            
+    if current_index == -1:
+        return False, penalty_suffered, current_index, []
+    else:
+        print("TASKS: ", returned_tasks)
+        return True, penalty_suffered, current_index, returned_tasks
+
 
 
 def phaseIpreferences(player, community, global_random):
@@ -27,10 +55,33 @@ def phaseIpreferences(player, community, global_random):
                                 list_choices.append(
                                     [community.tasks.index(task), assignment[0][0]]
                                 )
+        else:
+            perfect_match, _, _, _ = exists_good_match(community.tasks, player.abilities, each_difference=1, penalty_tolerance=2)
+            if perfect_match:
+                print("PERFECT MATCH")
+                #return []
+            else:
+                for member in community.members:
+                    max_abilities = [max(player.abilities[i], member.abilities[i]) for i in range(len(player.abilities))]
+                    _, _, _, matching_tasks = exists_good_match(community.tasks, max_abilities, each_difference=3, penalty_tolerance=max(len(player.abilities), 6), return_multiple_tasks=True)
+                    for matching_task in matching_tasks:
+                        list_choices.append([community.tasks.index(matching_task), member.id])
+                
+                threshold = 3
+                if len(list_choices) < threshold:
+                    for member in community.members:
+                        max_abilities = [max(player.abilities[i], member.abilities[i]) for i in range(len(player.abilities))]
+                        _, _, _, matching_tasks = exists_good_match(community.tasks, max_abilities, each_difference=4, penalty_tolerance=8, return_multiple_tasks=True)
+                        for matching_task in matching_tasks:
+                            list_choices.append([community.tasks.index(matching_task), member.id])
+            
     except Exception as e:
         print(e)
-
+    
+    print(list_choices)
     return list_choices
+
+
 
 
 def phaseIIpreferences(player, community, global_random):
