@@ -28,7 +28,7 @@ def exists_good_match(tasks, player_abilities, each_difference = 1, total_differ
     if current_index == -1:
         return False, penalty_suffered, current_index, []
     else:
-        print("TASKS: ", returned_tasks)
+        # print("TASKS: ", returned_tasks)
         return True, penalty_suffered, current_index, returned_tasks
 
 
@@ -58,8 +58,8 @@ def phaseIpreferences(player, community, global_random):
         else:
             perfect_match, _, _, _ = exists_good_match(community.tasks, player.abilities, each_difference=1, penalty_tolerance=2)
             if perfect_match:
-                print("PERFECT MATCH")
-                #return []
+                # print("PERFECT MATCH")
+                return []
             else:
                 for member in community.members:
                     max_abilities = [max(player.abilities[i], member.abilities[i]) for i in range(len(player.abilities))]
@@ -78,7 +78,7 @@ def phaseIpreferences(player, community, global_random):
     except Exception as e:
         print(e)
     
-    print(list_choices)
+    # print(list_choices)
     return list_choices
 
 
