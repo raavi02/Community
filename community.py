@@ -507,7 +507,7 @@ def create_gui(community, run_simulation_func, task_difficulty_distribution, num
         member_tree.delete(*member_tree.get_children())
         for member in community.members:
             status = "Incapacitated" if member.incapacitated else "Active"
-            if member.energy < 0 and member.energy>=-10:
+            if member.energy < 0 and member.energy> -10:
                 status = "Tired"
             formatted_abilities = ", ".join(f"{ability:2d}" for ability in member.abilities)
             member_tree.insert("", "end", values=(member.id, member.group, f"{member.energy:.1f}", formatted_abilities, status))
@@ -585,9 +585,9 @@ if __name__ == "__main__":
     parser.add_argument('--seed_ability', type=int, default=42, help='Seed for ability distribution randomness')
     parser.add_argument('--seed_task_difficulty', type=int, default=42, help='Seed for task difficulty randomness')
     parser.add_argument('--group_task_distribution', type=int, default=0, choices=range(0, 11), help='Task distribution of group selected')
-    parser.add_argument('--task_distribution_difficulty', type=str, default='easy', choices=['easy', 'med', 'hard'], help='Easy (e), medium (m) or hard difficulty')
+    parser.add_argument('--task_distribution_difficulty', type=str, default='easy', choices=['easy', 'medium', 'hard'], help='Easy (e), medium (m) or hard difficulty')
     parser.add_argument('--group_abilities_distribution', type=int, default=0, choices=range(0, 11), help='Ability distribution of group selected')
-    parser.add_argument('--abilities_distribution_difficulty', type=str, default='easy', choices=['easy', 'med', 'hard'], help='Easy (e), medium (m) or hard difficulty')
+    parser.add_argument('--abilities_distribution_difficulty', type=str, default='easy', choices=['easy', 'medium', 'hard'], help='Easy (e), medium (m) or hard difficulty')
     parser.add_argument('--log', action='store_true', help='Log the results to a txt in folder')
     parser.add_argument('--gui', action='store_true', help='Run the simulation with GUI')
     for i in range(1, 11):

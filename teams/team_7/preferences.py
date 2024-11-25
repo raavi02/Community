@@ -17,7 +17,6 @@ def phaseIIpreferences(player, community, global_random):
     solo_bids = get_all_possible_tasks(community, player)
     return solo_bids
 
-
 def get_partner_bids(player, community):
     """
     This function calculates a person's cost matrix for performing every task alone or partnered and then returns a preference to work alone or in partnerships.
