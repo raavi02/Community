@@ -11,22 +11,28 @@ def phaseIpreferences(player, community, global_random):
     """
     list_choices = []
 
-    if PHASE_1_ASSIGNMENTS:
-        partner_loss_threshold = 0
-        assignments, total_cost = assign_phase1(community.tasks, community.members)
+    try:
+        if PHASE_1_ASSIGNMENTS:
+            partner_loss_threshold = 0
+            assignments, total_cost = assign_phase1(community.tasks, community.members)
 
-        for assignment in assignments:
-            if player.id in assignment[0] and assignment[2] <= partner_loss_threshold:
-                for task in community.tasks:
-                    if task == assignment[1]:
-                        if player.id == assignment[0][0]:
-                            list_choices.append(
-                                [community.tasks.index(task), assignment[0][1]]
-                            )
-                        else:
-                            list_choices.append(
-                                [community.tasks.index(task), assignment[0][0]]
-                            )
+            for assignment in assignments:
+                if (
+                    player.id in assignment[0]
+                    and assignment[2] <= partner_loss_threshold
+                ):
+                    for task in community.tasks:
+                        if task == assignment[1]:
+                            if player.id == assignment[0][0]:
+                                list_choices.append(
+                                    [community.tasks.index(task), assignment[0][1]]
+                                )
+                            else:
+                                list_choices.append(
+                                    [community.tasks.index(task), assignment[0][0]]
+                                )
+    except Exception as e:
+        print(e)
 
     return list_choices
 
