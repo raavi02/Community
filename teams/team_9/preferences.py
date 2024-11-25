@@ -1,7 +1,8 @@
 def phaseIpreferences(player, community, global_random):
     '''Return a list of task index and the partner id for the particular player.'''
     preferences = []
-    energy_limit = 0  # Allow energy to drop but not too far into the negatives
+    primary_energy_limit = 0  # Allow energy to drop but not too far into the negatives
+    secondary_energy_limit = -10  # Allow for deeper energy dips, but avoid incapacitation
 
     # Sort tasks by total difficulty (descending)
     sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
@@ -27,8 +28,11 @@ def phaseIpreferences(player, community, global_random):
             player_remaining_energy = player.energy - energy_cost
             partner_remaining_energy = partner.energy - energy_cost
 
-            # Allow pairing even if player energy is negative, but limit the drop
-            if player_remaining_energy > energy_limit and partner_remaining_energy > energy_limit:
+            # Allow partnering even if energy dips below the primary limit
+            if (
+                player_remaining_energy > secondary_energy_limit
+                and partner_remaining_energy > secondary_energy_limit
+            ):
                 # Choose the partner that maximizes the minimum remaining energy
                 if min(player_remaining_energy, partner_remaining_energy) > best_remaining_energy:
                     best_partner = partner.id
@@ -40,18 +44,20 @@ def phaseIpreferences(player, community, global_random):
 
     return preferences
 
+
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually.'''
     preferences = []
-    energy_limit = 0  # Allow energy to drop but not too far into the negatives
+    primary_energy_limit = 0  # Allow energy to drop but not too far into the negatives
+    secondary_energy_limit = -10  # Allow for deeper energy dips, but avoid incapacitation
 
     # Evaluate tasks for individual completion
     for task_id, task in enumerate(community.tasks):
         energy_cost = sum(max(task[i] - player.abilities[i], 0) for i in range(len(task)))
         remaining_energy = player.energy - energy_cost
 
-        # Consider tasks that leave the player with energy above the limit
-        if remaining_energy > energy_limit:
+        # Consider tasks that leave the player with energy above the secondary limit
+        if remaining_energy > secondary_energy_limit:
             preferences.append((task_id, energy_cost, remaining_energy))
 
     # Sort tasks by a combination of low energy cost and high remaining energy
