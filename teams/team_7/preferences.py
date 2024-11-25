@@ -5,12 +5,11 @@ tracking_data = []
 
 # Partnership Round
 def phaseIpreferences(player, community, global_random):
-    if player.energy <= 5:
+    if player.energy <= 0:
         return []
 
     partner_bids = get_partner_bids(player, community)
     return partner_bids
-
 
 # Individual Round
 def phaseIIpreferences(player, community, global_random):
@@ -29,23 +28,25 @@ def get_partner_bids(player, community):
     partner_bids = []
 
     # Iterate over each column (penalties for single task)
-    do_task_alone_cutoff = min(2, player.energy)
     for task_index, column in enumerate(penalty_matrix.T):
         solo_penalty = column[0]
 
-        # Do not partner if the task alone has (1) no penalty alone or (2) is "easy enough".
-        if (solo_penalty == 0) or (solo_penalty <= do_task_alone_cutoff):
+        # Do not partner if the task alone has no penalty.
+        if (solo_penalty == 0):
             continue
 
-        # Partner with anyone where the task penalty is bottom 5% of penalty difficulty for that task.
-        do_task_partnered_cutoff = round(np.percentile(np.array(column[1:]), 5))
-        for offset_player_index, penalty in enumerate(column[1:]):
-            if (penalty == 0) or (penalty <= do_task_partnered_cutoff):
-                # Remember that the player_abilities index for partnered abilities started at 1 not 0.
-                # To get the original partner id we need to reset adn use the community members object.
-                partner_id = community.members[offset_player_index - 1].id
-                partner_bids.append([task_index, partner_id])
+        partner_bids = get_best_partner(player, community, solo_penalty)
 
+        # Partner with anyone where the task penalty is bottom 5% of penalty difficulty for that task.
+        # RETIRED: this was the other code offering to partner with multiple ppl
+        # do_task_partnered_cutoff = round(np.percentile(np.array(column[1:]), 5))
+        # for offset_player_index, penalty in enumerate(column[1:]):
+        #
+        #     if (penalty == 0) or (penalty <= do_task_partnered_cutoff):
+        #         # Remember that the player_abilities index for partnered abilities started at 1 not 0.
+        #         # To get the original partner id we need to reset adn use the community members object.
+        #         partner_id = community.members[offset_player_index - 1].id
+        #         partner_bids.append([task_index, partner_id])
     return partner_bids
 
 
@@ -137,7 +138,7 @@ Retired Helper Functions
 """
 
 
-def get_best_partner(preferences, tasks, task_index, player, community):
+def get_best_partner(player, community, solo_task_energy):
     """
     Volunteer for every task with the minimum penalty partner.
     """
@@ -145,7 +146,6 @@ def get_best_partner(preferences, tasks, task_index, player, community):
     # Returns a list of [task_index, partner_id]
     preferences = []
     sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
-
     # Iterate over all tasks
     for task_index, task in sorted_tasks:
 
@@ -177,7 +177,6 @@ def get_best_partner(preferences, tasks, task_index, player, community):
                 min_energy_cost = energy_cost
                 best_partner = partner.id
 
-        if best_partner is not None:
+        if best_partner is not None and (solo_task_energy >= 1.5* min_energy_cost):
             preferences.append([task_index, best_partner])
-
     return preferences
