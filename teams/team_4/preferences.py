@@ -24,12 +24,6 @@ def phaseIpreferences(player, community, global_random):
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
     list_choices = []
 
-    # Print member abilities and task difficulty
-    # for member in community.members:
-    #     logging.debug(f"Member {member.id} abilities: {member.abilities}")
-    # for task in community.tasks:
-    #     logging.debug(f"Task: {task}")
-
     # Calculate cost matrices
     cost_matrix_individual, cost_matrix_pairs = calculate_cost_matrix(community)
 
@@ -44,33 +38,34 @@ def phaseIpreferences(player, community, global_random):
             if is_weakest_player(player, community):
                 return list_choices
 
-        # Tiring tasks (10 <= energy required < 20)
-        # Wait until energy is full to volunteer with a partner
-        elif 10 < list_of_ranked_assignments[t][0][1] < 20:
-            for assignment in list_of_ranked_assignments[t]:
-                if player.id in assignment[0] and None not in assignment[0] and player.energy == 10:                    
-                    partner_id = assignment[0][0] if player.id == assignment[0][1] else assignment[0][1]
-                    list_choices.append([t, partner_id])
+        best_decision = (None, np.inf)  # (partner_id, cost)
 
-        # Easier tasks (energy required < 10)
-        # Volunteer to partner as long as energy >= task cost
-        else:
-            best_decision = (None, np.inf)  # (partner_id, cost)
-            for assignment in list_of_ranked_assignments[t]:
-                if player.id in assignment[0] and player.energy >= assignment[1]:
-                    if None not in assignment[0]:
-                        # Paired assignment
+        for assignment in list_of_ranked_assignments[t]:
+            if player.id in assignment[0]:
+                if 10 < assignment[1] < 20:
+                    # Tiring tasks (10 <= energy required < 20)
+                    # Wait until energy is full to volunteer with a partner
+                    if None not in assignment[0] and player.energy == 10:
                         partner_id = assignment[0][0] if player.id == assignment[0][1] else assignment[0][1]
-                        if best_decision[0] is not None and assignment[1] < best_decision[1]:
-                            best_decision = (partner_id, assignment[1])
-                        elif best_decision[0] is None and assignment[1] + PAIRING_ADVANTAGE < best_decision[1]:
-                            best_decision = (partner_id, assignment[1])
-                    else:
-                        # Individual assignment
-                        if assignment[1] < best_decision[1] + PAIRING_ADVANTAGE:
-                            best_decision = (None, assignment[1])
-            if best_decision[0] is not None:
-                list_choices.append([t, best_decision[0]])
+                        list_choices.append([t, partner_id])
+                else:
+                    # Easier tasks (energy required < 10)
+                    # Volunteer to partner as long as energy >= task cost
+                    if player.energy >= assignment[1]:
+                        if None not in assignment[0]:
+                            # Paired assignment
+                            partner_id = assignment[0][0] if player.id == assignment[0][1] else assignment[0][1]
+                            if best_decision[0] is not None and assignment[1] < best_decision[1]:
+                                best_decision = (partner_id, assignment[1])
+                            elif best_decision[0] is None and assignment[1] + PAIRING_ADVANTAGE < best_decision[1]:
+                                best_decision = (partner_id, assignment[1])
+                        else:
+                            # Individual assignment
+                            if assignment[1] < best_decision[1] + PAIRING_ADVANTAGE:
+                                best_decision = (None, assignment[1])
+        
+        if best_decision[0] is not None:
+            list_choices.append([t, best_decision[0]])
 
     return list_choices
 
