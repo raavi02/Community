@@ -13,14 +13,10 @@ def phaseIpreferences(player, community, global_random):
 
     try:
         if PHASE_1_ASSIGNMENTS:
-            partner_loss_threshold = 0
             assignments, total_cost = assign_phase1(community.tasks, community.members)
 
             for assignment in assignments:
-                if (
-                    player.id in assignment[0]
-                    and assignment[2] <= partner_loss_threshold
-                ):
+                if len(assignment[0]) == 2 and player.id in assignment[0]:
                     for task in community.tasks:
                         if task == assignment[1]:
                             if player.id == assignment[0][0]:
@@ -68,29 +64,50 @@ def assign_phase1(tasks, members):
     num_tasks = len(tasks)
     num_members = len(members)
 
+    # Generate all possible partnerships
     partnerships = []
     for i in range(num_members):
         for j in range(i + 1, num_members):
             partnerships.append((i, j))
     num_partnerships = len(partnerships)
 
-    cost_matrix = np.zeros((num_tasks, num_partnerships))
+    # Create cost matrix with columns for both partnerships and individual assignments
+    cost_matrix = np.zeros((num_tasks, num_partnerships + num_members))
 
+    # Fill partnership costs (first num_partnerships columns)
     for i, task in enumerate(tasks):
         for j, (member1_idx, member2_idx) in enumerate(partnerships):
             member1 = members[member1_idx]
             member2 = members[member2_idx]
             cost_matrix[i][j] = loss_phase1(task, member1, member2)
 
+    # Fill individual costs (remaining columns)
+    for i, task in enumerate(tasks):
+        for j, member in enumerate(members):
+            cost_matrix[i][num_partnerships + j] = loss_phase2(
+                task, member.abilities, member.energy
+            )
+
+    # Solve assignment problem
     row_indices, col_indices = linear_sum_assignment(cost_matrix)
 
+    # Convert results to assignments
     assignments = []
-    for task_idx, partnership_idx in zip(row_indices, col_indices):
-        member1_idx, member2_idx = partnerships[partnership_idx]
-        member1 = members[member1_idx]
-        member2 = members[member2_idx]
-        loss = cost_matrix[task_idx, partnership_idx]
-        assignments.append(([member1.id, member2.id], tasks[task_idx], loss))
+    for task_idx, col_idx in zip(row_indices, col_indices):
+        task = tasks[task_idx]
+        # If column index is less than num_partnerships, it's a partnership
+        if col_idx < num_partnerships:
+            member1_idx, member2_idx = partnerships[col_idx]
+            member1 = members[member1_idx]
+            member2 = members[member2_idx]
+            loss = cost_matrix[task_idx, col_idx]
+            assignments.append(([member1.id, member2.id], task, loss))
+        else:
+            # Individual assignment
+            member_idx = col_idx - num_partnerships
+            member = members[member_idx]
+            loss = cost_matrix[task_idx, col_idx]
+            assignments.append(([member.id], task, loss))
 
     total_cost = sum(
         cost_matrix[row_indices[i], col_indices[i]] for i in range(len(row_indices))
