@@ -233,7 +233,7 @@ def loss_phase1(task, player1, player2):
         max(task[k] - max(player1.abilities[k], player2.abilities[k]), 0)
         for k in range(len(task))
     )
-    cost += max(0, cost - player1.energy - player2.energy) / 2
+    cost += (max(0, cost - player1.energy) + max(0, cost - player2.energy)) / 2
     cost += sum(
         max(max(player1.abilities[k], player2.abilities[k]) - task[k], 0)
         for k in range(len(task))
