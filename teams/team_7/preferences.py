@@ -1,4 +1,7 @@
 import numpy as np
+import csv
+
+tracking_data = []
 
 # Partnership Round
 def phaseIpreferences(player, community, global_random):
@@ -101,6 +104,34 @@ def get_all_possible_tasks(community, player):
 
     return solo_bids
 
+
+def log_turn_data(turn, community, tasks_completed):
+    """
+    Logs the state of the community for a single turn.
+    """
+    global tracking_data
+
+    energy_levels = [player.energy for player in community.members]
+    median_energy = np.median(energy_levels)
+    exhausted_count = sum(1 for energy in energy_levels if energy < 0)
+
+    tracking_data.append({
+        "Turn": turn,
+        "Tasks Completed": tasks_completed,
+        "Median Energy": median_energy,
+        "Exhausted Players": exhausted_count,
+    })
+
+
+def export_csv(filename="simulation_data.csv"):
+    """
+    Exports the logged data to a CSV file.
+    """
+    global tracking_data
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=["Turn", "Tasks Completed", "Median Energy", "Exhausted Players"])
+        writer.writeheader()
+        writer.writerows(tracking_data)
 
 """
 Retired Helper Functions 
