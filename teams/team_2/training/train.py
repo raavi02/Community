@@ -46,18 +46,20 @@ class RestDecisionNN(nn.Module):
         return score
 
 
-def evaluate_fitness(model: nn.Module, task_environment):
-    total_score = 0
-    for task in task_environment:
-        action = model(task.features, task.state)
-        result = run(action)
-        # result = task_environment.run(action)  # Simulates environment behavior
-        total_score += result
-    return total_score
+def evaluate_fitness(task_model: nn.Module, rest_model: nn.Module):
+    # for task in task_environment:
+    # action = model(task.features, task.state)
+    result = run(task_model, rest_model)
+    # result = task_environment.run(action)  # Simulates environment behavior
+    return result
 
 
-def crossover(parent1, parent2):
-    child = TaskScorerNN(task_feature_size, player_state_size, hidden_size)
+def crossover(parent1, parent2, is_task):
+    if is_task:
+        child = TaskScorerNN(task_feature_size, player_state_size, hidden_size)
+    else:
+        child = RestDecisionNN(player_state_size + 1, hidden_size)
+
     for param1, param2, child_param in zip(
         parent1.parameters(), parent2.parameters(), child.parameters()
     ):
@@ -72,7 +74,9 @@ def mutate(model, mutation_rate=0.1):
 
 
 def select_parents(population, fitness_scores):
-    best = list(zip(population, fitness_scores)).sort(key=lambda x: x[1], reverse=True)
+    best = sorted(
+        list(zip(population, fitness_scores)), key=lambda x: x[1], reverse=True
+    )
 
     return [b[0] for b in best][: len(population) // 2]
 
@@ -93,39 +97,61 @@ class Task:
             self.state = torch.zeros(features.shape[0])
 
 
-max_generations = 100
-hidden_size = 10
-task_feature_size = 3
-pop_size = 40
-player_state_size = 3
-tasks = [Task(torch.tensor([1, 2, 3])), Task(torch.tensor([1, 2, 10]))]
-player_state = [1, 2, 1]
+max_generations = 5
+hidden_size = 64
+task_feature_size = 1
+pop_size = 10
+player_state_size = 7
 
 population = [
-    TaskScorerNN(task_feature_size, player_state_size, hidden_size)
+    (
+        TaskScorerNN(task_feature_size, player_state_size, hidden_size),
+        RestDecisionNN(player_state_size + task_feature_size, hidden_size),
+    )
     for _ in range(pop_size)
 ]
 
 for generation in range(max_generations):
     # Evaluate fitness
-    fitness_scores = [evaluate_fitness(model, tasks) for model in population]
+    fitness_scores = [
+        evaluate_fitness(task_model, rest_model)
+        for task_model, rest_model in population
+    ]
 
     # Select parents
     parents = select_parents(population, fitness_scores)
 
     # Generate offspring
     offspring = []
-    for _ in range(len(population) // 2):
+    # for now, only create offspring from TaskScorerNN
+    for _ in range(len(parents) // 2):
         parent1, parent2 = random.sample(parents, 2)
-        child = crossover(parent1, parent2)
-        mutate(child)
-        offspring.append(child)
+        child_task = crossover(parent1[0], parent2[0], is_task=True)
+        child_rest = crossover(parent1[1], parent2[1], is_task=False)
+        mutate(child_task)
+        mutate(child_rest)
+        offspring.append((child_task, child_rest))
+
+        parent1, parent2 = random.sample(parents, 2)
+        child_task = crossover(parent1[0], parent2[0], is_task=True)
+        child_rest = crossover(parent1[1], parent2[1], is_task=False)
+        mutate(child_task)
+        mutate(child_rest)
+        offspring.append((child_task, child_rest))
 
     # Replace population
-    population = offspring
+    population = parents + offspring
+    print(f"{len(population)} members")
+
+    print(f"{generation}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}")
 
 
-task_scores = [task_scorer(task, player_state) for task in tasks]
-rest_score = rest_scorer(player_state)
-combined_scores = torch.cat([task_scores, rest_score.unsqueeze(0)])
-action = torch.argmax(combined_scores).item()
+best_model = select_parents(population, fitness_scores)[0]
+
+torch.save(best_model, "best_weigths.pth")
+print('best model weights saved in "best_weights.pth"')
+
+# task_scores = [task_scorer(task, player_state) for task in tasks]
+# rest_score = rest_scorer(player_state)
+# combined_scores = torch.cat([task_scores, rest_score.unsqueeze(0)])
+# action = torch.argmax(combined_scores).item()

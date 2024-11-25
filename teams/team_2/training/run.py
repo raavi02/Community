@@ -1,21 +1,28 @@
 import subprocess
+from torch import nn, save
 
 
-def run(_action):
+def run(task_model: nn.Module, rest_model: nn.Module):
+    save(task_model.state_dict(), "task_weights.pth")
+    save(rest_model.state_dict(), "rest_weights.pth")
+
     result = subprocess.run(
         [
             "python",
             "community.py",
             "--num_members",
-            "40",
+            "10",
             "--g2",
-            "40",
+            "10",
             "--num_turns",
-            "100",
+            "20",
         ],
         capture_output=True,
         text=True,
     )
+
+    if result.stderr:
+        print(result.stderr)
 
     lines = result.stdout.strip().split("\n")
     for line in lines:
