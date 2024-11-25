@@ -1,8 +1,21 @@
 def phaseIpreferences(player, community, global_random):
     '''Return a list of task index and the partner id for the particular player.'''
     preferences = []
+
+    task_avg_difficulty = sum(sum(task) for task in community.tasks) / len(community.tasks)
+    player_avg_skill = sum(sum(member.abilities) for member in community.members) / len(community.members)
+
     primary_energy_limit = 0  # Allow energy to drop but not too far into the negatives
-    secondary_energy_limit = -10  # Allow for deeper energy dips, but avoid incapacitation
+
+    # Calculate the ratio of difficulty to skill
+    difficulty_ratio = task_avg_difficulty / max(player_avg_skill, 1e-6)  # Avoid division by zero
+
+    # Map difficulty ratio to the range [-10, primary_energy_limit]
+    if difficulty_ratio <= 1:
+        secondary_energy_limit = primary_energy_limit  # Tasks are manageable
+    else:
+        secondary_energy_limit = primary_energy_limit - (difficulty_ratio - 1) * 10
+        secondary_energy_limit = max(secondary_energy_limit, -10)  # Ensure it doesn't drop below -10
 
     # Sort tasks by total difficulty (descending)
     sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
@@ -48,8 +61,21 @@ def phaseIpreferences(player, community, global_random):
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually.'''
     preferences = []
+
+    task_avg_difficulty = sum(sum(task) for task in community.tasks) / max(len(community.tasks), 1e-6) 
+    player_avg_skill = sum(sum(member.abilities) for member in community.members) / max(len(community.members), 1e-6)
+
     primary_energy_limit = 0  # Allow energy to drop but not too far into the negatives
-    secondary_energy_limit = -10  # Allow for deeper energy dips, but avoid incapacitation
+
+    # Calculate the ratio of difficulty to skill
+    difficulty_ratio = task_avg_difficulty / max(player_avg_skill, 1e-6)  # Avoid division by zero
+
+    # Map difficulty ratio to the range [-10, primary_energy_limit]
+    if difficulty_ratio <= 1:
+        secondary_energy_limit = primary_energy_limit  # Tasks are manageable
+    else:
+        secondary_energy_limit = primary_energy_limit - (difficulty_ratio - 1) * 10
+        secondary_energy_limit = max(secondary_energy_limit, -10)  # Ensure it doesn't drop below -10
 
     # Evaluate tasks for individual completion
     for task_id, task in enumerate(community.tasks):
