@@ -52,7 +52,7 @@ def calculate_minimum_delta_pair(
                 max(task[i] - max(player.abilities[i], partner.abilities[i]), 0)
                 for i in range(num_abilities)
             )
-            / 2
+            * 0.5
         )
         pair_waste = (
             sum(
@@ -96,6 +96,9 @@ def phaseIpreferences(player: Member, community: Community, global_random):
     )
 
     player_delta = player_cost + player_waste
+
+    if pair_delta >= player.energy + community.members[best_partner].energy:
+        return list_choices
 
     if pair_delta < player_delta * 1.5:
         list_choices.append([best_task, best_partner])
