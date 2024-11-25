@@ -35,6 +35,7 @@ def get_partner_bids(player, community):
         if (solo_penalty == 0):
             continue
 
+        # todo - rewrite this to use the cost matrix and just grab the min penalty / partner pair for each task.
         partner_bids = get_best_partner(player, community, solo_penalty)
 
         # Partner with anyone where the task penalty is bottom 5% of penalty difficulty for that task.
