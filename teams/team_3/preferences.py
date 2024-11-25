@@ -1,23 +1,6 @@
 from community import Member, Community
 
 
-def community_statistics(community: Community):
-    num_members = len(community.members)
-    num_abilities = len(community.members[0].abilities)
-
-    total_energy = 0
-    avg_abilties = [0] * num_abilities
-
-    for member in community.members:
-        total_energy += member.energy
-        for i, ability in enumerate(member.abilities):
-            avg_abilties[i] += ability
-
-    avg_abilties = [ab / num_members for ab in avg_abilties]
-    avg_energy = total_energy / num_members
-    return avg_abilties, avg_energy
-
-
 def player_score(community: Community) -> list[int]:
     members = {member.id: 0 for member in community.members}
 
@@ -40,7 +23,10 @@ def calculate_minimum_delta_individual(player: Member, community: Community):
 
     for task_index, task in enumerate(community.tasks):
         cost = sum(max(task[i] - player.abilities[i], 0) for i in range(num_abilities))
-        waste = sum(max(player.abilities[i] - task[i], 0) for i in range(num_abilities))
+        waste = (
+            sum(max(player.abilities[i] - task[i], 0) for i in range(num_abilities))
+            * 0.5
+        )
 
         if minimum_delta >= cost + waste:
             minimum_delta = cost + waste
@@ -68,9 +54,12 @@ def calculate_minimum_delta_pair(
             )
             / 2
         )
-        pair_waste = sum(
-            max(max(player.abilities[i], partner.abilities[i]) - task[i], 0)
-            for i in range(num_abilities)
+        pair_waste = (
+            sum(
+                max(max(player.abilities[i], partner.abilities[i]) - task[i], 0)
+                for i in range(num_abilities)
+            )
+            * 0.5
         )
 
         if minimum_delta >= pair_cost + pair_waste:
@@ -108,7 +97,6 @@ def phaseIpreferences(player: Member, community: Community, global_random):
 
     player_delta = player_cost + player_waste
 
-    # list_choices.append([best_task, best_partner])
     if pair_delta < player_delta * 2.5:
         list_choices.append([best_task, best_partner])
 
