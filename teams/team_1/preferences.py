@@ -11,6 +11,8 @@ def phaseIpreferences(player, community, global_random):
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
 
     all_players = set(range(len(community.members)))
+    num_abilities = len(player.abilities)
+    cost_threshold = 0.5
     
     for p in community.members:
         # assume the player can do all tasks perfectly until proven otherwise
@@ -25,21 +27,20 @@ def phaseIpreferences(player, community, global_random):
 
     # Form all possible partnerships from the remaining players
     remaining_players = all_players - strong_players
-    partnerships = list(itertools.combinations(remaining_players, 2))
     partner_choices = []
 
     # Find good partnerships for the particular player
-    for p1_id, p2_id in partnerships:
-        if player.id in (p1_id, p2_id):
-            p1 = community.members[p1_id]
-            p2 = community.members[p2_id]
-            joint_abilities = [max(a1, a2) for a1, a2 in zip(p1.abilities, p2.abilities)]
-            
-            for task_id, task in enumerate(community.tasks):
-                energy_cost = calculate_energy_cost(joint_abilities, task)
-                if energy_cost <= 0:
-                    partner_choices.append([task_id, p2_id] if player.id == p1_id else [task_id, p1_id])
-    
+    for partner_id in remaining_players:
+        if partner_id == player.id:
+            continue
+        
+        partner = community.members[partner_id]
+        joint_abilities = [max(a1, a2) for a1, a2 in zip(player.abilities, partner.abilities)]
+        for task_id, task in enumerate(community.tasks):
+            energy_cost = sum([max(task[j] - joint_abilities[j], 0) for j in range(num_abilities)])
+            if energy_cost / 2 <= cost_threshold:
+                partner_choices.append([task_id, partner_id])
+
     return partner_choices
 
 def phaseIIpreferences(player, community, global_random):
@@ -62,6 +63,3 @@ def phaseIIpreferences(player, community, global_random):
             bids.append(task_id)
     
     return bids
-
-def calculate_energy_cost(abilities, task):
-    return sum(max(0, task[i] - abilities[i]) for i in range(len(task)))
