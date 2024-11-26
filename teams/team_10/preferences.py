@@ -28,6 +28,18 @@ from teams.team_10.constants import *
 # Task 6: Variable lower bounds.. Would be cool to adjust lower bounds gradually? 
 # Akhil
 
+
+# USE best pairs instead of just the first 8.
+
+
+# Task 7: (Do later...)
+# We could just play submissive.... 
+# We see if we are playing with a bunch of other teams.
+# Just volenteer for every task with every player from every other team
+# - We don't something weird / worse than them. 
+# - Reduces the complexity of the situation.
+
+
 def phaseIpreferences(player, community: Community, global_random):
     """Return a list of task index and the partner id for the particular player.
     The output format should be a list of lists such that each element
@@ -84,10 +96,10 @@ def phaseIIpreferences(player: Member, community, global_random):
     
     player_data = all_player_data[all_player_data["player_id"] == player.id] # Data for this specific player
     
-    tasks_at_turn = player_data["tasks_at_turn"].tolist() # Tasks at turn for this player
-    acceptable_energy_level_at_turn = player_data["acceptable_energy_level_at_turn"].tolist()
+    tasks_at_turn = player_data['tasks_at_turn'].tolist()
+    acceptable_energy_level_at_turn = player_data['acceptable_energy_level_at_turn'].tolist()
     
-    NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING = 10
+    NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING = 5
     
     if player.incapacitated:
         return []
@@ -99,14 +111,26 @@ def phaseIIpreferences(player: Member, community, global_random):
         to_be_sacrificed = find_weakest_agents(community.members, len(sacrifices))
         if player.id in to_be_sacrificed: 
             return sacrifices 
+    START_SACRIFICING_YEAR = 20
+    
+    if len(tasks_at_turn) >= START_SACRIFICING_YEAR and all(
+        x == LOW_ENERGY_LEVEL for x in acceptable_energy_level_at_turn[-NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING:]
+    ):
+        # SACRIFICE THE ELDERS / CHILDREN
+        num_weakest_palayers = 2
+        weakest_players_id = find_weakest_agents(community.members, num_weakest_palayers)
+        if player.id in weakest_players_id:
+            return [task_id for task_id, _ in enumerate(community.tasks)]
+        else:
+            return []
 
     return tasks_we_can_complete_alone(player, player.abilities, community.tasks)
     
 
 def get_acceptable_energy_level(tasks_at_turn: list[int]) -> int:
-    
-    if len(tasks_at_turn) >= 10 and all(
-        x == tasks_at_turn[-1] for x in tasks_at_turn[-10:]
+    TURNS_TO_LOOK_BACK = 3
+    if len(tasks_at_turn) >= 3 and all(
+        x == tasks_at_turn[-1] for x in tasks_at_turn[-TURNS_TO_LOOK_BACK:]
     ):
         acceptable_energy_level = LOW_ENERGY_LEVEL
     else:
@@ -236,3 +260,12 @@ if len(tasks_at_turn) >= START_SACRIFICING_YEAR and all(
 # Just volenteer for every task with every player from every other team
 # - We don't something weird / worse than them. 
 # - Reduces the complexity of the situation.
+
+
+def find_weakest_agents(members, num_weakest) -> list[int]:
+    """Return the id of the weakest agents in the community"""
+    agents = [(member.id, sum(member.abilities)) for member in members if not member.incapacitated]
+
+    three_weakest_agents = sorted(agents, key=lambda x: x[1])[:num_weakest]
+    weakest_agent_ids = [agent[0] for agent in three_weakest_agents]
+    return weakest_agent_ids
