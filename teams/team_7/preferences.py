@@ -3,6 +3,7 @@ import csv
 
 tracking_data = []
 
+
 # Partnership Round
 def phaseIpreferences(player, community, global_random):
     if player.energy <= 0:
@@ -17,10 +18,12 @@ def phaseIpreferences(player, community, global_random):
     partner_bids = get_best_partner(player, community)
     return partner_bids
 
+
 # Individual Round
 def phaseIIpreferences(player, community, global_random):
     solo_bids = get_all_possible_tasks(community, player)
     return solo_bids
+
 
 def get_stats(penalty_matrix, player, community):
     med_player_task_penalty, avg_player_task_penalty = np.median(penalty_matrix[0]), np.mean(penalty_matrix[0])
@@ -33,18 +36,19 @@ def get_stats(penalty_matrix, player, community):
     med_member_ability = np.median([np.median(member.abilities) for member in community.members])
 
     stats = {
-        'community':{
-            'avg_task_difficulty':avg_task_difficulty,
-            'med_task_difficulty':med_task_difficulty,
-            'avg_member_ability':avg_member_ability,
-            'med_member_ability':med_member_ability
+        'community': {
+            'avg_task_difficulty': avg_task_difficulty,
+            'med_task_difficulty': med_task_difficulty,
+            'avg_member_ability': avg_member_ability,
+            'med_member_ability': med_member_ability
         },
-        'player':{'avg_player_task_penalty':avg_player_task_penalty,
-                  'med_player_task_penalty':med_player_task_penalty,
-                  'avg_player_ability':avg_player_ability,
-                  'med_player_ability':med_player_ability}
+        'player': {'avg_player_task_penalty': avg_player_task_penalty,
+                   'med_player_task_penalty': med_player_task_penalty,
+                   'avg_player_ability': avg_player_ability,
+                   'med_player_ability': med_player_ability}
     }
     return stats
+
 
 def get_possible_partnerships(player, community):
     """
@@ -146,10 +150,9 @@ def get_best_partner(player, community):
                 min_energy_cost = energy_cost
                 best_partner = partner.id
 
-        if best_partner is not None and (solo_energy_cost >= 1.5* min_energy_cost):
+        if best_partner is not None and (solo_energy_cost >= 1.5 * min_energy_cost):
             preferences.append([task_index, best_partner])
     return preferences
-
 
 
 def log_turn_data(turn, community, tasks_completed):
