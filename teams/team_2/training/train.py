@@ -67,10 +67,10 @@ def crossover(parent1, parent2, is_task):
     return child
 
 
-def mutate(model, mutation_rate=0.1):
+def mutate(model, mutation_rate=0.1, mutation_noise=0.01):
     for param in model.parameters():
         if torch.rand(1).item() < mutation_rate:
-            param.data += torch.randn_like(param.data) * 0.01  # Small random noise
+            param.data += torch.randn_like(param.data) * mutation_noise  # Small random noise
 
 
 def select_parents(population, fitness_scores):
@@ -97,16 +97,17 @@ class Task:
             self.state = torch.zeros(features.shape[0])
 
 
-max_generations = 5
-hidden_size = 64
-task_feature_size = 1
+max_generations = 10
 pop_size = 10
-player_state_size = 7
+hidden_size = 64
+task_feature_size = 5
+player_state_size = 9
 
 population = [
     (
         TaskScorerNN(task_feature_size, player_state_size, hidden_size),
-        RestDecisionNN(player_state_size + task_feature_size, hidden_size),
+        # 1 is hardcoded
+        RestDecisionNN(player_state_size + 1, hidden_size),
     )
     for _ in range(pop_size)
 ]
@@ -120,6 +121,7 @@ for generation in range(max_generations):
 
     # Select parents
     parents = select_parents(population, fitness_scores)
+    
 
     # Generate offspring
     offspring = []
@@ -128,18 +130,19 @@ for generation in range(max_generations):
         parent1, parent2 = random.sample(parents, 2)
         child_task = crossover(parent1[0], parent2[0], is_task=True)
         child_rest = crossover(parent1[1], parent2[1], is_task=False)
-        mutate(child_task)
-        mutate(child_rest)
+        mutate(child_task, 0.1, 0.05)
+        mutate(child_rest, 0.1, 0.05)
         offspring.append((child_task, child_rest))
 
         parent1, parent2 = random.sample(parents, 2)
         child_task = crossover(parent1[0], parent2[0], is_task=True)
         child_rest = crossover(parent1[1], parent2[1], is_task=False)
-        mutate(child_task)
-        mutate(child_rest)
+        mutate(child_task, 0.1, 0.05)
+        mutate(child_rest, 0.1, 0.05)
         offspring.append((child_task, child_rest))
 
     # Replace population
+    [(mutate(ptask), mutate(prest)) for ptask, prest in parents]
     population = parents + offspring
     print(f"{len(population)} members")
 
