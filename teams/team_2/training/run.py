@@ -33,7 +33,3 @@ def run(task_model: nn.Module, rest_model: nn.Module):
             return completed_tasks
 
     raise Exception("something broke")
-
-
-if __name__ == "__main__":
-    run()

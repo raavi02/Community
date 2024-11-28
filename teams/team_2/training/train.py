@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import linear_sum_assignment
 import random
 import os
+
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 import torch
@@ -81,7 +81,9 @@ def crossover(parent1, parent2, is_task):
 def mutate(model, mutation_rate=0.1, mutation_noise=0.01):
     for param in model.parameters():
         if torch.rand(1).item() < mutation_rate:
-            param.data += torch.randn_like(param.data) * mutation_noise  # Small random noise
+            param.data += (
+                torch.randn_like(param.data) * mutation_noise
+            )  # Small random noise
 
 
 def select_parents(population, fitness_scores):
@@ -108,8 +110,6 @@ class Task:
             self.state = torch.zeros(features.shape[0])
 
 
-
-
 population = [
     (
         TaskScorerNN(TASK_FEATURE_SIZE, PLAYER_STATE_SIZE, HIDDEN_SIZE),
@@ -133,7 +133,6 @@ for generation in range(MAX_GENERATIONS):
 
     # Select parents
     parents = select_parents(population, fitness_scores)
-    
 
     # Generate offspring
     offspring = []
@@ -161,31 +160,36 @@ for generation in range(MAX_GENERATIONS):
     print(f"{generation}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}")
 
 
-best_model = select_parents(population, fitness_scores)[0]
+if __name__ == "__main__":
+    best_model = select_parents(population, fitness_scores)[0]
 
-torch.save(best_model, "best_weigths.pth")
-print('best model weights saved in "best_weights.pth"')
+    torch.save(best_model, "best_weigths.pth")
+    print('best model weights saved in "best_weights.pth"')
 
-# Get the current working directory (runfolder)
-runfolder = os.getcwd()
+    # Get the current working directory (runfolder)
+    runfolder = os.getcwd()
 
-# Plot both curves
-plt.plot(np.arange(len(avg_scores)), avg_scores, label='Average Score', color='blue')
-plt.plot(np.arange(len(max_scores)), max_scores, label='Max Score', color='red')
+    # Plot both curves
+    plt.plot(
+        np.arange(len(avg_scores)), avg_scores, label="Average Score", color="blue"
+    )
+    plt.plot(np.arange(len(max_scores)), max_scores, label="Max Score", color="red")
 
-# Add labels and title
-plt.xlabel('Generation')
-plt.ylabel('Score')
-plt.title(f'Average and Max Fitness Scores Over {MAX_GENERATIONS} Generations\nInitial population size = {POP_SIZE}')
+    # Add labels and title
+    plt.xlabel("Generation")
+    plt.ylabel("Score")
+    plt.title(
+        f"Average and Max Fitness Scores Over {MAX_GENERATIONS} Generations\nInitial population size = {POP_SIZE}"
+    )
 
-# Add a legend
-plt.legend()
+    # Add a legend
+    plt.legend()
 
-# Save the plot to the current directory
-plt.savefig(os.path.join(runfolder, 'fitness_scores.png'))
-print("path", os.path.join(runfolder, 'fitness_scores.png'))
+    # Save the plot to the current directory
+    plt.savefig(os.path.join(runfolder, "fitness_scores.png"))
+    print("path", os.path.join(runfolder, "fitness_scores.png"))
 
-# task_scores = [task_scorer(task, player_state) for task in tasks]
-# rest_score = rest_scorer(player_state)
-# combined_scores = torch.cat([task_scores, rest_score.unsqueeze(0)])
-# action = torch.argmax(combined_scores).item()
+    # task_scores = [task_scorer(task, player_state) for task in tasks]
+    # rest_score = rest_scorer(player_state)
+    # combined_scores = torch.cat([task_scores, rest_score.unsqueeze(0)])
+    # action = torch.argmax(combined_scores).item()
