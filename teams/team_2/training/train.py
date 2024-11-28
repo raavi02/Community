@@ -1,10 +1,21 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.optimize import linear_sum_assignment
 import random
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+
+MAX_GENERATIONS = 4
+POP_SIZE = 4
+HIDDEN_SIZE = 64
+TASK_FEATURE_SIZE = 5
+PLAYER_STATE_SIZE = 9
+
 
 if __name__ == "__main__":
     from run import run
@@ -13,11 +24,11 @@ else:
 
 
 class TaskScorerNN(nn.Module):
-    def __init__(self, task_feature_size, player_state_size, hidden_size):
+    def __init__(self, task_feature_size, player_state_size, HIDDEN_SIZE):
         super(TaskScorerNN, self).__init__()
-        self.fc1 = nn.Linear(task_feature_size + player_state_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, 1)  # Outputs a single score for a task
+        self.fc1 = nn.Linear(task_feature_size + player_state_size, HIDDEN_SIZE)
+        self.fc2 = nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE)
+        self.fc3 = nn.Linear(HIDDEN_SIZE, 1)  # Outputs a single score for a task
 
     def forward(self, task_features: torch.Tensor, player_state: torch.Tensor):
         # Concatenate task features and player state
@@ -56,9 +67,9 @@ def evaluate_fitness(task_model: nn.Module, rest_model: nn.Module):
 
 def crossover(parent1, parent2, is_task):
     if is_task:
-        child = TaskScorerNN(task_feature_size, player_state_size, hidden_size)
+        child = TaskScorerNN(TASK_FEATURE_SIZE, PLAYER_STATE_SIZE, HIDDEN_SIZE)
     else:
-        child = RestDecisionNN(player_state_size + 1, hidden_size)
+        child = RestDecisionNN(PLAYER_STATE_SIZE + 1, HIDDEN_SIZE)
 
     for param1, param2, child_param in zip(
         parent1.parameters(), parent2.parameters(), child.parameters()
@@ -97,27 +108,28 @@ class Task:
             self.state = torch.zeros(features.shape[0])
 
 
-max_generations = 10
-pop_size = 10
-hidden_size = 64
-task_feature_size = 5
-player_state_size = 9
+
 
 population = [
     (
-        TaskScorerNN(task_feature_size, player_state_size, hidden_size),
+        TaskScorerNN(TASK_FEATURE_SIZE, PLAYER_STATE_SIZE, HIDDEN_SIZE),
         # 1 is hardcoded
-        RestDecisionNN(player_state_size + 1, hidden_size),
+        RestDecisionNN(PLAYER_STATE_SIZE + 1, HIDDEN_SIZE),
     )
-    for _ in range(pop_size)
+    for _ in range(POP_SIZE)
 ]
 
-for generation in range(max_generations):
+avg_scores = []
+max_scores = []
+
+for generation in range(MAX_GENERATIONS):
     # Evaluate fitness
     fitness_scores = [
         evaluate_fitness(task_model, rest_model)
         for task_model, rest_model in population
     ]
+    avg_scores.append(np.mean(fitness_scores))
+    max_scores.append(max(fitness_scores))
 
     # Select parents
     parents = select_parents(population, fitness_scores)
@@ -153,6 +165,25 @@ best_model = select_parents(population, fitness_scores)[0]
 
 torch.save(best_model, "best_weigths.pth")
 print('best model weights saved in "best_weights.pth"')
+
+# Get the current working directory (runfolder)
+runfolder = os.getcwd()
+
+# Plot both curves
+plt.plot(np.arange(len(avg_scores)), avg_scores, label='Average Score', color='blue')
+plt.plot(np.arange(len(max_scores)), max_scores, label='Max Score', color='red')
+
+# Add labels and title
+plt.xlabel('Generation')
+plt.ylabel('Score')
+plt.title(f'Average and Max Fitness Scores Over {MAX_GENERATIONS} Generations\nInitial population size = {POP_SIZE}')
+
+# Add a legend
+plt.legend()
+
+# Save the plot to the current directory
+plt.savefig(os.path.join(runfolder, 'fitness_scores.png'))
+print("path", os.path.join(runfolder, 'fitness_scores.png'))
 
 # task_scores = [task_scorer(task, player_state) for task in tasks]
 # rest_score = rest_scorer(player_state)
