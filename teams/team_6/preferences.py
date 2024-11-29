@@ -58,19 +58,18 @@ def phaseIpreferences(player, community, global_random):
     try:
         if PHASE_1_ASSIGNMENTS:
             assignments, total_cost = assign_phase1(community.tasks, community.members)
-
-            for assignment in assignments:
-                if len(assignment[0]) == 2 and player.id in assignment[0]:
-                    for task in community.tasks:
-                        if task == assignment[1]:
-                            if player.id == assignment[0][0]:
-                                list_choices.append(
-                                    [community.tasks.index(task), assignment[0][1]]
-                                )
-                            else:
-                                list_choices.append(
-                                    [community.tasks.index(task), assignment[0][0]]
-                                )
+            # for assignment in assignments:
+            #     if len(assignment[0]) == 2 and player.id in assignment[0]:
+            #         for task in community.tasks:
+            #             if task == assignment[1]:
+            #                 if player.id == assignment[0][0]:
+            #                     list_choices.append(
+            #                         [community.tasks.index(task), assignment[0][1]]
+            #                     )
+            #                 else:
+            #                     list_choices.append(
+            #                         [community.tasks.index(task), assignment[0][0]]
+            #                     )
         else:
             perfect_match, _, _, _ = exists_good_match(
                 community.tasks,
@@ -164,21 +163,31 @@ def assign_phase1(tasks, members):
     num_partnerships = len(partnerships)
 
     # Create cost matrix with columns for both partnerships and individual assignments
-    cost_matrix = np.zeros((num_tasks, num_partnerships + num_members))
+    cost_matrix = np.zeros((num_tasks, num_partnerships + num_members + num_members))
 
-    # Fill partnership costs (first num_partnerships columns)
+    # Fill partnership costs (num_partnerships columns)
     for i, task in enumerate(tasks):
         for j, (member1_idx, member2_idx) in enumerate(partnerships):
             member1 = members[member1_idx]
             member2 = members[member2_idx]
             cost_matrix[i][j] = loss_phase1(task, member1, member2)
 
-    # Fill individual costs (remaining columns)
+    # Fill individual costs (num_members columns)
     for i, task in enumerate(tasks):
         for j, member in enumerate(members):
             cost_matrix[i][num_partnerships + j] = loss_phase2(
                 task, member.abilities, member.energy
             )
+
+    # Fill resting costs (num_tasks columns)
+    for i, task in enumerate(tasks):
+        for j, member in enumerate(members):
+            # Resting cost is a function of current energy and some base resting penalty
+            # This encourages rest when energy is low or no good tasks are available
+            resting_cost = loss_resting(task, member.abilities, member.energy)
+
+            # Column index for resting is the last set of columns
+            cost_matrix[i][num_partnerships + num_members + j] = resting_cost
 
     # Solve assignment problem
     row_indices, col_indices = linear_sum_assignment(cost_matrix)
@@ -261,3 +270,7 @@ def loss_phase2(task, abilities, current_energy):
     cost = energy_used + negative_energy_compensation
 
     return cost
+
+
+def loss_resting(task, abilities, current_energy):
+    return sum(abilities) * current_energy
