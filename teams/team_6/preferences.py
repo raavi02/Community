@@ -131,7 +131,7 @@ def phaseIIpreferences(player, community, global_random):
         return bids
 
     try:
-        wait_energy_threshold = 0
+        wait_energy_threshold = -9
         player_index = community.members.index(player)
         assignments, total_cost = assign_phase2(community.tasks, community.members)
 
@@ -228,15 +228,36 @@ def assign_phase2(tasks, members):
     num_tasks = len(tasks)
     num_members = len(members)
 
-    cost_matrix = np.zeros((num_tasks, num_members))
+    cost_matrix = np.zeros((num_tasks, num_members + num_members))
 
+    # Fill individual costs (num_members columns)
     for i, task in enumerate(tasks):
         for j, member in enumerate(members):
             cost_matrix[i][j] = loss_phase2(task, member.abilities, member.energy)
 
+    # Fill resting costs (num_tasks columns)
+    for i, task in enumerate(tasks):
+        for j, member in enumerate(members):
+            # Resting cost is a function of current energy and some base resting penalty
+            # This encourages rest when energy is low or no good tasks are available
+            resting_cost = loss_resting(task, member.abilities, member.energy)
+
+            # Column index for resting is the last set of columns
+            cost_matrix[i][num_members + j] = resting_cost
+
     row_indices, col_indices = linear_sum_assignment(cost_matrix)
 
-    assignments = {player: task for task, player in zip(row_indices, col_indices)}
+    assignments = {}
+    for task_idx, col_idx in zip(row_indices, col_indices):
+        task = tasks[task_idx]
+        if col_idx < num_members:
+            member = members[col_idx]
+            loss = cost_matrix[task_idx, col_idx]
+            assignments[col_idx] = task_idx
+        else:
+            loss = cost_matrix[task_idx, col_idx]
+            assignments[col_idx] = None
+
     total_cost = sum(
         cost_matrix[row_indices[i], col_indices[i]] for i in range(len(row_indices))
     )
