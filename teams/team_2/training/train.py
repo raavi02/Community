@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import os
+import signal
+import sys
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
@@ -21,6 +23,16 @@ if __name__ == "__main__":
     from run import run
 else:
     from teams.team_2.training.run import run
+
+
+def handle_signal(population):
+    def catch_signal(sig, frame):
+        print(f"\nCaught {signal.Signals(sig).name}, finding best player...")
+        best_model = max(population, key=lambda model: evaluate_fitness(*model))
+        print(f"best_model: {evaluate_fitness(*best_model)}")
+        sys.exit(0)
+
+    return catch_signal
 
 
 class TaskScorerNN(nn.Module):
@@ -110,57 +122,63 @@ class Task:
             self.state = torch.zeros(features.shape[0])
 
 
-population = [
-    (
-        TaskScorerNN(TASK_FEATURE_SIZE, PLAYER_STATE_SIZE, HIDDEN_SIZE),
-        # 1 is hardcoded
-        RestDecisionNN(PLAYER_STATE_SIZE + 1, HIDDEN_SIZE),
-    )
-    for _ in range(POP_SIZE)
-]
-
-avg_scores = []
-max_scores = []
-
-for generation in range(MAX_GENERATIONS):
-    # Evaluate fitness
-    fitness_scores = [
-        evaluate_fitness(task_model, rest_model)
-        for task_model, rest_model in population
-    ]
-    avg_scores.append(np.mean(fitness_scores))
-    max_scores.append(max(fitness_scores))
-
-    # Select parents
-    parents = select_parents(population, fitness_scores)
-
-    # Generate offspring
-    offspring = []
-    # for now, only create offspring from TaskScorerNN
-    for _ in range(len(parents) // 2):
-        parent1, parent2 = random.sample(parents, 2)
-        child_task = crossover(parent1[0], parent2[0], is_task=True)
-        child_rest = crossover(parent1[1], parent2[1], is_task=False)
-        mutate(child_task, 0.1, 0.05)
-        mutate(child_rest, 0.1, 0.05)
-        offspring.append((child_task, child_rest))
-
-        parent1, parent2 = random.sample(parents, 2)
-        child_task = crossover(parent1[0], parent2[0], is_task=True)
-        child_rest = crossover(parent1[1], parent2[1], is_task=False)
-        mutate(child_task, 0.1, 0.05)
-        mutate(child_rest, 0.1, 0.05)
-        offspring.append((child_task, child_rest))
-
-    # Replace population
-    [(mutate(ptask), mutate(prest)) for ptask, prest in parents]
-    population = parents + offspring
-    print(f"{len(population)} members")
-
-    print(f"{generation}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}")
-
-
 if __name__ == "__main__":
+    avg_scores = []
+    max_scores = []
+
+    parents = []
+    offspring = []
+    fitness_scores = []
+    population = [
+        (
+            TaskScorerNN(TASK_FEATURE_SIZE, PLAYER_STATE_SIZE, HIDDEN_SIZE),
+            # 1 is hardcoded
+            RestDecisionNN(PLAYER_STATE_SIZE + 1, HIDDEN_SIZE),
+        )
+        for _ in range(POP_SIZE)
+    ]
+
+    signal.signal(signal.SIGINT, handle_signal(population))
+    # signal.signal(signal.SIGTERM, catch_signal)
+
+    for generation in range(MAX_GENERATIONS):
+        # Evaluate fitness
+        fitness_scores = [
+            evaluate_fitness(task_model, rest_model)
+            for task_model, rest_model in population
+        ]
+        avg_scores.append(np.mean(fitness_scores))
+        max_scores.append(max(fitness_scores))
+
+        # Select parents
+        parents = select_parents(population, fitness_scores)
+
+        # Generate offspring
+        offspring = []
+        # for now, only create offspring from TaskScorerNN
+        for _ in range(len(parents) // 2):
+            parent1, parent2 = random.sample(parents, 2)
+            child_task = crossover(parent1[0], parent2[0], is_task=True)
+            child_rest = crossover(parent1[1], parent2[1], is_task=False)
+            mutate(child_task, 0.1, 0.05)
+            mutate(child_rest, 0.1, 0.05)
+            offspring.append((child_task, child_rest))
+
+            parent1, parent2 = random.sample(parents, 2)
+            child_task = crossover(parent1[0], parent2[0], is_task=True)
+            child_rest = crossover(parent1[1], parent2[1], is_task=False)
+            mutate(child_task, 0.1, 0.05)
+            mutate(child_rest, 0.1, 0.05)
+            offspring.append((child_task, child_rest))
+
+        # Replace population
+        [(mutate(ptask), mutate(prest)) for ptask, prest in parents]
+        population = parents + offspring
+
+        print(
+            f"{generation}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}"
+        )
+
     best_model = select_parents(population, fitness_scores)[0]
 
     torch.save(best_model, "best_weigths.pth")
