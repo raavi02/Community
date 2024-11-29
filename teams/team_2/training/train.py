@@ -38,7 +38,12 @@ def handle_signal(population):
         )
         best_score = evaluate_fitness(*best_model, turns=TURNS, civilians=CIVILIANS)
         print(f"best_model: {best_score} per turn per civilian")
-        torch.save(best_model, f"best_model_score={best_score}.pth")
+        torch.save(
+            best_model[0], f"best_task_score={str(best_score).replace(".", ",")}.pth"
+        )
+        torch.save(
+            best_model[1], f"best_rest_score={str(best_score).replace(".", ",")}.pth"
+        )
         sys.exit(0)
 
     return catch_signal
@@ -191,13 +196,16 @@ Generations: {MAX_GENERATIONS}
         population = parents + offspring
 
         print(
-            f"{generation}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}"
+            f"{generation}/{MAX_GENERATIONS}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}"
         )
 
     best_model = select_parents(population, fitness_scores)[0]
 
-    torch.save(best_model, "best_weigths.pth")
-    print('best model weights saved in "best_weights.pth"')
+    torch.save(best_model[0].state_dict(), "best_task_weigths.pth")
+    torch.save(best_model[1].state_dict(), "best_rest_weigths.pth")
+    print(
+        'best model weights saved in "best_task_weights.pth" and "best_rest_weights.pth"'
+    )
 
     # Get the current working directory (runfolder)
     runfolder = os.getcwd()

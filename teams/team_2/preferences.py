@@ -60,9 +60,7 @@ def decide_action(
     """
     player_state_tensor = torch.tensor(player_state, dtype=torch.float32)
 
-    task_vectors = [
-        torch.tensor(task, dtype=torch.float32) for task in task_features
-    ]
+    task_vectors = [torch.tensor(task, dtype=torch.float32) for task in task_features]
 
     task_scores = torch.tensor(
         [task_scorer(task_vector, player_state_tensor) for task_vector in task_vectors]
@@ -141,6 +139,7 @@ def create_cost_matrix(player, community):
     cost_matrix = np.array(cost_matrix)
     return cost_matrix
 
+
 def create_cost_matrix_raw(community):
     cost_matrix = []
     for task in community.tasks:
@@ -157,6 +156,7 @@ def create_cost_matrix_raw(community):
     cost_matrix = np.array(cost_matrix)
     return cost_matrix
 
+
 def create_cost_matrix_would_exhaust(community):
     cost_matrix = []
     for task in community.tasks:
@@ -172,6 +172,7 @@ def create_cost_matrix_would_exhaust(community):
         cost_matrix.append(task_costs)
     cost_matrix = np.array(cost_matrix)
     return cost_matrix
+
 
 def create_cost_matrix_would_tire(community):
     cost_matrix = []
@@ -193,20 +194,20 @@ def create_cost_matrix_would_tire(community):
 def count_lower_cost_players(player_cost_array, cost_matrix):
     """
     Count the number of players with lower costs than the given player for each task.
-    
+
     Args:
         player_cost_array (np.ndarray): 1D array of the player's costs for each task.
         cost_matrix (np.ndarray): 2D array of shape (num_tasks, num_members), where each entry is the cost for a member to perform a task.
-        
+
     Returns:
         list: A list where each element is the count of players with lower costs for the corresponding task.
     """
     # Ensure the player's cost array is an array
     player_cost_array = np.array(player_cost_array)
-    
+
     # Compare the player's costs with all members' costs for each task
     lower_cost_counts = np.sum(cost_matrix < player_cost_array[:, None], axis=1)
-    
+
     return lower_cost_counts.tolist()
 
 
@@ -216,6 +217,7 @@ def best_partner(task: np.ndarray):
             return partner_id
 
     raise Exception("All arrays have a minimum value")
+
 
 def create_tasks_feature_vector(player, community):
 
@@ -236,7 +238,7 @@ def create_tasks_feature_vector(player, community):
     tasks_lower_raw = count_lower_cost_players(player_cost_array, mat_raw)
     tasks_lower_tire = count_lower_cost_players(player_cost_array, mat_tire)
     tasks_lower_exhaust = count_lower_cost_players(player_cost_array, mat_exhaust)
-    
+
     task_costs = []
     for i, task in enumerate(community.tasks):
         subvector = []
@@ -244,7 +246,7 @@ def create_tasks_feature_vector(player, community):
         subvector.append(task_difficulty)
         subvector.append(player_cost_array[i])
         subvector.append(tasks_lower_raw[i] / len(community.members))
-        subvector.append(tasks_lower_tire[i]/ len(community.members))
+        subvector.append(tasks_lower_tire[i] / len(community.members))
         subvector.append(tasks_lower_exhaust[i] / len(community.members))
 
         task_costs.append(subvector)
@@ -297,7 +299,7 @@ def phaseIpreferences(player, community, global_random):
 def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
     try:
-        
+
         # bids.sort(key=lambda x: (x[1], -sum(community.tasks[x[0]])))
         # return [b[0] for b in bids[:3]]
 
@@ -320,7 +322,8 @@ def phaseIIpreferences(player, community, global_random):
             )
             player.restNN = RestDecisionNN(
                 # The 1 here is hardcoded because we get a mean of the task scores
-                input_size=player_params_size + 1, hidden_size=hidden_size
+                input_size=player_params_size + 1,
+                hidden_size=hidden_size,
             )
             player.restNN.load_state_dict(
                 torch.load("rest_weights.pth", weights_only=True)
@@ -330,15 +333,15 @@ def phaseIIpreferences(player, community, global_random):
             player.num_tasks = len(community.members) * 2
             # This should contain the params for decision, such as player.energy, etc
             player.params = [
-                len(community.members), 
+                len(community.members),
                 len(community.tasks),
                 len(community.members) / (len(community.tasks) + 1),
                 player.turn,
                 player.energy,
                 min(player.energy, 0) ** 2,
-                0, # Energy to gain from resting
-                0, # Num tired
-                0, # Num exhausted
+                0,  # Energy to gain from resting
+                0,  # Num tired
+                0,  # Num exhausted
             ]
         else:
             player.turn += 1
@@ -354,8 +357,6 @@ def phaseIIpreferences(player, community, global_random):
                 tired,
                 exh,
             ]
-
-        
 
         task_features = create_tasks_feature_vector(player, community)
         action = decide_action(
