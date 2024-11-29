@@ -211,8 +211,6 @@ def assign_phase1(tasks, members):
             assignments.append(([member.id], task, loss))
         else:
             # Resting
-            member_idx = col_idx - num_partnerships - num_members
-            member = members[member_idx]
             loss = cost_matrix[task_idx, col_idx]
             assignments.append(([], task, loss))
 
