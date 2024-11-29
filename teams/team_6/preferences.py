@@ -229,22 +229,35 @@ def assign_phase2(tasks, members):
 
 
 def loss_phase1(task, player1, player2):
-    cost = sum(
+    energy_used = sum(
         max(task[k] - max(player1.abilities[k], player2.abilities[k]), 0)
         for k in range(len(task))
     )
-    cost += (max(0, cost - player1.energy) + max(0, cost - player2.energy)) / 2
-    # cost += sum(
-    #     max(max(player1.abilities[k], player2.abilities[k]) - task[k], 0)
-    #     for k in range(len(task))
+    negative_energy_compensation = (
+        max(0, energy_used - player1.energy) + max(0, energy_used - player2.energy)
+    ) / 2
+    partnership_waste = sum(
+        abs(player1.abilities[k] - player2.abilities[k]) for k in range(len(task))
+    )
+    skill_surplus = sum(
+        max(max(player1.abilities[k], player2.abilities[k]) - task[k], 0)
+        for k in range(len(task))
+    )
+
+    # cost = (
+    #     energy_used + negative_energy_compensation + partnership_waste + skill_surplus
     # )
-    # cost += sum(
-    #     abs(player1.abilities[k] - player2.abilities[k]) for k in range(len(task))
-    # )
+    cost = energy_used + negative_energy_compensation
+
     return cost
 
+
 def loss_phase2(task, abilities, current_energy):
-    cost = sum([max(task[k] - abilities[k], 0) for k in range(len(abilities))])
-    cost += max(0, cost - current_energy)
-    # cost += sum([abs(abilities[k] - task[k]) for k in range(len(abilities))])
+    energy_used = sum([max(task[k] - abilities[k], 0) for k in range(len(abilities))])
+    negative_energy_compensation = max(0, energy_used - current_energy)
+    skill_surplus = sum([abs(abilities[k] - task[k]) for k in range(len(abilities))])
+
+    # cost = energy_used + negative_energy_compensation + skill_surplus
+    cost = energy_used + negative_energy_compensation
+
     return cost
