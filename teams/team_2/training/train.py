@@ -12,8 +12,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-MAX_GENERATIONS = 4
-POP_SIZE = 4
+MAX_GENERATIONS = 20
+TURNS = 20
+CIVILIANS = 20
+POP_SIZE = 10
 HIDDEN_SIZE = 64
 TASK_FEATURE_SIZE = 5
 PLAYER_STATE_SIZE = 9
@@ -28,8 +30,15 @@ else:
 def handle_signal(population):
     def catch_signal(sig, frame):
         print(f"\nCaught {signal.Signals(sig).name}, finding best player...")
-        best_model = max(population, key=lambda model: evaluate_fitness(*model))
-        print(f"best_model: {evaluate_fitness(*best_model)}")
+        best_model = max(
+            population,
+            key=lambda model: evaluate_fitness(
+                *model, turns=TURNS, civilians=CIVILIANS
+            ),
+        )
+        best_score = evaluate_fitness(*best_model, turns=TURNS, civilians=CIVILIANS)
+        print(f"best_model: {best_score} per turn per civilian")
+        torch.save(best_model, f"best_model_score={best_score}.pth")
         sys.exit(0)
 
     return catch_signal
@@ -69,12 +78,11 @@ class RestDecisionNN(nn.Module):
         return score
 
 
-def evaluate_fitness(task_model: nn.Module, rest_model: nn.Module):
-    # for task in task_environment:
-    # action = model(task.features, task.state)
-    result = run(task_model, rest_model)
-    # result = task_environment.run(action)  # Simulates environment behavior
-    return result
+def evaluate_fitness(task_model: nn.Module, rest_model: nn.Module, turns, civilians):
+    tasks = run(task_model, rest_model, turns, civilians)
+    score = tasks / turns / civilians
+    print(f"score: {round(score, 3)}")
+    return score
 
 
 def crossover(parent1, parent2, is_task):
@@ -139,12 +147,19 @@ if __name__ == "__main__":
     ]
 
     signal.signal(signal.SIGINT, handle_signal(population))
-    # signal.signal(signal.SIGTERM, catch_signal)
+
+    print(
+        f"""Training with:
+ Population: {POP_SIZE} 
+Generations: {MAX_GENERATIONS}
+      Turns: {TURNS}
+  Civilians: {CIVILIANS}\n"""
+    )
 
     for generation in range(MAX_GENERATIONS):
         # Evaluate fitness
         fitness_scores = [
-            evaluate_fitness(task_model, rest_model)
+            evaluate_fitness(task_model, rest_model, TURNS, CIVILIANS)
             for task_model, rest_model in population
         ]
         avg_scores.append(np.mean(fitness_scores))
