@@ -58,18 +58,18 @@ def phaseIpreferences(player, community, global_random):
     try:
         if PHASE_1_ASSIGNMENTS:
             assignments, total_cost = assign_phase1(community.tasks, community.members)
-            # for assignment in assignments:
-            #     if len(assignment[0]) == 2 and player.id in assignment[0]:
-            #         for task in community.tasks:
-            #             if task == assignment[1]:
-            #                 if player.id == assignment[0][0]:
-            #                     list_choices.append(
-            #                         [community.tasks.index(task), assignment[0][1]]
-            #                     )
-            #                 else:
-            #                     list_choices.append(
-            #                         [community.tasks.index(task), assignment[0][0]]
-            #                     )
+            for assignment in assignments:
+                if len(assignment[0]) == 2 and player.id in assignment[0]:
+                    for task in community.tasks:
+                        if task == assignment[1]:
+                            if player.id == assignment[0][0]:
+                                list_choices.append(
+                                    [community.tasks.index(task), assignment[0][1]]
+                                )
+                            else:
+                                list_choices.append(
+                                    [community.tasks.index(task), assignment[0][0]]
+                                )
         else:
             perfect_match, _, _, _ = exists_good_match(
                 community.tasks,
@@ -203,12 +203,18 @@ def assign_phase1(tasks, members):
             member2 = members[member2_idx]
             loss = cost_matrix[task_idx, col_idx]
             assignments.append(([member1.id, member2.id], task, loss))
-        else:
+        elif col_idx < num_partnerships + num_members:
             # Individual assignment
             member_idx = col_idx - num_partnerships
             member = members[member_idx]
             loss = cost_matrix[task_idx, col_idx]
             assignments.append(([member.id], task, loss))
+        else:
+            # Resting
+            member_idx = col_idx - num_partnerships - num_members
+            member = members[member_idx]
+            loss = cost_matrix[task_idx, col_idx]
+            assignments.append(([], task, loss))
 
     total_cost = sum(
         cost_matrix[row_indices[i], col_indices[i]] for i in range(len(row_indices))
