@@ -203,16 +203,19 @@ def assign_phase1(tasks, members):
             member2 = members[member2_idx]
             loss = cost_matrix[task_idx, col_idx]
             assignments.append(([member1.id, member2.id], task, loss))
+            # print(f"Partnership -> cost: {loss}")
         elif col_idx < num_partnerships + num_members:
             # Individual assignment
             member_idx = col_idx - num_partnerships
             member = members[member_idx]
             loss = cost_matrix[task_idx, col_idx]
             assignments.append(([member.id], task, loss))
+            # print(f"Individual -> cost: {loss}")
         else:
             # Resting
             loss = cost_matrix[task_idx, col_idx]
             assignments.append(([], task, loss))
+            # print(f"Rest -> cost: {loss}")
 
     total_cost = sum(
         cost_matrix[row_indices[i], col_indices[i]] for i in range(len(row_indices))
@@ -277,4 +280,4 @@ def loss_phase2(task, abilities, current_energy):
 
 
 def loss_resting(task, abilities, current_energy):
-    return sum(abilities) * current_energy
+    return sum(abilities) + current_energy
