@@ -2,6 +2,9 @@ from community import Member, Community
 
 
 def player_score(community: Community) -> list[int]:
+    """
+    Calculate the score of every player sort from best to worst
+    """
     members = {member.id: 0 for member in community.members}
 
     for member in community.members:
@@ -16,6 +19,11 @@ def player_score(community: Community) -> list[int]:
 
 
 def calculate_minimum_delta_individual(player: Member, community: Community):
+    """
+    Find the best task for an individual, the task that minimizes waste + energy
+
+    delta = min(energy + waste)
+    """
     num_abilities = len(player.abilities)
 
     minimum_delta = float("inf")
@@ -39,6 +47,11 @@ def calculate_minimum_delta_individual(player: Member, community: Community):
 def calculate_minimum_delta_pair(
     player: Member, best_partner: int, community: Community
 ):
+    """
+    Find the best task for a pair, the task that minimizes waste + energy
+
+    delta = min(energy + waste)
+    """
     members = {member.id: member for member in community.members}
     partner = members[best_partner]
     num_abilities = len(player.abilities)
@@ -78,6 +91,7 @@ def phaseIpreferences(player: Member, community: Community, global_random):
     if player.energy < 2:
         return list_choices
 
+    # Members are stored from best to worst (best player index: 0)
     members = player_score(community)
     index = members.index(player.id)
 
@@ -86,10 +100,13 @@ def phaseIpreferences(player: Member, community: Community, global_random):
         player, best_partner, community
     )
 
+    # Cost of performing the task alone
     player_cost = sum(
         max(community.tasks[best_task][i] - player.abilities[i], 0)
         for i in range(len(player.abilities))
     )
+    # How much the player is wasting his abilities
+    # Player has ability 8, the task costs 5. waste = 3
     player_waste = sum(
         max(player.abilities[i] - community.tasks[best_task][i], 0)
         for i in range(len(player.abilities))
@@ -97,9 +114,11 @@ def phaseIpreferences(player: Member, community: Community, global_random):
 
     player_delta = player_cost + player_waste
 
+    # Energy management (players don't kill themselves)
     if pair_delta >= player.energy + community.members[best_partner].energy:
         return list_choices
 
+    # Only pair up if it is more benificial
     if pair_delta < player_delta * 1.5:
         list_choices.append([best_task, best_partner])
 
