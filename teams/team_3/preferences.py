@@ -127,6 +127,35 @@ def phaseIpreferences(player: Member, community: Community, global_random):
 
 def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
+    # check if this is the worst player
+    members = player_score(community)
+    if members.index(player.id) == len(members) - 1:
+        
+        # it is, so check of there is an impossible task
+        for i in range(len(community.tasks)):
+            task = community.tasks[i]
+            possible = False
+            for m1 in range(len(community.members)):
+                if possible:
+                    break
+
+                for m2 in range(len(community.members)):
+                    if m1 != m2:
+                        p1, p2 = community.members[m1], community.members[m2]
+                        energy_cost = (
+                            sum(
+                                max(task[i] - max(p1.abilities[i], p2.abilities[i]), 0)
+                                for i in range(len(player.abilities))
+                            )
+                            * 0.5
+                        )
+
+                        if p1.energy - energy_cost > -10 and p2.energy - energy_cost > -10:
+                            possible = True
+
+            if not possible:
+                return [i]
+
     bids = []
     num_abilities = len(player.abilities)
     best_task, _ = calculate_minimum_delta_individual(player, community)
