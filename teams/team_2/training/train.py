@@ -12,8 +12,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-MAX_GENERATIONS = 20
-TURNS = 20
+MAX_GENERATIONS = 4
+TURNS = 4
 CIVILIANS = 20
 POP_SIZE = 10
 HIDDEN_SIZE = 64
