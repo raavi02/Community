@@ -404,6 +404,8 @@ def run_simulation(
 
     community = Community(num_abilities, num_players, player_distribution, members)
 
+    tasks_completed = []
+
     for _ in tqdm(range(num_turns)):
         available_players = {p for p in community.members if not p.incapacitated}
         if len(available_players) == 0:
@@ -412,6 +414,10 @@ def run_simulation(
         CommunityActions.simulate_turn(
             community, task_difficulty_distribution, available_players
         )
+        tasks_completed.append(community.completed_tasks)
+
+    with open(f"{community.num_abilities}-{len(community.members)}.npy", "wb") as f:
+        np.save(f, np.array(tasks_completed))
 
     return community.completed_tasks
 
