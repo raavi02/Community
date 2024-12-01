@@ -19,18 +19,16 @@ def player_score(community: Community) -> list[int]:
 
 
 def sacrifice(player: Member, community: Community):
-
     members = player_score(community)
 
-    if members.index(player.id) != len(members) - 1:
+    if members.index(player.id) != len(members) - 1 or len(community.tasks) == 0:
         return []
 
-    # it is, so check of there is an impossible task
+    impossible_tasks = []
+    full_energy = 10
+
     for idx, task in enumerate(community.tasks):
-        possible = False
         for p1 in community.members:
-            if possible:
-                break
             for p2 in community.members:
                 if p1 == p2:
                     continue
@@ -43,12 +41,13 @@ def sacrifice(player: Member, community: Community):
                     * 0.5
                 )
 
-                if p1.energy - energy_cost > -10 and p2.energy - energy_cost > -10:
-                    possible = True
-                    break
+                if full_energy - energy_cost > -10:
+                    return []
 
-        if not possible:
-            return [idx]
+        impossible_tasks.append(idx)
+
+    if len(impossible_tasks) == len(community.tasks):
+        return [impossible_tasks[0]]
 
     return []
 
