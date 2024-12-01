@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import os
+import signal
+import sys
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
@@ -12,6 +14,8 @@ import torch.nn.functional as F
 
 MAX_GENERATIONS = 4
 POP_SIZE = 4
+TURNS = 20
+CIVILIANS = 20
 HIDDEN_SIZE = 64
 TASK_FEATURE_SIZE = 5
 PLAYER_STATE_SIZE = 9
@@ -21,6 +25,25 @@ if __name__ == "__main__":
     from run import run
 else:
     from teams.team_2.training.run import run
+
+
+def handle_signal(best_model):
+    def catch_signal(sig, frame):
+        print(f"\nCaught {signal.Signals(sig).name}, saving best model...")
+
+        best_score = evaluate_fitness(*best_model, turns=TURNS, civilians=CIVILIANS)
+        print(f"best_model: {best_score} per turn per civilian")
+        torch.save(
+            best_model[0].state_dict(),
+            f"best_task_score={str(round(best_score,3)).replace('.', ',')}.pth",
+        )
+        torch.save(
+            best_model[1].state_dict(),
+            f"best_rest_score={str(round(best_score, 3)).replace('.', ',')}.pth",
+        )
+        sys.exit(0)
+
+    return catch_signal
 
 
 class TaskScorerNN(nn.Module):
@@ -57,12 +80,11 @@ class RestDecisionNN(nn.Module):
         return score
 
 
-def evaluate_fitness(task_model: nn.Module, rest_model: nn.Module):
-    # for task in task_environment:
-    # action = model(task.features, task.state)
-    result = run(task_model, rest_model)
-    # result = task_environment.run(action)  # Simulates environment behavior
-    return result
+def evaluate_fitness(task_model: nn.Module, rest_model: nn.Module, turns, civilians):
+    tasks = run(task_model, rest_model, turns, civilians)
+    score = tasks / turns / civilians
+    print(f"score: {round(score, 3)}")
+    return score
 
 
 def crossover(parent1, parent2, is_task):
@@ -110,61 +132,85 @@ class Task:
             self.state = torch.zeros(features.shape[0])
 
 
-population = [
-    (
-        TaskScorerNN(TASK_FEATURE_SIZE, PLAYER_STATE_SIZE, HIDDEN_SIZE),
-        # 1 is hardcoded
-        RestDecisionNN(PLAYER_STATE_SIZE + 1, HIDDEN_SIZE),
-    )
-    for _ in range(POP_SIZE)
-]
-
-avg_scores = []
-max_scores = []
-
-for generation in range(MAX_GENERATIONS):
-    # Evaluate fitness
-    fitness_scores = [
-        evaluate_fitness(task_model, rest_model)
-        for task_model, rest_model in population
-    ]
-    avg_scores.append(np.mean(fitness_scores))
-    max_scores.append(max(fitness_scores))
-
-    # Select parents
-    parents = select_parents(population, fitness_scores)
-
-    # Generate offspring
-    offspring = []
-    # for now, only create offspring from TaskScorerNN
-    for _ in range(len(parents) // 2):
-        parent1, parent2 = random.sample(parents, 2)
-        child_task = crossover(parent1[0], parent2[0], is_task=True)
-        child_rest = crossover(parent1[1], parent2[1], is_task=False)
-        mutate(child_task, 0.1, 0.05)
-        mutate(child_rest, 0.1, 0.05)
-        offspring.append((child_task, child_rest))
-
-        parent1, parent2 = random.sample(parents, 2)
-        child_task = crossover(parent1[0], parent2[0], is_task=True)
-        child_rest = crossover(parent1[1], parent2[1], is_task=False)
-        mutate(child_task, 0.1, 0.05)
-        mutate(child_rest, 0.1, 0.05)
-        offspring.append((child_task, child_rest))
-
-    # Replace population
-    [(mutate(ptask), mutate(prest)) for ptask, prest in parents]
-    population = parents + offspring
-    print(f"{len(population)} members")
-
-    print(f"{generation}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}")
-
-
 if __name__ == "__main__":
+    avg_scores = []
+    max_scores = []
+
+    parents = []
+    offspring = []
+    fitness_scores = []
+    population = [
+        (
+            TaskScorerNN(TASK_FEATURE_SIZE, PLAYER_STATE_SIZE, HIDDEN_SIZE),
+            # 1 is hardcoded
+            RestDecisionNN(PLAYER_STATE_SIZE + 1, HIDDEN_SIZE),
+        )
+        for _ in range(POP_SIZE)
+    ]
+
+    print(
+        f"""Training with:
+ Population: {POP_SIZE} 
+Generations: {MAX_GENERATIONS}
+      Turns: {TURNS}
+  Civilians: {CIVILIANS}\n"""
+    )
+
+    for generation in range(MAX_GENERATIONS):
+        # Evaluate fitness
+        fitness_scores = [
+            evaluate_fitness(task_model, rest_model, TURNS, CIVILIANS)
+            for task_model, rest_model in population
+        ]
+        avg_scores.append(np.mean(fitness_scores))
+        max_scores.append(max(fitness_scores))
+
+        # sort the population list based off the fitness_scores
+        spop = [
+            x
+            for _, x in sorted(
+                zip(fitness_scores, population), key=lambda p: p[0], reverse=True
+            )
+        ]
+        # save the current best population
+        signal.signal(signal.SIGINT, handle_signal(spop[0]))
+
+        # Select parents
+        parents = select_parents(population, fitness_scores)
+
+        # Generate offspring
+        offspring = []
+        # for now, only create offspring from TaskScorerNN
+        for _ in range(len(parents) // 2):
+            parent1, parent2 = random.sample(parents, 2)
+            child_task = crossover(parent1[0], parent2[0], is_task=True)
+            child_rest = crossover(parent1[1], parent2[1], is_task=False)
+            mutate(child_task, 0.1, 0.05)
+            mutate(child_rest, 0.1, 0.05)
+            offspring.append((child_task, child_rest))
+
+            parent1, parent2 = random.sample(parents, 2)
+            child_task = crossover(parent1[0], parent2[0], is_task=True)
+            child_rest = crossover(parent1[1], parent2[1], is_task=False)
+            mutate(child_task, 0.1, 0.05)
+            mutate(child_rest, 0.1, 0.05)
+            offspring.append((child_task, child_rest))
+
+        # Replace population
+        [(mutate(ptask), mutate(prest)) for ptask, prest in parents]
+        population = parents + offspring
+
+        print(
+            f"{generation}/{MAX_GENERATIONS}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}"
+        )
+
     best_model = select_parents(population, fitness_scores)[0]
 
-    torch.save(best_model, "best_weigths.pth")
-    print('best model weights saved in "best_weights.pth"')
+    torch.save(best_model[0].state_dict(), "best_task_weigths.pth")
+    torch.save(best_model[1].state_dict(), "best_rest_weigths.pth")
+    print(
+        'best model weights saved in "best_task_weights.pth" and "best_rest_weights.pth"'
+    )
 
     # Get the current working directory (runfolder)
     runfolder = os.getcwd()
