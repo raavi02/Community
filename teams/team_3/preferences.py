@@ -130,7 +130,6 @@ def phaseIIpreferences(player, community, global_random):
     # check if this is the worst player
     members = player_score(community)
     if members.index(player.id) == len(members) - 1:
-        
         # it is, so check of there is an impossible task
         for i in range(len(community.tasks)):
             task = community.tasks[i]
@@ -150,7 +149,10 @@ def phaseIIpreferences(player, community, global_random):
                             * 0.5
                         )
 
-                        if p1.energy - energy_cost > -10 and p2.energy - energy_cost > -10:
+                        if (
+                            p1.energy - energy_cost > -10
+                            and p2.energy - energy_cost > -10
+                        ):
                             possible = True
 
             if not possible:
