@@ -84,7 +84,6 @@ def calculate_minimum_delta_individual(player: Member, community: Community):
     return (best_task, minimum_delta)
 
 
-# Delta = min(energy + waste)
 def calculate_minimum_delta_pair(
     player: Member, best_partner: int, community: Community
 ):
