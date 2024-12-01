@@ -27,22 +27,19 @@ else:
     from teams.team_2.training.run import run
 
 
-def handle_signal(population):
+def handle_signal(best_model):
     def catch_signal(sig, frame):
         print(f"\nCaught {signal.Signals(sig).name}, finding best player...")
-        best_model = max(
-            population,
-            key=lambda model: evaluate_fitness(
-                *model, turns=TURNS, civilians=CIVILIANS
-            ),
-        )
+
         best_score = evaluate_fitness(*best_model, turns=TURNS, civilians=CIVILIANS)
         print(f"best_model: {best_score} per turn per civilian")
         torch.save(
-            best_model[0], f"best_task_score={str(best_score).replace(".", ",")}.pth"
+            best_model[0].state_dict(),
+            f"best_task_score={str(round(best_score,3)).replace('.', ',')}.pth",
         )
         torch.save(
-            best_model[1], f"best_rest_score={str(best_score).replace(".", ",")}.pth"
+            best_model[1].state_dict(),
+            f"best_rest_score={str(round(best_score, 3)).replace('.', ',')}.pth",
         )
         sys.exit(0)
 
@@ -151,8 +148,6 @@ if __name__ == "__main__":
         for _ in range(POP_SIZE)
     ]
 
-    signal.signal(signal.SIGINT, handle_signal(population))
-
     print(
         f"""Training with:
  Population: {POP_SIZE} 
@@ -169,6 +164,16 @@ Generations: {MAX_GENERATIONS}
         ]
         avg_scores.append(np.mean(fitness_scores))
         max_scores.append(max(fitness_scores))
+
+        # sort the population list based off the fitness_scores
+        spop = [
+            x
+            for _, x in sorted(
+                zip(fitness_scores, population), key=lambda p: p[0], reverse=True
+            )
+        ]
+        # save the current best population
+        signal.signal(signal.SIGINT, handle_signal(spop[0]))
 
         # Select parents
         parents = select_parents(population, fitness_scores)
