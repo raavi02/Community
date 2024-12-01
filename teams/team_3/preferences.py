@@ -135,34 +135,32 @@ def phaseIpreferences(player: Member, community: Community, global_random):
 
     # Members are stored from best to worst (best player index: 0)
     members = player_score(community)
-    index = members.index(player.id)
 
-    best_partner = members[len(members) - 1 - index]
-    best_task, pair_delta = calculate_minimum_delta_pair(
-        player, best_partner, community
-    )
+    for partner in members:
+        if partner == player.id:
+            continue
 
-    # Cost of performing the task alone
-    player_cost = sum(
-        max(community.tasks[best_task][i] - player.abilities[i], 0)
-        for i in range(len(player.abilities))
-    )
-    # How much the player is wasting his abilities
-    # Player has ability 8, the task costs 5. waste = 3
-    player_waste = sum(
-        max(player.abilities[i] - community.tasks[best_task][i], 0)
-        for i in range(len(player.abilities))
-    )
+        task, pair_delta = calculate_minimum_delta_pair(player, partner, community)
 
-    player_delta = player_cost + player_waste
+        player_cost = sum(
+            max(community.tasks[task][i] - player.abilities[i], 0)
+            for i in range(len(player.abilities))
+        )
 
-    # Energy management (players don't kill themselves)
-    if pair_delta >= player.energy + community.members[best_partner].energy:
-        return list_choices
+        player_waste = sum(
+            max(player.abilities[i] - community.tasks[task][i], 0)
+            for i in range(len(player.abilities))
+        )
 
-    # Only pair up if it is more benificial
-    if pair_delta < player_delta * 1.5:
-        list_choices.append([best_task, best_partner])
+        player_delta = player_cost + player_waste
+
+        # Energy management (players don't kill themselves)
+        if pair_delta >= player.energy + community.members[partner].energy:
+            continue
+
+        # Only pair up if it is more benificial
+        if pair_delta <= player_delta * 1.0:
+            list_choices.append([task, partner])
 
     return list_choices
 
