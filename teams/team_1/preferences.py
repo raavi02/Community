@@ -1,55 +1,92 @@
+import math
+
+def getPainThreshold(community):
+    '''Computes the pain threshold according to the average task difficulty and median member abilities'''
+    
+    # Only consider members who are not overly tired
+    valid_members = [member for member in community.members if member.energy >= -5]
+
+    if len(valid_members) == 0 or len(community.tasks) == 0:
+        return -10
+    
+    # Compute the average ability total across all valid members
+    avg_ability_total = 0
+    for member in valid_members:
+        avg_ability_total += sum(member.abilities)
+    avg_ability_total /= len(valid_members)
+
+    # Compute the average task difficulty total across all remaining tasks
+    avg_task_total = 0
+    for task in community.tasks:
+        avg_task_total += sum(task)
+    avg_task_total /= len(community.tasks)
+
+    # Find the pain threshold members should be willing to bear
+    avg_energy_expended = max(avg_task_total - avg_ability_total, 0)
+    pain_threshold = min(10 - (avg_energy_expended / 2), 0)
+
+    return pain_threshold
+
 def phaseIpreferences(player, community, global_random):
     '''Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
 
-    all_players = set(range(len(community.members)))
+    # Don't volunteer if tired
+    if player.energy < 0:
+        return []
+    
     num_abilities = len(player.abilities)
 
     # Sort tasks in order of descending difficulty
     sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
-
-    if not isValidForPartnership(player, community, None):
-        return []
+    pain_threshold = getPainThreshold(community)
     
     # Form partnerships based on the tasks
     partner_choices = []
     
     for task_id, task in sorted_tasks:
+        solo_energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
+
+        # Initialize params to find optimal partner for current task
         best_partner_id = None
-        best_final_energy = -float("inf")
-        for partner_id in all_players:
-            if partner_id == player.id:
+        best_pair_energy_cost = float("inf")
+
+        for partner in community.members:
+            if partner.id == player.id or partner.energy < 0:
                 continue
         
-            partner = community.members[partner_id]
-            if isValidForPartnership(partner, community, task):
-                joint_abilities = [max(a1, a2) for a1, a2 in zip(player.abilities, partner.abilities)]
-                energy_cost = sum([max(task[j] - joint_abilities[j], 0) for j in range(num_abilities)]) / 2
-                
-                player_final_energy = player.energy - energy_cost
-                partner_final_energy = partner.energy - energy_cost
-                lowest_final_energy = min(player_final_energy, partner_final_energy)
+            joint_abilities = [max(a1, a2) for a1, a2 in zip(player.abilities, partner.abilities)]
+            pair_energy_cost = sum([max(task[j] - joint_abilities[j], 0) for j in range(num_abilities)]) / 2
 
-                # Skip pairing if it will tire out either of the two players too much
-                if lowest_final_energy < -5:
-                    continue
+            # Skip partnership if energy cost will bring either member below the pain threshold
+            if player.energy - pair_energy_cost < pain_threshold or partner.energy - pair_energy_cost < pain_threshold:
+                continue
+            
+            # Better partnership found, update params
+            if pair_energy_cost < best_pair_energy_cost:
+                best_pair_energy_cost = pair_energy_cost
+                best_partner_id = partner.id
 
-                # Keep track of best partnership to preserve energy
-                if lowest_final_energy > best_final_energy:
-                    best_final_energy = lowest_final_energy
-                    best_partner_id = partner.id
-        
-        if best_partner_id:
+        dynamic_threshold = 1.5 # CHANGE TO MAKE DYNAMIC
+
+        # Only bid for partnership if its more energy efficient than solo work
+        if solo_energy_cost >= dynamic_threshold * best_pair_energy_cost:
             partner_choices.append([task_id, best_partner_id])
 
     return partner_choices
 
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
+    
+    # Don't volunteer if tired
+    if player.energy < 0:
+        return []
+    
     bids = []
 
     for task_id, task in enumerate(community.tasks):
         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(task))])
+        
         # Volunteering logic
         if player.energy - energy_cost >= 0:
             bids.append(task_id)
