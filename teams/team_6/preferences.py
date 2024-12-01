@@ -126,6 +126,15 @@ def phaseIpreferences(player, community, global_random):
 
 def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
+
+    weakest_player = weakest_member(player, community)
+    print("WEAKEST PLAYER: ", weakest_player)
+
+    hard_tasks, impossible_tasks = find_impossible_tasks(community)
+
+    print("HARD TASKS: ", hard_tasks)
+    print("IMPOSSIBLE TASKS: ", impossible_tasks)
+
     bids = []
     if player.energy < 0:
         return bids
@@ -302,3 +311,30 @@ def loss_phase2(task, abilities, current_energy):
 
 def loss_resting(task, abilities, current_energy):
     return sum(abilities) + current_energy
+
+
+def weakest_member(player, community):
+    all_skills = [sum(member.abilities) for member in community.members]
+    player_skill = sum(player.abilities)
+
+    if player_skill == min(all_skills):
+        return True
+    else:
+        return False
+
+def find_impossible_tasks(community):
+    impossible_tasks = []
+    hard_tasks = []
+    for task in community.tasks:
+        best_case = 10**9
+        for member in community.members:
+            energy_deficit = sum(max(task[i] - member.abilities[i], 0) for i in range(len(task)))
+            best_case = min(best_case, energy_deficit)
+            if best_case <= 0:
+                break
+        if best_case >= 20:
+            impossible_tasks.append(task)
+        elif best_case >= 10:
+            hard_tasks.append(task)
+
+    return hard_tasks, impossible_tasks
