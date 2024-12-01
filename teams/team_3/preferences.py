@@ -159,7 +159,7 @@ def phaseIpreferences(player: Member, community: Community, global_random):
             continue
 
         # Only pair up if it is more benificial
-        if pair_delta <= player_delta * 1.0:
+        if pair_delta <= player_delta:
             list_choices.append([task, partner])
 
     return list_choices
