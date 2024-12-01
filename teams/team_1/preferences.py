@@ -1,5 +1,7 @@
 import math
+import matplotlib.pyplot as plt
 
+turns = []
 def getPainThreshold(community):
     '''Computes the pain threshold according to the average task difficulty and median member abilities'''
     
@@ -66,8 +68,13 @@ def phaseIpreferences(player, community, global_random):
             if pair_energy_cost < best_pair_energy_cost:
                 best_pair_energy_cost = pair_energy_cost
                 best_partner_id = partner.id
+        
 
-        dynamic_threshold = 1.5 # CHANGE TO MAKE DYNAMIC
+        #if the everage energy of the community is greter than 5, we can push players to work solo
+        avg_energy = getAvgEnergy(community)
+
+        if (avg_energy >= 5): dynamic_threshold = 2
+        else: dynamic_threshold = 1.2 # CHANGE TO MAKE DYNAMIC
 
         # Only bid for partnership if its more energy efficient than solo work
         if solo_energy_cost >= dynamic_threshold * best_pair_energy_cost:
@@ -75,6 +82,12 @@ def phaseIpreferences(player, community, global_random):
 
     return partner_choices
 
+def getAvgEnergy(community):
+    total_energy = 0
+    for player in community.members:
+        total_energy += player.energy
+    return total_energy / len(community.members)
+    
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
     
