@@ -123,8 +123,10 @@ def calculate_minimum_delta_pair(
 
 
 def phaseIpreferences(player: Member, community: Community, global_random):
-    """Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
-    in the list has the first index task [index in the community.tasks list] and the second index as the partner id
+    """
+    Return a list of task index and the partner id for the particular player. The output
+    format should be a list of lists such that each element in the list has the first index
+    task [index in the community.tasks list] and the second index as the partner id
     """
     list_choices = []
 
