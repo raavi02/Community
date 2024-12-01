@@ -8,6 +8,8 @@ def player_score(community: Community) -> list[int]:
     members = {member.id: 0 for member in community.members}
 
     for member in community.members:
+        if member.energy <= -10:
+            continue
         for task in community.tasks:
             cost = sum(
                 max(task[i] - member.abilities[i], 0)
@@ -19,12 +21,20 @@ def player_score(community: Community) -> list[int]:
 
 
 def sacrifice(player: Member, community: Community):
+    """
+    Sacrifice the weakest community member, only when
+    all tasks are impossible and when no other task can be done
+    """
     members = player_score(community)
 
-    if members.index(player.id) != len(members) - 1 or len(community.tasks) == 0:
+    if player.id != members[-1] or len(community.tasks) == 0:
         return []
 
     impossible_tasks = []
+
+    # NOTE: Sacrificing is a last resort and has negative impact on community performance
+    #       Thus, only consider sacrificying a player if a task cannot be completed by any
+    #       pair with full energy.
     full_energy = 10
 
     for idx, task in enumerate(community.tasks):
@@ -46,10 +56,7 @@ def sacrifice(player: Member, community: Community):
 
         impossible_tasks.append(idx)
 
-    if len(impossible_tasks) == len(community.tasks):
-        return [impossible_tasks[0]]
-
-    return []
+    return [impossible_tasks[0]]
 
 
 def calculate_minimum_delta_individual(player: Member, community: Community):
@@ -159,7 +166,7 @@ def phaseIpreferences(player: Member, community: Community, global_random):
     return list_choices
 
 
-def phaseIIpreferences(player, community, global_random):
+def phaseIIpreferences(player: Member, community: Community, global_random):
     """Return a list of tasks for the particular player to do individually"""
 
     if impossible := sacrifice(player, community):
