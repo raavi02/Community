@@ -18,6 +18,41 @@ def player_score(community: Community) -> list[int]:
     return sorted(members, key=members.get)
 
 
+def sacrifice(player: Member, community: Community):
+
+    members = player_score(community)
+
+    if members.index(player.id) != len(members) - 1:
+        return []
+
+    # it is, so check of there is an impossible task
+    for idx, task in enumerate(community.tasks):
+        possible = False
+        for p1 in community.members:
+            if possible:
+                break
+            for p2 in community.members:
+                if p1 == p2:
+                    continue
+
+                energy_cost = (
+                    sum(
+                        max(task[i] - max(p1.abilities[i], p2.abilities[i]), 0)
+                        for i in range(len(player.abilities))
+                    )
+                    * 0.5
+                )
+
+                if p1.energy - energy_cost > -10 and p2.energy - energy_cost > -10:
+                    possible = True
+                    break
+
+        if not possible:
+            return [idx]
+
+    return []
+
+
 def calculate_minimum_delta_individual(player: Member, community: Community):
     """
     Find the best task for an individual, the task that minimizes waste + energy
@@ -127,36 +162,9 @@ def phaseIpreferences(player: Member, community: Community, global_random):
 
 def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
-    # check if this is the worst player
-    members = player_score(community)
-    if members.index(player.id) == len(members) - 1:
-        # it is, so check of there is an impossible task
-        for i in range(len(community.tasks)):
-            task = community.tasks[i]
-            possible = False
-            for m1 in range(len(community.members)):
-                if possible:
-                    break
 
-                for m2 in range(len(community.members)):
-                    if m1 != m2:
-                        p1, p2 = community.members[m1], community.members[m2]
-                        energy_cost = (
-                            sum(
-                                max(task[i] - max(p1.abilities[i], p2.abilities[i]), 0)
-                                for i in range(len(player.abilities))
-                            )
-                            * 0.5
-                        )
-
-                        if (
-                            p1.energy - energy_cost > -10
-                            and p2.energy - energy_cost > -10
-                        ):
-                            possible = True
-
-            if not possible:
-                return [i]
+    if impossible := sacrifice(player, community):
+        return impossible
 
     bids = []
     num_abilities = len(player.abilities)
