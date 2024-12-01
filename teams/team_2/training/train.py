@@ -29,7 +29,7 @@ else:
 
 def handle_signal(best_model):
     def catch_signal(sig, frame):
-        print(f"\nCaught {signal.Signals(sig).name}, finding best player...")
+        print(f"\nCaught {signal.Signals(sig).name}, saving best model...")
 
         best_score = evaluate_fitness(*best_model, turns=TURNS, civilians=CIVILIANS)
         print(f"best_model: {best_score} per turn per civilian")
