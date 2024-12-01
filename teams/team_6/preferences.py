@@ -177,7 +177,7 @@ def phaseIIpreferences(player, community, global_random):
                 returned_tasks.append(community.tasks.index(task))
             return returned_tasks
         else:
-            for task in doable:
+            for task in impossible_tasks:
                 returned_tasks.append(community.tasks.index(task))
             return returned_tasks
                 
