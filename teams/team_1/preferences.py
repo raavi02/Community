@@ -94,6 +94,7 @@ def phaseIIpreferences(player, community, global_random):
     # Handle extremely difficult tasks
     diff_tasks = findDifficultTasks(community)
     if len(diff_tasks) > 0:
+        print("Difficult tasks:", len(diff_tasks))
         for task_id, _ in diff_tasks:
             # attempt to execute a sacrifice for these tasks
             sacrificer_id = executeSacrifice(community, community.tasks[task_id], len(player.abilities))
@@ -113,30 +114,16 @@ def findDifficultTasks(community):
 
     for task_id, task in enumerate(community.tasks):
         # Check if any single player can complete the task
+        # if a players' abilities exceed the task difficulties, the energy deficit is 0
+        # if a players' abilities come short of the task difficulties, there is a non-zero energy deficit
+            # if the non-zero energy deficit results in the overall energy going to -10 or below, that player is incapacitated
         individual_fail = all(
-            sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)]) > player.energy
+            player.energy - sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)]) <= -10
             for player in community.members
         )
 
-        # Check if any partnership can complete the task
-        partnership_fail = True
-        for i, player1 in enumerate(community.members):
-            for j, player2 in enumerate(community.members):
-                if i >= j:
-                    continue
-                
-                joint_abilities = [max(player1.abilities[k], player2.abilities[k]) for k in range(num_abilities)]
-                energy_cost = sum([max(task[l] - joint_abilities[l], 0) for l in range(num_abilities)]) / 2
-
-                # Check if both players can handle the energy cost
-                if player1.energy - energy_cost >= -10 and player2.energy - energy_cost >= -10:
-                    partnership_fail = False
-                    break
-            if not partnership_fail:
-                break
-
-        # ff neither individuals nor partnerships can complete the task, it's "difficult"
-        if individual_fail and partnership_fail:
+        # if neither individuals nor partnerships can complete the task, it's "difficult"
+        if individual_fail:
             max_energy_loss = max([
                 sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
                 for player in community.members
@@ -169,53 +156,36 @@ def isValidForPartnership(player, community, task):
 def executeSacrifice(community, task, num_abilities):
     """
     Execute a sacrifice to complete a difficult task.
-    - identifies the player with the lowest energy who can complete the task
-    - ensures no other valid partnerships or individual efforts can resolve the task
-    - deducts the energy cost and marks the sacrificer as incapacitated
+    - Chooses the player with the lowest abilities and lowest energy to sacrifice.
+    - Ensures no valid individual solution exists (partnerships already ruled out in phase I).
     """
-    # check if the task requires a sacrifice (this might be redundant since this method is only called on difficult tasks anyway)
-    individual_fail = all(
-        sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)]) > player.energy
-        for player in community.members
+    # Sort members by (total ability, energy), ascending
+    sorted_members = sorted(
+        community.members,
+        key=lambda member: (sum(member.abilities), member.energy)
     )
 
-    partnership_fail = True
-    for i, player1 in enumerate(community.members):
-        for j, player2 in enumerate(community.members):
-            if i >= j:
-                continue
-            
-            joint_abilities = [max(player1.abilities[k], player2.abilities[k]) for k in range(num_abilities)]
-            energy_cost = sum([max(task[l] - joint_abilities[l], 0) for l in range(num_abilities)]) / 2
+    # Find the sacrificer (lowest abilities, lowest energy)
+    for sacrificer in sorted_members:
+        energy_cost = sum([max(task[j] - sacrificer.abilities[j], 0) for j in range(num_abilities)])
+        print("Energy cost:", energy_cost)
+        
+        # Ensure the sacrificer can complete the task and avoid premature sacrifice
 
-            if player1.energy - energy_cost >= -10 and player2.energy - energy_cost >= -10:
-                partnership_fail = False
-                break
-        if not partnership_fail:
-            break
-
-    # if no valid partnerships or individual efforts, proceed with sacrifice
-    if individual_fail and partnership_fail:
-        # identify sacrificer (player with the lowest energy)
-        sacrificer = None
-        lowest_energy = float('inf')
-
-        for player in community.members:
-            energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
-            if energy_cost <= player.energy and player.energy < lowest_energy:
-                lowest_energy = player.energy
-                sacrificer = player
-
-        # execute the sacrifice
-        if sacrificer:
-            energy_cost = sum([max(task[j] - sacrificer.abilities[j], 0) for j in range(num_abilities)])
-            sacrificer.energy -= energy_cost
-            print(f"Player {sacrificer.id} sacrificed for task, remaining energy: {sacrificer.energy}")
-            
-            if sacrificer.energy <= -10:
-                sacrificer.incapacitated = True
-                print(f"Player {sacrificer.id} is now incapacitated.")
-            
+        if sacrificer.energy - energy_cost > -10:
+            # sacrificer.energy -= energy_cost
+            print(f"Player {sacrificer.id} sacrificed for task.")                    
+            print(f"Player {sacrificer.id} is NOT yet incapacitated.")
+                    
             return sacrificer.id
-    # no sacrifice made
-    return None  
+
+        if sacrificer.energy - energy_cost <= -10:
+            # sacrificer.energy -= energy_cost
+            # sacrificer.incapacitated = True
+            print(f"Player {sacrificer.id} sacrificed for task.")                    
+            print(f"Player {sacrificer.id} is now incapacitated.")
+                    
+            return sacrificer.id
+
+    # No sacrifice made
+    return None
