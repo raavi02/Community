@@ -5,27 +5,34 @@ turns = []
 def getPainThreshold(community):
     '''Computes the pain threshold according to the average task difficulty and median member abilities'''
     
-    # Only consider members who are not overly tired
-    valid_members = [member for member in community.members if member.energy >= -5]
+    # Only consider members who are not tired
+    valid_members = [member for member in community.members if member.energy >= 0]
 
     if len(valid_members) == 0 or len(community.tasks) == 0:
         return -10
     
-    # Compute the average ability total across all valid members
-    avg_ability_total = 0
-    for member in valid_members:
-        avg_ability_total += sum(member.abilities)
-    avg_ability_total /= len(valid_members)
-
-    # Compute the average task difficulty total across all remaining tasks
-    avg_task_total = 0
+    # Find the maximum optimal energy pair expenditure across all tasks
+    max_energy_across_all_tasks = -float("inf")
     for task in community.tasks:
-        avg_task_total += sum(task)
-    avg_task_total /= len(community.tasks)
+        min_energy_expended = float("inf")
+        for m1 in valid_members:
+            for m2 in valid_members:
+                if m1 == m2:
+                    continue
 
-    # Find the pain threshold members should be willing to bear
-    avg_energy_expended = max(avg_task_total - avg_ability_total, 0)
-    pain_threshold = max(10 - (avg_energy_expended / 2), 0)
+                joint_abilities = [max(a1, a2) for a1, a2 in zip(m1.abilities, m2.abilities)]
+                pair_energy_cost = sum([max(task[j] - joint_abilities[j], 0) for j in range(len(task))]) / 2
+
+                if pair_energy_cost < min_energy_expended:
+                    min_energy_expended = pair_energy_cost
+        
+        if min_energy_expended > max_energy_across_all_tasks:
+            max_energy_across_all_tasks = min_energy_expended
+
+    pain_threshold = 0 if max_energy_across_all_tasks < 10 else 10 - max_energy_across_all_tasks
+    
+    if pain_threshold <= -10:
+        pain_threshold = -9     # prevent incapacitation
 
     return pain_threshold
 
@@ -104,16 +111,16 @@ def phaseIIpreferences(player, community, global_random):
         if player.energy - energy_cost >= 0:
             bids.append(task_id)
 
-    # Handle extremely difficult tasks
-    diff_tasks = findDifficultTasks(community)
-    if len(diff_tasks) > 0:
-        print("Difficult tasks:", len(diff_tasks))
-        for task_id, _ in diff_tasks:
-            # attempt to execute a sacrifice for these tasks
-            sacrificer_id = executeSacrifice(community, community.tasks[task_id], len(player.abilities))
-            if sacrificer_id is not None:
-                print(f"Sacrificed player {sacrificer_id} to complete task {task_id}.")
-                bids.append(task_id)
+    # # Handle extremely difficult tasks
+    # diff_tasks = findDifficultTasks(community)
+    # if len(diff_tasks) > 0:
+    #     print("Difficult tasks:", len(diff_tasks))
+    #     for task_id, _ in diff_tasks:
+    #         # attempt to execute a sacrifice for these tasks
+    #         sacrificer_id = executeSacrifice(community, community.tasks[task_id], len(player.abilities))
+    #         if sacrificer_id is not None:
+    #             print(f"Sacrificed player {sacrificer_id} to complete task {task_id}.")
+    #             bids.append(task_id)
 
     return bids
 
@@ -195,27 +202,4 @@ def executeSacrifice(community, task, num_abilities):
         key=lambda member: (sum(member.abilities), member.energy)
     )
 
-    # Find the sacrificer (lowest abilities, lowest energy)
-    for sacrificer in sorted_members:
-        energy_cost = sum([max(task[j] - sacrificer.abilities[j], 0) for j in range(num_abilities)])
-        print("Energy cost:", energy_cost)
-        
-        # Ensure the sacrificer can complete the task and avoid premature sacrifice
-
-        if sacrificer.energy - energy_cost > -10:
-            # sacrificer.energy -= energy_cost
-            print(f"Player {sacrificer.id} sacrificed for task.")                    
-            print(f"Player {sacrificer.id} is NOT yet incapacitated.")
-                    
-            return sacrificer.id
-
-        if sacrificer.energy - energy_cost <= -10:
-            # sacrificer.energy -= energy_cost
-            # sacrificer.incapacitated = True
-            print(f"Player {sacrificer.id} sacrificed for task.")                    
-            print(f"Player {sacrificer.id} is now incapacitated.")
-                    
-            return sacrificer.id
-
-    # No sacrifice made
-    return None
+    return sorted_members[0]
