@@ -404,9 +404,9 @@ def loss_phase2(task, abilities, current_energy):
 
 def loss_resting(task, abilities, current_energy):
     energy_used = sum([max(task[k] - abilities[k], 0) for k in range(len(abilities))])
-    cost = energy_used * max(0, current_energy)
+    cost = energy_used + max(0, current_energy)
 
-    scaling_factor = len(abilities) * 10 * len(abilities) * 10
+    scaling_factor = len(abilities) * 10 + 10
 
     return cost / scaling_factor
 
