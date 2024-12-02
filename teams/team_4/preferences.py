@@ -5,7 +5,8 @@ from itertools import combinations
 
 # Global static variables
 WEAKNESS_THRESHOLD = 5          # Percentile threshold for weakest player
-PAIRING_ADVANTAGE = 3         # Advantage of pairing over individual work
+OPTIONS_THRESHOLD = 2           # Threshold for skipping tasks with better options
+PAIRING_ADVANTAGE = 3           # Advantage of pairing over individual work
 
 
 # Set up logging
@@ -45,8 +46,8 @@ def phaseIpreferences(player, community, global_random):
                 # Tiring tasks (10 <= energy required < 20)
                 if 10 < assignment[1] < 20:
                     # Skip task if better options are available
-                    # if better_option_available(player, list_of_ranked_assignments[t], t):
-                    #     continue
+                    if count_better_options(player, list_of_ranked_assignments[t]) > OPTIONS_THRESHOLD:
+                        continue
                     # Wait until energy is full to volunteer with a partner
                     if None not in assignment[0] and player.energy == 10:
                         partner_id = assignment[0][0].id if player == assignment[0][1] else assignment[0][1].id
@@ -163,12 +164,12 @@ def is_weakest_player(player, community):
     return sum(player.abilities) < threshold
 
 # @profile
-def better_option_available(player, ranked_assignments, task_index):
+def count_better_options(player, ranked_assignments):
+    result = 0
     for assignment in ranked_assignments:
         if player in assignment[0]:
-            return False
+            return result
         if assignment[0][0].energy >= assignment[1]:
             if assignment[0][1] is None or assignment[0][1].energy >= assignment[1]:
-                print(f"Task {task_index} has better option of {assignment[0][0].id} and {assignment[0][1].id if assignment[0][1] is not None else None}")
-                return True
-    return False
+                result += 1
+    return result
