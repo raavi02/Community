@@ -173,12 +173,12 @@ def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
 
     weakest_player = weakest_member(player, community)
-    print("WEAKEST PLAYER: ", weakest_player)
+    # print("WEAKEST PLAYER: ", weakest_player)
 
     hard_tasks, impossible_tasks = find_impossible_tasks(community)
 
-    print("HARD TASKS: ", hard_tasks)
-    print("IMPOSSIBLE TASKS: ", impossible_tasks)
+    # print("HARD TASKS: ", hard_tasks)
+    # print("IMPOSSIBLE TASKS: ", impossible_tasks)
 
     if weakest_player == True and len(impossible_tasks) > 0:
         doable = doable_tasks(player, community)
