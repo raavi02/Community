@@ -1,7 +1,3 @@
-import math
-import matplotlib.pyplot as plt
-
-turns = []
 def getPainThreshold(community):
     '''Computes the pain threshold according to the average task difficulty and median member abilities'''
     
@@ -9,7 +5,7 @@ def getPainThreshold(community):
     valid_members = [member for member in community.members if member.energy >= 0]
 
     if len(valid_members) == 0 or len(community.tasks) == 0:
-        return -10
+        return -9
     
     # Find the maximum optimal energy pair expenditure across all tasks
     max_energy_across_all_tasks = -float("inf")
@@ -76,12 +72,9 @@ def phaseIpreferences(player, community, global_random):
                 best_pair_energy_cost = pair_energy_cost
                 best_partner_id = partner.id
         
-
-        #if the everage energy of the community is greter than 5, we can push players to work solo
+        # If the average energy of the community is greater than 5, push players to work solo
         avg_energy = getAvgEnergy(community)
-
-        if (avg_energy >= 5): dynamic_threshold = 2
-        else: dynamic_threshold = 1.2 # CHANGE TO MAKE DYNAMIC
+        dynamic_threshold = 2 if avg_energy >= 5 else 1.2
 
         # Only bid for partnership if its more energy efficient than solo work
         if solo_energy_cost >= dynamic_threshold * best_pair_energy_cost:
@@ -98,11 +91,24 @@ def getAvgEnergy(community):
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
     
+    bids = []
+
+    # Handle impossible tasks with sacrifice
+    impossible_tasks = findImpossibleTasks(community)
+    if impossible_tasks:
+        print("Impossible tasks:", len(impossible_tasks))
+        for task_id in impossible_tasks:
+            # Execute a sacrifice if member is the weakest
+            sacrificee_id = getWeakestMember(community)
+            print(f"Sacrificed player {sacrificee_id} to complete task {task_id}.")
+            bids.append(task_id)
+            if player.id == sacrificee_id:
+                bids.append(task_id)
+                return bids
+    
     # Don't volunteer if tired
     if player.energy < 0:
-        return []
-    
-    bids = []
+        return bids
 
     for task_id, task in enumerate(community.tasks):
         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(task))])
@@ -110,118 +116,52 @@ def phaseIIpreferences(player, community, global_random):
         # Volunteering logic
         if player.energy - energy_cost >= 0:
             bids.append(task_id)
-
-    # Handle extremely difficult tasks
-    diff_tasks = findDifficultTasks(community)
-    if len(diff_tasks) > 0:
-        print("Difficult tasks:", len(diff_tasks))
-        for task_id, _ in diff_tasks:
-            # attempt to execute a sacrifice for these tasks
-            sacrificer_id = getWeakest(community, community.tasks[task_id], len(player.abilities))
-            if sacrificer_id is not None:
-                print(f"Sacrificed player {sacrificer_id} to complete task {task_id}.")
-                bids.append(task_id)
-
+    
     return bids
 
-def findDifficultTasks(community):
+def findImpossibleTasks(community):
     """
     Identifies difficult tasks that cannot be completed by any individual player
     or through partnerships without causing energy exhaustion.
     """
-    difficult_tasks = []
+    impossible_tasks = []
     num_abilities = len(community.members[0].abilities)
 
     for task_id, task in enumerate(community.tasks):
-        # Check if any single player can complete the task
-        # if a players' abilities exceed the task difficulties, the energy deficit is 0
-        # if a players' abilities come short of the task difficulties, there is a non-zero energy deficit
-            # if the non-zero energy deficit results in the overall energy going to -10 or below, that player is incapacitated
+        # Check whether any individual player can complete the task without incapacitation on full energy
         individual_fail = 10 - sum(task[j] for j in range(num_abilities)) <= -10
 
+        # Check whether any partnership can complete the task without incapacitation on full energy
         partnership_fail = True
         for i, player1 in enumerate(community.members):
             for j, player2 in enumerate(community.members):
                 if i >= j:  # Avoid self-pairing
                     continue
 
-                # Joint abilities of the partnership
                 joint_abilities = [max(player1.abilities[k], player2.abilities[k]) for k in range(num_abilities)]
                 energy_cost = sum([max(task[l] - joint_abilities[l], 0) for l in range(num_abilities)]) / 2
 
-                # Check if both players can handle their share of the energy cost
-                if player1.energy - energy_cost > -10 and player2.energy - energy_cost > -10:
+                if 10 - energy_cost > -10:
                     partnership_fail = False
                     break
+            
             if not partnership_fail:
                 break
 
-        # if neither individuals nor partnerships can complete the task, it's "difficult"
+        # If neither individuals nor partnerships can complete the task, it's impossible
         if individual_fail and partnership_fail:
-            max_energy_loss = max([
-                sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
-                for player in community.members
-            ])
-            difficult_tasks.append((task_id, max_energy_loss))
+            impossible_tasks.append(task_id)
 
-    return difficult_tasks
+    return impossible_tasks
 
-def isValidForPartnership(player, community, task):
-    if player.energy <= 0:
-        return False
-    
-    ### THIS CODE BELOW IS LIKE THE STRONG PLAYER LOGIC, DIDN'T HELP....
-
-    # if task:
-    #     energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(task))])
-    #     if energy_cost == 0:
-    #         return False
-    # else:
-    #     for task in community.tasks:
-    #         energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(task))])
-    #         if energy_cost == 0:
-    #             return False
-
-    # sacrificing strategy
-    
-    return True
-
-
-def getWeakest(community, task, num_abilities):
+def getWeakestMember(community):
     """
-    Execute a sacrifice to complete a difficult task.
-    - Chooses the player with the lowest abilities and lowest energy to sacrifice.
-    - Ensures no valid individual solution exists (partnerships already ruled out in phase I).
+    Finds the weakest member of the community for sacrifice on an impossible task.
     """
     # Sort members by (total ability, energy), ascending
     sorted_members = sorted(
         community.members,
         key=lambda member: (sum(member.abilities), member.energy)
     )
+
     return sorted_members[0]
-
-
-    # Find the sacrificer (lowest abilities, lowest energy)
-    for sacrificer in sorted_members:
-        energy_cost = sum([max(task[j] - sacrificer.abilities[j], 0) for j in range(num_abilities)])
-        print("Energy cost:", energy_cost)
-        
-        # Ensure the sacrificer can complete the task and avoid premature sacrifice
-
-        if sacrificer.energy - energy_cost > -10:
-            # sacrificer.energy -= energy_cost
-            print(f"Player {sacrificer.id} sacrificed for task.")                    
-            print(f"Player {sacrificer.id} is NOT yet incapacitated.")
-                    
-            return sacrificer.id
-
-        if sacrificer.energy - energy_cost <= -10:
-            # sacrificer.energy -= energy_cost
-            # sacrificer.incapacitated = True
-            print(f"Player {sacrificer.id} sacrificed for task.")                    
-            print(f"Player {sacrificer.id} is now incapacitated.")
-                    
-            return sacrificer.id
-
-    # No sacrifice made
-    return None
