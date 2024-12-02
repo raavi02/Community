@@ -28,5 +28,5 @@ def task_difficulty_distribution(num_abilities: int, seed, task_generation_id, g
     else:
         difficulties = [local_random_task.randint(*easy_range) for _ in range(num_abilities)]
 
-    print(difficulties)
+    # print(difficulties)
     return difficulties

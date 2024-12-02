@@ -5,7 +5,8 @@ from itertools import combinations
 
 # Global static variables
 WEAKNESS_THRESHOLD = 5          # Percentile threshold for weakest player
-PAIRING_ADVANTAGE = 3         # Advantage of pairing over individual work
+DIFFICULTY_ABILITY_RATIO = 2    # Ratio of average difficulty to average ability for strategy selection
+PAIRING_ADVANTAGE = 3           # Advantage of pairing over individual work
 
 
 # Set up logging
@@ -24,12 +25,24 @@ def phaseIpreferences(player, community, global_random):
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
     list_choices = []
 
+
     # Calculate cost matrices
     cost_matrix_individual, cost_matrix_pairs = calculate_cost_matrix(community)
 
     # Rank assignment options by task
     list_of_ranked_assignments = get_ranked_assignments(community, cost_matrix_individual,
                                                         cost_matrix_pairs)
+
+    # If time is scarcer than energy, use simple strategy
+    if average_difficulty(community) < average_ability(community) * DIFFICULTY_ABILITY_RATIO:
+        for t in range(len(list_of_ranked_assignments)):
+            individual_cost = cost_matrix_individual[(player.id, t)]
+            for assignment in list_of_ranked_assignments[t]:
+                if player in assignment[0] and None not in assignment[0]:
+                    partner = assignment[0][0] if player == assignment[0][1] else assignment[0][1]
+                    if player.energy >= assignment[1] and partner.energy >= assignment[1]:
+                        if individual_cost + PAIRING_ADVANTAGE > assignment[1]:
+                            list_choices.append([t, partner.id])
 
     for t in range(len(list_of_ranked_assignments)):
         # Exhausting tasks (energy required >= 20)
@@ -41,20 +54,20 @@ def phaseIpreferences(player, community, global_random):
         best_decision = (None, np.inf)  # (partner_id, cost)
 
         for assignment in list_of_ranked_assignments[t]:
-            if player.id in assignment[0]:
+            if player in assignment[0]:
+                # Tiring tasks (10 <= energy required < 20)
                 if 10 < assignment[1] < 20:
-                    # Tiring tasks (10 <= energy required < 20)
                     # Wait until energy is full to volunteer with a partner
                     if None not in assignment[0] and player.energy == 10:
-                        partner_id = assignment[0][0] if player.id == assignment[0][1] else assignment[0][1]
+                        partner_id = assignment[0][0].id if player == assignment[0][1] else assignment[0][1].id
                         list_choices.append([t, partner_id])
+                # Easier tasks (energy required < 10)
                 else:
-                    # Easier tasks (energy required < 10)
                     # Volunteer to partner as long as energy >= task cost
                     if player.energy >= assignment[1]:
                         if None not in assignment[0]:
                             # Paired assignment
-                            partner_id = assignment[0][0] if player.id == assignment[0][1] else assignment[0][1]
+                            partner_id = assignment[0][0].id if player == assignment[0][1] else assignment[0][1].id
                             if best_decision[0] is not None and assignment[1] < best_decision[1]:
                                 best_decision = (partner_id, assignment[1])
                             elif best_decision[0] is None and assignment[1] + PAIRING_ADVANTAGE < best_decision[1]:
@@ -93,7 +106,7 @@ def phaseIIpreferences(player, community, global_random):
         # Volunteer to partner as long as energy >= task cost
         elif list_of_ranked_assignments[t][0][1] <= 10:
             for assignment in list_of_ranked_assignments[t]:
-                if player.id in assignment[0] and None in assignment[0] and player.energy >= assignment[1]:
+                if player in assignment[0] and None in assignment[0] and player.energy >= assignment[1]:
                     bids.append(t)
 
     return bids
@@ -137,9 +150,9 @@ def get_ranked_assignments(community, cost_matrix_individual, cost_matrix_pairs)
     for t in range(len(tasks)):
         assignments = {}
         for member in members:
-            assignments[(member.id, None)] = cost_matrix_individual[(member.id, t)]
+            assignments[(member, None)] = cost_matrix_individual[(member.id, t)]
         for member1, member2 in combinations(members, 2):
-            assignments[(member1.id, member2.id)] = cost_matrix_pairs[(member1.id, member2.id, t)]
+            assignments[(member1, member2)] = cost_matrix_pairs[(member1.id, member2.id, t)]
 
         ranked_assignments_dict = dict(sorted(assignments.items(), key=lambda item: item[1]))
         ranked_assignments = list(ranked_assignments_dict.items())
@@ -159,3 +172,8 @@ def is_weakest_player(player, community):
     
     return sum(player.abilities) < threshold
 
+def average_difficulty(community):
+    return sum([sum(task) for task in community.tasks]) / len(community.tasks)
+
+def average_ability(community):
+    return sum([sum(member.abilities) for member in community.members]) / len(community.members)
