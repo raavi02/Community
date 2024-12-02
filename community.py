@@ -329,7 +329,7 @@ def run_simulation(num_abilities: int, num_players: int, player_distribution, nu
 
     community = Community(num_abilities, num_players, player_distribution, members)
 
-    for _ in tqdm(range(num_turns)):
+    for _ in tqdm(range(num_turns), file=sys.stdout):
         available_players = {p for p in community.members if not p.incapacitated}
         if len(available_players) == 0:
             print("No active players")
@@ -593,7 +593,7 @@ if __name__ == "__main__":
     for i in range(1, 11):
         parser.add_argument(f'--g{i}', type=int, default=0, help=f'Number of players in group {i}')
 
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
     global_random.seed(args.seed)
     num_members = args.num_members
     num_turns = args.num_turns
