@@ -170,7 +170,7 @@ def phaseIpreferences(player, community, global_random):
     return list_choices
 
 
-def phaseIIpreferences(player, community, global_random, resting_loss_scale=1):
+def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7):
     """Return a list of tasks for the particular player to do individually"""
 
     total_difficulty = sum([np.mean(task) for task in community.tasks])
