@@ -3,6 +3,7 @@ import numpy as np
 
 
 PHASE_1_ASSIGNMENTS = False
+PHASE_2_ASSIGNMENTS = False
 
 
 def exists_good_match(
@@ -197,44 +198,46 @@ def phaseIIpreferences(player, community, global_random):
         return bids
 
     try:
-        min_loss = float("inf")
-        best_task = None
+        if PHASE_2_ASSIGNMENTS:
+            # Use cost matrix to assign tasks
+            wait_energy_threshold = -9
+            player_index = community.members.index(player)
+            assignments, total_cost = assign_phase2(community.tasks, community.members)
 
-        for task in community.tasks:
-            loss = loss_phase2(task, player.abilities, player.energy)
-            resting_loss = loss_resting(task, player.abilities, player.energy)
+            best_task = assignments.get(player_index)
+            if best_task is None:
+                return []
 
-            better_loss = min(loss, resting_loss)
+            best_task_cost = loss_phase2(
+                community.tasks[best_task], player.abilities, player.energy
+            )
+            if player.energy - best_task_cost < wait_energy_threshold:
+                return []
 
-            if better_loss < min_loss:
-                min_loss = better_loss
-
-                if loss < resting_loss:
-                    best_task = community.tasks.index(task)
-                else:
-                    best_task = None
-
-        if best_task is not None:
             return [best_task]
         else:
-            return []
+            min_loss = float("inf")
+            best_task = None
 
-        # # Use cost matrix to assign tasks
-        # wait_energy_threshold = -9
-        # player_index = community.members.index(player)
-        # assignments, total_cost = assign_phase2(community.tasks, community.members)
+            for task in community.tasks:
+                loss = loss_phase2(task, player.abilities, player.energy)
+                resting_loss = loss_resting(task, player.abilities, player.energy)
 
-        # best_task = assignments.get(player_index)
-        # if best_task is None:
-        #     return []
+                better_loss = min(loss, resting_loss)
 
-        # best_task_cost = loss_phase2(
-        #     community.tasks[best_task], player.abilities, player.energy
-        # )
-        # if player.energy - best_task_cost < wait_energy_threshold:
-        #     return []
+                if better_loss < min_loss:
+                    min_loss = better_loss
 
-        # return [best_task]
+                    if loss < resting_loss:
+                        best_task = community.tasks.index(task)
+                    else:
+                        best_task = None
+
+            if best_task is not None:
+                return [best_task]
+            else:
+                return []
+
     except Exception as e:
         print(e)
         return bids
