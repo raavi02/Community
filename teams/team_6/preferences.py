@@ -170,7 +170,7 @@ def phaseIpreferences(player, community, global_random):
     return list_choices
 
 
-def phaseIIpreferences(player, community, global_random):
+def phaseIIpreferences(player, community, global_random, resting_loss_scale=1):
     """Return a list of tasks for the particular player to do individually"""
 
     total_difficulty = sum([np.mean(task) for task in community.tasks])
@@ -199,10 +199,6 @@ def phaseIIpreferences(player, community, global_random):
                 returned_tasks.append(community.tasks.index(task))
             return returned_tasks
 
-    bids = []
-    if player.energy < 0:
-        return bids
-
     try:
         if PHASE_2_ASSIGNMENTS:
             # Use cost matrix to assign tasks
@@ -227,7 +223,10 @@ def phaseIIpreferences(player, community, global_random):
 
             for task in community.tasks:
                 loss = loss_phase2(task, player.abilities, player.energy)
-                resting_loss = loss_resting(task, player.abilities, player.energy)
+                resting_loss = (
+                    loss_resting(task, player.abilities, player.energy)
+                    * resting_loss_scale
+                )
 
                 better_loss = min(loss, resting_loss)
 

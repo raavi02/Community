@@ -269,7 +269,9 @@ class CommunityActions:
             global num_calls_prefII
             try:
                 t1_start = process_time()
-                tasksVolunteered = getPairPreferencesPhaseII(player, community)
+                tasksVolunteered = getPairPreferencesPhaseII(
+                    player, community, args.resting_loss_scale
+                )
                 t1_stop = process_time()
                 num_calls_prefII += 1
                 time_prefII += t1_stop - t1_start
@@ -314,12 +316,12 @@ def getPairPreferencesPhaseI(player, community):
     return func(player, community, global_random)
 
 
-def getPairPreferencesPhaseII(player, community):
+def getPairPreferencesPhaseII(player, community, resting_loss_scale=1):
     group = player.group
     func = import_class_from_file(
         f"teams/team_{group}", "preferences", "phaseIIpreferences"
     )
-    return func(player, community, global_random)
+    return func(player, community, global_random, resting_loss_scale)
 
 
 def import_class_from_file(folder, file_name, class_name):
@@ -421,11 +423,13 @@ def run_simulation(
     file_index = 0
 
     for file in files:
-        if file.startswith(f"{ability_team}_{args.abilities_distribution_difficulty}_{task_difficulty_distribution_team}_{task_difficulty}_{community.num_abilities}_{len(community.members)}_"):
+        if file.startswith(
+            f"{ability_team}_{args.abilities_distribution_difficulty}_{task_difficulty_distribution_team}_{task_difficulty}_{community.num_abilities}_{len(community.members)}_{args.resting_loss_scale}_"
+        ):
             file_index += 1
 
     with open(
-        f"teams/team_6/data/{ability_team}_{args.abilities_distribution_difficulty}_{task_difficulty_distribution_team}_{task_difficulty}_{community.num_abilities}_{len(community.members)}_{file_index}.npy",
+        f"teams/team_6/data/{ability_team}_{args.abilities_distribution_difficulty}_{task_difficulty_distribution_team}_{task_difficulty}_{community.num_abilities}_{len(community.members)}_{args.resting_loss_scale}_{file_index}.npy",
         "wb",
     ) as f:
         np.save(f, np.array(tasks_completed))
@@ -805,6 +809,11 @@ if __name__ == "__main__":
         default="easy",
         choices=["easy", "medium", "hard"],
         help="Easy (e), medium (m) or hard difficulty",
+    )
+    parser.add_argument(
+        "--resting_loss_scale",
+        type=float,
+        default=1,
     )
     parser.add_argument(
         "--log", action="store_true", help="Log the results to a txt in folder"
