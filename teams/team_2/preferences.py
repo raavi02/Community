@@ -319,7 +319,7 @@ def phaseIIpreferences(player, community, global_random):
             prefix = ""
             for arg in sys.argv:
                 if arg.startswith("prefix="):
-                    prefix = arg[len("prefix=") :] + "_"
+                    prefix = "models/" + arg[len("prefix=") :] + "_"
                     break
 
             player.taskNN = TaskScorerNN(

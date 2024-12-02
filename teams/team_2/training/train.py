@@ -150,6 +150,10 @@ if __name__ == "__main__":
         for _ in range(POP_SIZE)
     ]
 
+    # create models/ dir for storing training models
+    if not os.path.exists("models"):
+        os.makedirs("models")
+
     print(
         f"""Training with:
  Population: {POP_SIZE} 
