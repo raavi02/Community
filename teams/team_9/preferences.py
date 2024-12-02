@@ -1,3 +1,5 @@
+import math
+
 def phaseIpreferences(player, community, global_random):
     '''Return a list of task index and the partner id for the particular player.'''
     preferences = []
@@ -14,7 +16,9 @@ def phaseIpreferences(player, community, global_random):
     if difficulty_ratio <= 1:
         secondary_energy_limit = primary_energy_limit  # Tasks are manageable
     else:
-        secondary_energy_limit = primary_energy_limit - (difficulty_ratio - 1) * 10
+        # The higher the difficulty_ratio, the closer the limit gets to -10
+        # secondary_energy_limit = primary_energy_limit - (difficulty_ratio - 1) * 10
+        secondary_energy_limit = primary_energy_limit - (10 * (1 - math.exp(-(difficulty_ratio - 1))))
         secondary_energy_limit = max(secondary_energy_limit, -10)  # Ensure it doesn't drop below -10
 
     # Sort tasks by total difficulty (descending)
@@ -25,16 +29,24 @@ def phaseIpreferences(player, community, global_random):
         best_remaining_energy = -float('inf')  # Track the best post-task energy state
 
         # Check if the player can complete the task alone
-        if all(task[i] <= player.abilities[i] for i in range(len(task))):
-            continue  # Skip partnering for tasks the player can complete alone
+        energy_needed = sum(max(task_i - ability_i, 0) for task_i, ability_i in zip(task, player.abilities))
+        if energy_needed <= 3:
+            continue
+
+        # if all(task[i] <= player.abilities[i] for i in range(len(task))):
+        #     continue  # Skip partnering for tasks the player can complete alone
 
         for partner in community.members:
             if partner.id == player.id or partner.incapacitated:
                 continue  # Skip self or incapacitated players
 
             # Check if the partner can complete the task alone
-            if all(task[i] <= partner.abilities[i] for i in range(len(task))):
-                continue  # Skip partnering for tasks the partner can complete alone
+            # if all(task[i] <= partner.abilities[i] for i in range(len(task))):
+            #     continue  # Skip partnering for tasks the partner can complete alone
+
+            energy_needed = sum(max(task_i - ability_i, 0) for task_i, ability_i in zip(task, partner.abilities))
+            if energy_needed <= 3:
+                continue
 
             # Calculate energy cost for both players
             energy_cost = sum(max(task[i] - max(player.abilities[i], partner.abilities[i]), 0) for i in range(len(task))) / 2
@@ -74,7 +86,9 @@ def phaseIIpreferences(player, community, global_random):
     if difficulty_ratio <= 1:
         secondary_energy_limit = primary_energy_limit  # Tasks are manageable
     else:
-        secondary_energy_limit = primary_energy_limit - (difficulty_ratio - 1) * 10
+        # The higher the difficulty_ratio, the closer the limit gets to -10
+        # secondary_energy_limit = primary_energy_limit - (difficulty_ratio - 1) * 10
+        secondary_energy_limit = primary_energy_limit - (10 * (1 - math.exp(-(difficulty_ratio - 1))))
         secondary_energy_limit = max(secondary_energy_limit, -10)  # Ensure it doesn't drop below -10
 
     # Evaluate tasks for individual completion
@@ -96,4 +110,9 @@ def phaseIIpreferences(player, community, global_random):
 Prevent overlap in volunteering
 Avoid volunteering to partner on easy tasks
 Player energy can fall below -10 but they become incapacitated
+Factor in player energy to determine limit
+
+python3.11 community.py --num_members 20 --num_turns 1000 --num_abilities 5 --group_abilities_distribution 4 --abilities_distribution_difficulty hard --group_task_distribution 4 --task_distribution_difficulty hard --g9 20
+
+python3.11 community.py --num_members 20 --num_turns 1000 --num_abilities 5 --g9 20
 '''
