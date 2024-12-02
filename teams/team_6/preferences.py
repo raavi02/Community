@@ -3,7 +3,7 @@ import numpy as np
 
 
 PHASE_1_ASSIGNMENTS = False
-PHASE_2_ASSIGNMENTS = False
+PHASE_2_ASSIGNMENTS = True
 
 
 def exists_good_match(
@@ -409,11 +409,13 @@ def loss_phase2(task, abilities, current_energy):
 
 def loss_resting(task, abilities, current_energy):
     energy_used = sum([max(task[k] - abilities[k], 0) for k in range(len(abilities))])
-    cost = energy_used + max(0, current_energy)
+    current_energy = (
+        current_energy + 20 if current_energy >= 0 else abs(current_energy) * 2
+    )
 
-    scaling_factor = len(abilities) * 10 + 10
+    scaling_factor = 30
 
-    return cost / scaling_factor
+    return current_energy / scaling_factor
 
 
 def weakest_member(player, community, top_n=1):
