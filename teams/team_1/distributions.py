@@ -9,4 +9,7 @@ def task_difficulty_distribution(num_abilities: int, seed, task_generation_id, g
     random_integers = local_random_task.sample(range(num_abilities), 3)
     for i in random_integers:
         difficulties[i] = local_random_task.randint(2, 10)
+    print(difficulties)
     return difficulties
+
+task_difficulty_distribution(8, 42, 1, 0)

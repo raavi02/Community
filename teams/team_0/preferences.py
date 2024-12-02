@@ -12,9 +12,6 @@ def phaseIpreferences(player, community, global_random):
     list_choices.append([0, min(partner_id + 1, num_members - 1)])
     return list_choices
 
-
-
-
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
     bids = []
