@@ -6,8 +6,8 @@ import os
 
 def run(task_model: nn.Module, rest_model: nn.Module, turns: int, civilians: int):
     prefix = random.randint(0, 100000000)
-    task_file = f"models/{prefix}_task_weights.pth"
-    rest_file = f"models/{prefix}_rest_weights.pth"
+    task_file = f"teams/team_2/models/{prefix}_task_weights.pth"
+    rest_file = f"teams/team_2/models/{prefix}_rest_weights.pth"
     save(task_model.state_dict(), task_file)
     save(rest_model.state_dict(), rest_file)
 
