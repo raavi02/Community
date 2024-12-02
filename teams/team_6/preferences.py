@@ -239,6 +239,18 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=1):
                         best_task = None
 
             if best_task is not None:
+                if (
+                    player.energy
+                    - sum(
+                        [
+                            max(task[k] - player.abilities[k], 0)
+                            for k in range(len(player.abilities))
+                        ]
+                    )
+                    < -9
+                ):
+                    return []
+
                 return [best_task]
             else:
                 return []
