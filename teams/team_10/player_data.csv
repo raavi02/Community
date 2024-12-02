@@ -1,4 +1,5 @@
 turn,player_id,tasks_at_turn,acceptable_energy_level_at_turn
+<<<<<<< HEAD
 48,14,1,0
 48,14,1,0
 49,14,1,0
@@ -1204,3 +1205,5 @@ turn,player_id,tasks_at_turn,acceptable_energy_level_at_turn
 59,7,9,0
 59,15,9,0
 59,6,9,0
+=======
+>>>>>>> afd6f104c04b2d28ef7046d781c956e5c9928c75
