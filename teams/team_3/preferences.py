@@ -59,38 +59,13 @@ def sacrifice(player: Member, community: Community):
     return [impossible_tasks[0]]
 
 
-def calculate_minimum_delta_individual(player: Member, community: Community):
-    """
-    Find the best task for an individual, the task that minimizes waste + energy
-
-    delta = min(energy + waste)
-    """
-    num_abilities = len(player.abilities)
-
-    minimum_delta = float("inf")
-    best_task = -1
-
-    for task_index, task in enumerate(community.tasks):
-        cost = sum(max(task[i] - player.abilities[i], 0) for i in range(num_abilities))
-        waste = (
-            sum(max(player.abilities[i] - task[i], 0) for i in range(num_abilities))
-            * 0.5
-        )
-
-        if minimum_delta >= cost + waste:
-            minimum_delta = cost + waste
-            best_task = task_index
-
-    return (best_task, minimum_delta)
-
-
 def calculate_minimum_delta_pair(
     player: Member, best_partner: int, community: Community
 ):
     """
-    Find the best task for a pair, the task that minimizes waste + energy
+    Find the best task for a pair, the task that minimizes suitability + energy
 
-    delta = min(energy + waste)
+    delta = min(energy + suitability)
     """
     members = {member.id: member for member in community.members}
     partner = members[best_partner]
@@ -98,6 +73,7 @@ def calculate_minimum_delta_pair(
 
     minimum_delta = float("inf")
     best_task = 0
+    best_pair_cost = 0
 
     for task_index, task in enumerate(community.tasks):
         pair_cost = (
@@ -107,19 +83,20 @@ def calculate_minimum_delta_pair(
             )
             * 0.5
         )
-        pair_waste = (
+        pair_suitability = (
             sum(
-                max(max(player.abilities[i], partner.abilities[i]) - task[i], 0)
+                abs(max(player.abilities[i], partner.abilities[i]) - task[i])
                 for i in range(num_abilities)
             )
             * 0.5
         )
 
-        if minimum_delta >= pair_cost + pair_waste:
-            minimum_delta = pair_cost + pair_waste
+        if minimum_delta >= pair_cost + pair_suitability:
+            minimum_delta = pair_cost + pair_suitability
             best_task = task_index
+            best_pair_cost = pair_cost
 
-    return (best_task, minimum_delta)
+    return (best_task, best_pair_cost, minimum_delta)
 
 
 def phaseIpreferences(player: Member, community: Community, global_random):
@@ -140,22 +117,27 @@ def phaseIpreferences(player: Member, community: Community, global_random):
         if partner == player.id:
             continue
 
-        task, pair_delta = calculate_minimum_delta_pair(player, partner, community)
+        task, pair_cost, pair_delta = calculate_minimum_delta_pair(
+            player, partner, community
+        )
 
         player_cost = sum(
             max(community.tasks[task][i] - player.abilities[i], 0)
             for i in range(len(player.abilities))
         )
 
-        player_waste = sum(
-            max(player.abilities[i] - community.tasks[task][i], 0)
-            for i in range(len(player.abilities))
+        player_suitability = (
+            sum(
+                abs(player.abilities[i] - community.tasks[task][i])
+                for i in range(len(player.abilities))
+            )
+            * 0.25
         )
 
-        player_delta = player_cost + player_waste
+        player_delta = player_cost + player_suitability
 
         # Energy management (players don't kill themselves)
-        if pair_delta >= player.energy + community.members[partner].energy:
+        if pair_cost >= player.energy + community.members[partner].energy:
             continue
 
         # Only pair up if it is more benificial
@@ -178,13 +160,13 @@ def phaseIIpreferences(player, community, global_random):
             max(task[i] - player.abilities[i], 0) for i in range(num_abilities)
         )
 
-        player_waste = sum(
-            max(player.abilities[i] - task[i], 0) for i in range(num_abilities)
+        player_suitability = (
+            sum(abs(player.abilities[i] - task[i]) for i in range(num_abilities)) * 0.5
         )
 
-        if player_cost <= player.energy:
-            bids.append((idx, player_cost, player_waste))
+        if player_cost <= player.energy * 0.7:
+            bids.append((idx, player_cost + player_suitability, player_cost))
 
-    # Sort bids by energy cost, then waste
+    # Sort bids by energy and suitability, then cost
     bids.sort(key=lambda x: (x[1], x[2]))
     return [b[0] for b in bids[:3]]
