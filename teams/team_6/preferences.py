@@ -197,21 +197,44 @@ def phaseIIpreferences(player, community, global_random):
         return bids
 
     try:
-        wait_energy_threshold = -9
-        player_index = community.members.index(player)
-        assignments, total_cost = assign_phase2(community.tasks, community.members)
+        min_loss = float("inf")
+        best_task = None
 
-        best_task = assignments.get(player_index)
-        if best_task is None:
+        for task in community.tasks:
+            loss = loss_phase2(task, player.abilities, player.energy)
+            resting_loss = loss_resting(task, player.abilities, player.energy)
+
+            better_loss = min(loss, resting_loss)
+
+            if better_loss < min_loss:
+                min_loss = better_loss
+
+                if loss < resting_loss:
+                    best_task = community.tasks.index(task)
+                else:
+                    best_task = None
+
+        if best_task is not None:
+            return [best_task]
+        else:
             return []
 
-        best_task_cost = loss_phase2(
-            community.tasks[best_task], player.abilities, player.energy
-        )
-        if player.energy - best_task_cost < wait_energy_threshold:
-            return []
+        # # Use cost matrix to assign tasks
+        # wait_energy_threshold = -9
+        # player_index = community.members.index(player)
+        # assignments, total_cost = assign_phase2(community.tasks, community.members)
 
-        return [best_task]
+        # best_task = assignments.get(player_index)
+        # if best_task is None:
+        #     return []
+
+        # best_task_cost = loss_phase2(
+        #     community.tasks[best_task], player.abilities, player.energy
+        # )
+        # if player.energy - best_task_cost < wait_energy_threshold:
+        #     return []
+
+        # return [best_task]
     except Exception as e:
         print(e)
         return bids
@@ -350,7 +373,9 @@ def loss_phase1(task, player1, player2):
     # cost = (
     #     energy_used + negative_energy_compensation + partnership_waste + skill_surplus
     # )
-    cost = energy_used + negative_energy_compensation
+    cost = energy_used + negative_energy_compensation + skill_surplus
+
+    scaling_factor = len(player1.abilities) * 10 * 3
 
     return cost
 
@@ -360,14 +385,21 @@ def loss_phase2(task, abilities, current_energy):
     negative_energy_compensation = max(0, energy_used - current_energy)
     skill_surplus = sum([abs(abilities[k] - task[k]) for k in range(len(abilities))])
 
-    # cost = energy_used + negative_energy_compensation + skill_surplus
-    cost = energy_used + negative_energy_compensation
+    cost = energy_used + negative_energy_compensation + skill_surplus
+    # cost = energy_used + negative_energy_compensation
 
-    return cost
+    scaling_factor = len(abilities) * 10 * 3
+
+    return cost / scaling_factor
 
 
 def loss_resting(task, abilities, current_energy):
-    return sum(abilities) + current_energy
+    energy_used = sum([max(task[k] - abilities[k], 0) for k in range(len(abilities))])
+    cost = energy_used * max(0, current_energy)
+
+    scaling_factor = len(abilities) * 10 * len(abilities) * 10
+
+    return cost / scaling_factor
 
 
 def weakest_member(player, community, top_n=1):
