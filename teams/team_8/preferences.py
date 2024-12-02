@@ -1,4 +1,4 @@
-'''def phaseIpreferences(player, community, global_random):
+def phaseIpreferences(player, community, global_random):
     """
     Phase I Preferences: Determine task and partner preferences for the player.
     Returns a list of [task_index, partner_id] pairs, indicating tasks the player
@@ -77,10 +77,10 @@ def phaseIIpreferences(player, community, global_random):
             bids.append(task_index)
             #break
 
-    return bids'''
+    return bids
 
 
-# Considers all partner pairs at once, rather than comparing the best partner for a particular player
+'''# Considers all partner pairs at once, rather than comparing the best partner for a particular player
 # Aims to tackle hardest tasks first
 # Attempts to find single best partner pair given lowest energy cost and remaining energy
 def create_connections(community):
@@ -177,5 +177,5 @@ def phaseIIpreferences(player, community, global_random):
             #break
 
     return bids
-
+'''
 
