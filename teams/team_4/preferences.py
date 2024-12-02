@@ -96,7 +96,7 @@ def phaseIIpreferences(player, community, global_random):
         # Volunteer to partner as long as energy >= task cost
         elif list_of_ranked_assignments[t][0][1] <= 10:
             for assignment in list_of_ranked_assignments[t]:
-                if player.id in assignment[0] and None in assignment[0] and player.energy >= assignment[1]:
+                if player in assignment[0] and None in assignment[0] and player.energy >= assignment[1]:
                     bids.append(t)
 
     return bids
