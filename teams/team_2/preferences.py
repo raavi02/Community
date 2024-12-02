@@ -316,7 +316,7 @@ def phaseIIpreferences(player, community, global_random):
         hidden_size = 64
 
         if not hasattr(player, "turn"):
-            prefix = ""
+            prefix = "teams/team_2/"
             for arg in sys.argv:
                 if arg.startswith("prefix="):
                     prefix = "models/" + arg[len("prefix=") :] + "_"
