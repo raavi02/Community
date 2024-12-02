@@ -7,6 +7,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# check if we're running a train simulation
+# or running for real
+training = False
+for args in sys.argv:
+    if args == "train=true":
+        training = True
+        break
+
 
 class TaskScorerNN(nn.Module):
     def __init__(self, task_feature_size, player_state_size, hidden_size):
@@ -259,15 +267,13 @@ def phaseIpreferences(player, community, global_random):
     """Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id
     """
+    # if we're training (phase 2), we don't want to do any pairing
+    if training:
+        return []
+
     list_choices = []
     if player.energy < 0:
         return list_choices
-    # num_members = len(community.members)
-    # partner_id = num_members - player.id - 1
-    # list_choices.append([0, partner_id])
-    # if len(community.tasks) > 1:
-    #     list_choices.append([1, partner_id])
-    # list_choices.append([0, min(partner_id + 1, num_members - 1)])
 
     cost_matrix = create_cost_matrix(player, community)
 
@@ -301,9 +307,6 @@ def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
     try:
 
-        # bids.sort(key=lambda x: (x[1], -sum(community.tasks[x[0]])))
-        # return [b[0] for b in bids[:3]]
-
         # NN part
         # Initialize
 
@@ -316,7 +319,7 @@ def phaseIIpreferences(player, community, global_random):
             prefix = ""
             for arg in sys.argv:
                 if arg.startswith("prefix="):
-                    prefix = arg[len("prefix=") :] + "_"
+                    prefix = "models/" + arg[len("prefix=") :] + "_"
                     break
 
             player.taskNN = TaskScorerNN(

@@ -14,9 +14,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-MAX_GENERATIONS = 4
-POP_SIZE = 48
-TURNS = 20
+MAX_GENERATIONS = 10
+POP_SIZE = 24
+TURNS = 80
 CIVILIANS = 20
 HIDDEN_SIZE = 64
 TASK_FEATURE_SIZE = 5
@@ -134,6 +134,31 @@ class Task:
             self.state = torch.zeros(features.shape[0])
 
 
+def plot(avg_scores, max_scores):
+    # Get the current working directory (runfolder)
+    runfolder = os.getcwd()
+
+    # Plot both curves
+    plt.plot(
+        np.arange(len(avg_scores)), avg_scores, label="Average Score", color="blue"
+    )
+    plt.plot(np.arange(len(max_scores)), max_scores, label="Max Score", color="red")
+
+    # Add labels and title
+    plt.xlabel("Generation")
+    plt.ylabel("Score")
+    plt.title(
+        f"Average and Max Fitness Scores Over {MAX_GENERATIONS} Generations\nInitial population size = {POP_SIZE}"
+    )
+
+    # Add a legend
+    plt.legend()
+
+    # Save the plot to the current directory
+    plt.savefig(os.path.join(runfolder, "fitness_scores.png"))
+    print("path", os.path.join(runfolder, "fitness_scores.png"))
+
+
 if __name__ == "__main__":
     avg_scores = []
     max_scores = []
@@ -149,6 +174,10 @@ if __name__ == "__main__":
         )
         for _ in range(POP_SIZE)
     ]
+
+    # create models/ dir for storing training models
+    if not os.path.exists("models"):
+        os.makedirs("models")
 
     print(
         f"""Training with:
@@ -204,8 +233,9 @@ Generations: {MAX_GENERATIONS}
         [(mutate(ptask), mutate(prest)) for ptask, prest in parents]
         population = parents + offspring
 
+        plot(avg_scores, max_scores)
         print(
-            f"{generation}/{MAX_GENERATIONS}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}"
+            f"{generation + 1}/{MAX_GENERATIONS}: fitness scores: {sorted(fitness_scores, reverse=True)[:3]}"
         )
 
     best_model = select_parents(population, fitness_scores)[0]
@@ -215,31 +245,3 @@ Generations: {MAX_GENERATIONS}
     print(
         'best model weights saved in "best_task_weights.pth" and "best_rest_weights.pth"'
     )
-
-    # Get the current working directory (runfolder)
-    runfolder = os.getcwd()
-
-    # Plot both curves
-    plt.plot(
-        np.arange(len(avg_scores)), avg_scores, label="Average Score", color="blue"
-    )
-    plt.plot(np.arange(len(max_scores)), max_scores, label="Max Score", color="red")
-
-    # Add labels and title
-    plt.xlabel("Generation")
-    plt.ylabel("Score")
-    plt.title(
-        f"Average and Max Fitness Scores Over {MAX_GENERATIONS} Generations\nInitial population size = {POP_SIZE}"
-    )
-
-    # Add a legend
-    plt.legend()
-
-    # Save the plot to the current directory
-    plt.savefig(os.path.join(runfolder, "fitness_scores.png"))
-    print("path", os.path.join(runfolder, "fitness_scores.png"))
-
-    # task_scores = [task_scorer(task, player_state) for task in tasks]
-    # rest_score = rest_scorer(player_state)
-    # combined_scores = torch.cat([task_scores, rest_score.unsqueeze(0)])
-    # action = torch.argmax(combined_scores).item()
