@@ -416,7 +416,10 @@ def run_simulation(
         )
         tasks_completed.append(community.completed_tasks)
 
-    with open(f"{community.num_abilities}-{len(community.members)}.npy", "wb") as f:
+    with open(
+        f"teams/team_6/data/{ability_team}_{args.abilities_distribution_difficulty}_{task_difficulty_distribution_team}_{task_difficulty}_{community.num_abilities}_{len(community.members)}.npy",
+        "wb",
+    ) as f:
         np.save(f, np.array(tasks_completed))
 
     return community.completed_tasks
