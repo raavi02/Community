@@ -15,66 +15,64 @@ import sys
 def phaseIpreferences(player, community, global_random):
     '''Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
-    # print("THIS IS THE LIST OF TASKS: ", community.tasks)
-    exhausted = True if player.energy < 0 else False # Am I exhuasted?
-    spent_energy = 0
+
     list_choices = []
-    # # if player.energy < -10:
-    # #     return list_choices 
-    
-    # cost0_tasks = set()
 
-    # #If any member can complete the task using 0 energy, then exclude it from our list
-    # for i, task in enumerate(community.tasks):
-    #     for member in community.members:
-    #         energy_cost = sum([max(task[j] - member.abilities[j], 0) for j in range(len(member.abilities))])
+    # If player is exhausted, return an empty list (no tasks)
+    if player.energy < 0:
+        return list_choices
 
-    #         if energy_cost == 0:
-    #             cost0_tasks.add(i)
-    #             break
-    # print("THESE ARE THE FREE TASKS: ", cost0_tasks)
+    # Check if the player can do individual tasks (no partner needed)
+    for i, task in enumerate(community.tasks):
+        energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(player.abilities))])
+        if energy_cost == 0:
+           # print("Can take individual Task: ", task, " Player: ", player.abilities)
+            return list_choices
 
-    # # We're prioritizing tasks based on energy cost
-    # task_priorities = sorted(
-    #     [(i, sum([max(task[j] - player.abilities[j], 0) for j in range(len(task))]))
-    #      for i, task in enumerate(community.tasks)],
-    #     key=lambda x: x[1]
-    # )
+    # Prioritize tasks based on energy cost and reward-to-energy ratio (score)
+    task_priorities = []
 
-    # exhausted_penalty = 0.5
-    # # Finding compatible partners for top priority tasks
-    # for task_id, _ in task_priorities:
-    #     if task_id in cost0_tasks:
-    #         continue
+    for i, task in enumerate(community.tasks):
+        energy_cost = sum([max(task[j] - player.abilities[j], 0) for j in range(len(player.abilities))])
+        reward = sum([task[j] for j in range(len(task))])  # Sum of task difficulty (can be adjusted)
+        score = reward / (energy_cost + 1)  # Reward-to-energy ratio (higher is better)
+        task_priorities.append((i, score, energy_cost))
 
-    #     best_partner = None
-    #     min_cost = float('inf')
-    #     for partner in community.members:
-    #         if partner.id == player.id:
-    #             continue
-    #         combined_abilities = [max(player.abilities[j],  partner.abilities[j]) for j in range(len(player.abilities))]
-    #         energy_cost = round((sum([max(community.tasks[task_id][j] - combined_abilities[j], 0) for j in range(len(player.abilities))]))/2, 2)
-    #         added_cost = exhausted_penalty if partner.energy < 0 else 0 #We prioritize active workers instead of exhasuted workers
+    # Sort tasks by score (reward-to-energy ratio, descending)
+    task_priorities.sort(key=lambda x: x[1], reverse=True)
 
-    #         comparison_metric = energy_cost + added_cost
+    # Dynamic adjustment of max tasks to consider
+    max_tasks_to_consider = int(player.energy) # Adjust based on player’s energy (higher energy allows more tasks)
 
-    #         if comparison_metric < min_cost and (partner.energy - energy_cost) > -10 and (player.energy - energy_cost) > -10: # Make sure ourself and our partner will not become incapacitated after performing the task
-    #             min_cost = comparison_metric
-    #             best_partner = partner.id
-    #             task_energy = energy_cost
+    top_tasks = task_priorities[:max_tasks_to_consider]
 
-    #     spent_energy += task_energy
-        
-    #     if (player.energy - spent_energy) <= -10:
-    #         print(f"Member {player.id} has too much work load, ending partner search now.")
-    #         print(f"Member {player.id}'s partner choices, ", list_choices)
-    #         return list_choices
+    exhausted_penalty = 0.5 
 
-    #     if best_partner is not None:
-    #         list_choices.append([task_id, best_partner])
-        
-    # print(f"Member {player.id}'s partner choices, ", list_choices)
-        
+    # Find partners for the selected tasks based on combined abilities and energy constraints
+    for task_id, score, _ in top_tasks:
+        best_partner = None
+        min_cost = float('inf')
+
+        # Iterate through community members to find the best partner
+        for partner in community.members:
+            if partner.id == player.id:
+                continue
+
+            combined_abilities = [player.abilities[j] + partner.abilities[j] for j in range(len(player.abilities))]
+            energy_cost = sum([max(community.tasks[task_id][j] - combined_abilities[j], 0) for j in range(len(player.abilities))])
+            added_cost = exhausted_penalty if partner.energy < 0 else 0
+
+            # Total energy cost considering player and partner's combined abilities
+            comparison_metric = energy_cost + added_cost
+
+            if comparison_metric < min_cost and (partner.energy - (energy_cost / 2)) > -10 and (player.energy - (energy_cost / 2)) > -10:
+                min_cost = comparison_metric
+                best_partner = partner.id
+
+        # If a compatible partner is found, assign the task to the player and partner
+        if best_partner is not None:
+            list_choices.append([task_id, best_partner])
+
     return list_choices
           
        
@@ -98,7 +96,7 @@ def phaseIIpreferences(player, community, global_random):
     # Find out the remaining workers
     for i in range(num_of_workers):
         if community.members[i].energy > -10:
-            print(f"I CAN WORK, Says: {community.members[i].id}")
+            # print(f"I CAN WORK, Says: {community.members[i].id}")
             surviving_workers.append(community.members[i])
 
     num_of_workers = len(surviving_workers) 
@@ -151,7 +149,7 @@ def phaseIIpreferences(player, community, global_random):
         for i in range(num_of_workers):
             solver.Add(solver.Sum([x[i, j] for j in range(num_of_tasks)]) <= 1)
 
-        # Each task is assigned to exactly worker.
+        # Each task is assigned to EXACTLY 1 worker.
         for j in range(num_of_tasks):
             solver.Add(solver.Sum([x[i, j] for i in range(num_of_workers)]) == 1)
 
@@ -163,24 +161,38 @@ def phaseIIpreferences(player, community, global_random):
     solver.Minimize(solver.Sum(objective_terms))
 
     # Solve
-    print(f"Solving with {solver.SolverVersion()}")
+    # print(f"Solving with {solver.SolverVersion()}")
     status = solver.Solve()
 
     phase2_optimal_pair = dict()
 
     # Print solution.
     if status == pywraplp.Solver.OPTIMAL or status == pywraplp.Solver.FEASIBLE:
-        print(f"Total cost = {solver.Objective().Value()}\n")
+        # print(f"Total cost = {solver.Objective().Value()}\n")
         for i in range(num_of_workers):
             for j in range(num_of_tasks):
                 # Test if x[i,j] is 1 (with tolerance for floating point arithmetic).
                 if x[i, j].solution_value() > 0.5:
                     print(f"Worker {i} assigned to task {j}." + f" Cost: {cost_matrix[i][j]}")
-                    phase2_optimal_pair[surviving_workers[i].id] = j
+                    sacrifice = True
+                    if cost_matrix[i][j] == exhausted_param:
+                        max_energy = 10
+                        for partner in community.members:
+                            if partner.id == player.id:
+                                continue
+
+                            combined_abilities = [player.abilities[k] + partner.abilities[k] for k in range(len(player.abilities))]
+                            energy_cost = sum([max(community.tasks[j][k] - combined_abilities[k], 0) for k in range(len(player.abilities))])
+
+                            if (max_energy - (energy_cost / 2)) > -10 and (max_energy - (energy_cost / 2)) > -10:
+                                sacrifice = False
+                    if sacrifice:
+                        phase2_optimal_pair[surviving_workers[i].id] = j
     else:
         print("No solution found.")
  
     hivemind = Hivemind(phase2_optimal_pair=phase2_optimal_pair, prev_task=len(community.tasks))
+
     if player.id in hivemind.phase2_optimal_pair:
         bids.append(hivemind.phase2_optimal_pair[player.id]) 
 
