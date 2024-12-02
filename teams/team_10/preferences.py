@@ -155,12 +155,12 @@ def tasks_we_can_complete_alone(player, our_abilities, tasks) -> list[int]:
 
 def find_pairs(player: Member, tasks, members, acceptable_energy_level) -> list[int]:
     # [Task_ID, other_player_id ]
-    task_player_pairs = []
+    task_player_pairs = {}
     our_abilities_np = np.array(player.abilities)
     our_id = player.id
     for task_id, task in enumerate(tasks):
         task_np = np.array(task)
-
+        task_player_pairs[task_id] = []
         for other_person in members:
             if other_person.id == our_id:
                 continue
@@ -178,21 +178,17 @@ def find_pairs(player: Member, tasks, members, acceptable_energy_level) -> list[
             )
             # print(negative_sum)
             if player_above_acceptable_energy and other_person_above_acceptable_energy:
-                task_player_pairs.append([task_id, other_person.id])
-            if len(task_player_pairs) >= 8:
-                return task_player_pairs
-
-    return task_player_pairs
-
+                task_player_pairs[task_id].append((abs(negative_sum), other_person.id))
+    pairs = []
+    for task in task_player_pairs:
+        least_energy_pairs = sorted(task_player_pairs[task])
+        for i in range(3):
+            if i >= len(least_energy_pairs):
+                break
+            pairs.append([task, least_energy_pairs[i][1]])
+    return pairs
 
 # For example, suppose n=4 and that an individual has skill levels (8,6,4,2), and that the task has difficulty vector (5,5,5,5). Then the individual would use up 1+3=4 units of energy to perform the task.
-
-
-def find_weakest_agents(members: List[Member], n: int):
-    agents = [(id, sum(member.abilties)) for member in members]
-    n_weakest_agents = sorted(agents, key=lambda x: x[1])[:n]
-    return n_weakest_agents
-
 """
 sacrifice(members, tasks)
 - identifies if there are tasks that require sacrificing members
