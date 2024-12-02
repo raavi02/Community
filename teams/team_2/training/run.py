@@ -21,6 +21,8 @@ def run(task_model: nn.Module, rest_model: nn.Module, turns: int, civilians: int
             f"{civilians}",
             "--num_turns",
             f"{turns}",
+            "--seed",
+            f"{prefix}",  # use new seeds every time
             f"prefix={prefix}",
         ],
         capture_output=True,
