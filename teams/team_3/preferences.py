@@ -165,25 +165,26 @@ def phaseIpreferences(player: Member, community: Community, global_random):
     return list_choices
 
 
-def phaseIIpreferences(player: Member, community: Community, global_random):
+def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
-
     if impossible := sacrifice(player, community):
         return impossible
 
     bids = []
     num_abilities = len(player.abilities)
-    best_task, _ = calculate_minimum_delta_individual(player, community)
 
-    if best_task == -1:
-        return []
+    for idx, task in enumerate(community.tasks):
+        player_cost = sum(
+            max(task[i] - player.abilities[i], 0) for i in range(num_abilities)
+        )
 
-    energy_cost = sum(
-        max(community.tasks[best_task][j] - player.abilities[j], 0)
-        for j in range(num_abilities)
-    )
+        player_waste = sum(
+            max(player.abilities[i] - task[i], 0) for i in range(num_abilities)
+        )
 
-    if energy_cost <= player.energy:
-        bids.append(best_task)
+        if player_cost <= player.energy:
+            bids.append((idx, player_cost, player_waste))
 
-    return bids
+    # Sort bids by energy cost, then waste
+    bids.sort(key=lambda x: (x[1], x[2]))
+    return [b[0] for b in bids[:3]]
