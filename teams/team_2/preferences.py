@@ -20,8 +20,8 @@ class TaskScorerNN(nn.Module):
     def __init__(self, task_feature_size, player_state_size, hidden_size):
         super(TaskScorerNN, self).__init__()
         self.fc1 = nn.Linear(task_feature_size + player_state_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, 1)  # Outputs a single score for a task
+        self.fc2 = nn.Linear(hidden_size, hidden_size // 2)
+        self.fc3 = nn.Linear(hidden_size // 2, 1)  # Outputs a single score for a task
 
     def forward(self, task_features, player_state):
         # Concatenate task features and player state
@@ -42,11 +42,13 @@ class RestDecisionNN(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(RestDecisionNN, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, 1)  # Single output for rest score
+        self.fc2 = nn.Linear(hidden_size, hidden_size // 2)
+        self.fc3 = nn.Linear(hidden_size // 2, 1)  # Single output for rest score
 
     def forward(self, features):
         x = F.relu(self.fc1(features))
-        score = self.fc2(x)
+        x = self.fc2(x)
+        score = self.fc3(x)
         return score
 
 
@@ -312,14 +314,14 @@ def phaseIIpreferences(player, community, global_random):
 
         # Hardcoded as 1, to be only the cost of the task - this can be changed.
         task_feature_size = 5
-        player_params_size = 9
-        hidden_size = 64
+        player_params_size = 11
+        hidden_size = 32
 
         if not hasattr(player, "turn"):
             prefix = "teams/team_2/"
             for arg in sys.argv:
                 if arg.startswith("prefix="):
-                    prefix = "models/" + arg[len("prefix=") :] + "_"
+                    prefix += "models/" + arg[len("prefix=") :] + "_"
                     break
 
             player.taskNN = TaskScorerNN(
@@ -344,11 +346,13 @@ def phaseIIpreferences(player, community, global_random):
             # This should contain the params for decision, such as player.energy, etc
             player.params = [
                 len(community.members),
-                len(community.tasks),
+                len(community.tasks) / player.num_tasks,
+                (1 - len(community.tasks) / player.num_tasks) ** 2,
                 len(community.members) / (len(community.tasks) + 1),
                 player.turn,
                 player.energy,
                 min(player.energy, 0) ** 2,
+                player.energy**3,
                 0,  # Energy to gain from resting
                 0,  # Num tired
                 0,  # Num exhausted
@@ -358,11 +362,13 @@ def phaseIIpreferences(player, community, global_random):
             tired, exh = count_tired_exhausted(community)
             player.params = [
                 len(community.members),
-                len(community.tasks),
+                len(community.tasks) / player.num_tasks,
+                (1 - len(community.tasks) / player.num_tasks) ** 2,
                 len(community.members) / (len(community.tasks) + 1),
                 player.turn,
                 player.energy,
                 min(player.energy, 0) ** 2,
+                player.energy**3,
                 rest_energy_gain(player.energy),
                 tired,
                 exh,
