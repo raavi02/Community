@@ -49,7 +49,7 @@ def exists_good_match(
         return True, penalty_suffered, current_index, returned_tasks
 
 
-def doable_tasks(player, community, allow_negative = True, max_allowed_loss = 20):
+def doable_tasks(player, community, allow_negative=True, max_allowed_loss=20):
     if allow_negative:
         remaining_energy = min(player.energy + 10, max_allowed_loss)
     else:
@@ -63,11 +63,12 @@ def doable_tasks(player, community, allow_negative = True, max_allowed_loss = 20
             doable.append(task)
     return doable
 
-def phaseIpreferences(player, community , global_random):
+
+def phaseIpreferences(player, community, global_random):
     """Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id
     """
-    
+
     list_choices = []
 
     try:
@@ -86,12 +87,16 @@ def phaseIpreferences(player, community , global_random):
                                     [community.tasks.index(task), assignment[0][0]]
                                 )
         else:
-            if player.energy < 0: # If player has negative energy but can do at least one task with no energy loss, then don't partner up
-                doable = doable_tasks(player, community, allow_negative = False) 
+            if (
+                player.energy < 0
+            ):  # If player has negative energy but can do at least one task with no energy loss, then don't partner up
+                doable = doable_tasks(player, community, allow_negative=False)
                 if len(doable) > 0:
                     return []
-            else: # If player has positive energy but can do at least one task with at most 50% energy loss, then don't partner up
-                doable = doable_tasks(player, community, max_allowed_loss = int(0.5 * player.energy))
+            else:  # If player has positive energy but can do at least one task with at most 50% energy loss, then don't partner up
+                doable = doable_tasks(
+                    player, community, max_allowed_loss=int(0.5 * player.energy)
+                )
                 if len(doable) > 0:
                     return []
 
@@ -107,15 +112,19 @@ def phaseIpreferences(player, community , global_random):
             # else:
 
             for member in community.members:
-                if member.energy < 0: # If member has negative energy but can do at least one task with no energy loss, then don't partner up
-                    doable = doable_tasks(member, community, allow_negative = False) 
+                if (
+                    member.energy < 0
+                ):  # If member has negative energy but can do at least one task with no energy loss, then don't partner up
+                    doable = doable_tasks(member, community, allow_negative=False)
                     if len(doable) > 0:
                         continue
-                else: # If member has positive energy but can do at least one task with at most 50% energy loss, then don't partner up
-                    doable = doable_tasks(member, community, max_allowed_loss = int(0.5 * member.energy))
+                else:  # If member has positive energy but can do at least one task with at most 50% energy loss, then don't partner up
+                    doable = doable_tasks(
+                        member, community, max_allowed_loss=int(0.5 * member.energy)
+                    )
                     if len(doable) > 0:
                         continue
-                
+
                 max_abilities = [
                     max(player.abilities[i], member.abilities[i])
                     for i in range(len(player.abilities))
@@ -124,7 +133,9 @@ def phaseIpreferences(player, community , global_random):
                     community.tasks,
                     max_abilities,
                     each_difference=10,
-                    penalty_tolerance=int(0.5 * max(0, member.energy) + 0.5 * max(0,player.energy)),
+                    penalty_tolerance=int(
+                        0.5 * max(0, member.energy) + 0.5 * max(0, player.energy)
+                    ),
                     return_multiple_tasks=True,
                 )
                 for matching_task in matching_tasks:
@@ -169,7 +180,7 @@ def phaseIIpreferences(player, community, global_random):
     print("HARD TASKS: ", hard_tasks)
     print("IMPOSSIBLE TASKS: ", impossible_tasks)
 
-    if weakest_player==True and len(impossible_tasks) > 0:
+    if weakest_player == True and len(impossible_tasks) > 0:
         doable = doable_tasks(player, community)
         returned_tasks = []
         if len(doable) > 0:
@@ -180,7 +191,6 @@ def phaseIIpreferences(player, community, global_random):
             for task in impossible_tasks:
                 returned_tasks.append(community.tasks.index(task))
             return returned_tasks
-                
 
     bids = []
     if player.energy < 0:
@@ -360,14 +370,15 @@ def loss_resting(task, abilities, current_energy):
     return sum(abilities) + current_energy
 
 
-def weakest_member(player, community, top_n = 1):
+def weakest_member(player, community, top_n=1):
     all_skills = [sum(member.abilities) for member in community.members]
     player_skill = sum(player.abilities)
-    
+
     if player_skill in sorted(all_skills)[:top_n]:
         return True
     else:
         return False
+
 
 def find_impossible_tasks(community):
     impossible_tasks = []
@@ -375,7 +386,9 @@ def find_impossible_tasks(community):
     for task in community.tasks:
         best_case = 10**9
         for member in community.members:
-            energy_deficit = sum(max(task[i] - member.abilities[i], 0) for i in range(len(task)))
+            energy_deficit = sum(
+                max(task[i] - member.abilities[i], 0) for i in range(len(task))
+            )
             best_case = min(best_case, energy_deficit)
             if best_case <= 0:
                 break
