@@ -25,7 +25,7 @@ def getPainThreshold(community):
 
     # Find the pain threshold members should be willing to bear
     avg_energy_expended = max(avg_task_total - avg_ability_total, 0)
-    pain_threshold = min(10 - (avg_energy_expended / 2), 0)
+    pain_threshold = max(10 - (avg_energy_expended / 2), 0)
 
     return pain_threshold
 
@@ -135,8 +135,25 @@ def findDifficultTasks(community):
             for player in community.members
         )
 
+        partnership_fail = True
+        for i, player1 in enumerate(community.members):
+            for j, player2 in enumerate(community.members):
+                if i >= j:  # Avoid self-pairing
+                    continue
+
+                # Joint abilities of the partnership
+                joint_abilities = [max(player1.abilities[k], player2.abilities[k]) for k in range(num_abilities)]
+                energy_cost = sum([max(task[l] - joint_abilities[l], 0) for l in range(num_abilities)]) / 2
+
+                # Check if both players can handle their share of the energy cost
+                if player1.energy - energy_cost > -10 and player2.energy - energy_cost > -10:
+                    partnership_fail = False
+                    break
+            if not partnership_fail:
+                break
+
         # if neither individuals nor partnerships can complete the task, it's "difficult"
-        if individual_fail:
+        if individual_fail and partnership_fail:
             max_energy_loss = max([
                 sum([max(task[j] - player.abilities[j], 0) for j in range(num_abilities)])
                 for player in community.members
