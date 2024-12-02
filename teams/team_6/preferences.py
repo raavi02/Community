@@ -173,6 +173,12 @@ def phaseIpreferences(player, community, global_random):
 def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
 
+    total_difficulty = sum([np.mean(task) for task in community.tasks])
+    total_ability = sum([np.mean(member.abilities) for member in community.members])
+    difficulty = (total_difficulty - total_ability) / len(community.tasks)
+
+    # print("DIFFICULTY: ", difficulty)
+
     weakest_player = weakest_member(player, community)
     # print("WEAKEST PLAYER: ", weakest_player)
 
