@@ -3,12 +3,19 @@ import csv
 
 tracking_data = []
 
+
 # Partnership Round
 def phaseIpreferences(player, community, global_random):
-    if player.energy <= 5:
+    if player.energy <= 0:
         return []
 
-    partner_bids = get_partner_bids(player, community)
+    partnered_abilities = get_possible_partnerships(player, community)
+    penalty_matrix = calculate_penalty_matrix(partnered_abilities, community.tasks)
+
+    # This returns a dictionary with all stats about task difficulties / player abilities
+    stats = get_stats(penalty_matrix, player, community)
+
+    partner_bids = get_best_partner(player, community)
     return partner_bids
 
 
@@ -17,36 +24,30 @@ def phaseIIpreferences(player, community, global_random):
     solo_bids = get_all_possible_tasks(community, player)
     return solo_bids
 
-def get_partner_bids(player, community):
-    """
-    This function calculates a person's cost matrix for performing every task alone or partnered and then returns a preference to work alone or in partnerships.
 
-    :return solo_preferences:
-            partnered_preferences:
-    """
-    partnered_abilities = get_possible_partnerships(player, community)
-    penalty_matrix = calculate_penalty_matrix(partnered_abilities, community.tasks)
-    partner_bids = []
+def get_stats(penalty_matrix, player, community):
+    med_player_task_penalty, avg_player_task_penalty = np.median(penalty_matrix[0]), np.mean(penalty_matrix[0])
+    med_player_ability, avg_player_ability = np.median(player.abilities), np.mean(player.abilities)
 
-    # Iterate over each column (penalties for single task)
-    do_task_alone_cutoff = min(2, player.energy)
-    for task_index, column in enumerate(penalty_matrix.T):
-        solo_penalty = column[0]
+    avg_task_difficulty = np.mean([t for task in community.tasks for t in task])
+    med_task_difficulty = np.median([t for task in community.tasks for t in task])
 
-        # Do not partner if the task alone has (1) no penalty alone or (2) is "easy enough".
-        if (solo_penalty == 0) or (solo_penalty <= do_task_alone_cutoff):
-            continue
+    avg_member_ability = np.mean([np.mean(member.abilities) for member in community.members])
+    med_member_ability = np.median([np.median(member.abilities) for member in community.members])
 
-        # Partner with anyone where the task penalty is bottom 5% of penalty difficulty for that task.
-        do_task_partnered_cutoff = round(np.percentile(np.array(column[1:]), 5))
-        for offset_player_index, penalty in enumerate(column[1:]):
-            if (penalty == 0) or (penalty <= do_task_partnered_cutoff):
-                # Remember that the player_abilities index for partnered abilities started at 1 not 0.
-                # To get the original partner id we need to reset adn use the community members object.
-                partner_id = community.members[offset_player_index - 1].id
-                partner_bids.append([task_index, partner_id])
-
-    return partner_bids
+    stats = {
+        'community': {
+            'avg_task_difficulty': avg_task_difficulty,
+            'med_task_difficulty': med_task_difficulty,
+            'avg_member_ability': avg_member_ability,
+            'med_member_ability': med_member_ability
+        },
+        'player': {'avg_player_task_penalty': avg_player_task_penalty,
+                   'med_player_task_penalty': med_player_task_penalty,
+                   'avg_player_ability': avg_player_ability,
+                   'med_player_ability': med_player_ability}
+    }
+    return stats
 
 
 def get_possible_partnerships(player, community):
@@ -104,6 +105,56 @@ def get_all_possible_tasks(community, player):
     return solo_bids
 
 
+def get_best_partner(player, community):
+    """
+    Volunteer for every task with the minimum penalty partner.
+    """
+
+    # Returns a list of [task_index, partner_id]
+    preferences = []
+    sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
+    # Iterate over all tasks
+    for task_index, task in sorted_tasks:
+
+        solo_energy_cost = sum(
+            max(task[i] - player.abilities[i], 0) for i in range(len(task))
+        )
+
+        # Find a partner with complementary skills and sufficient energy
+        best_partner = None
+        min_energy_cost = float('inf')
+
+        for partner in community.members:
+            # if player.abilities[i] == partner.abilities[i]:
+
+            # Skip invalid partners
+            if partner.id == player.id or partner.energy < 0:
+                continue
+
+            # Compute combined abilities
+            combined_abilities = [
+                max(player.abilities[i], partner.abilities[i]) for i in range(len(task))
+            ]
+
+            # Compute energy cost per partner for the task
+            energy_cost = sum(
+                max(task[i] - combined_abilities[i], 0) for i in range(len(task))
+            ) / 2
+
+            # Finding best partner for the task.
+            if (
+                    energy_cost < min_energy_cost
+                    and energy_cost <= player.energy
+                    and energy_cost <= partner.energy
+            ):
+                min_energy_cost = energy_cost
+                best_partner = partner.id
+
+        if best_partner is not None and (solo_energy_cost >= 1.5 * min_energy_cost):
+            preferences.append([task_index, best_partner])
+    return preferences
+
+
 def log_turn_data(turn, community, tasks_completed):
     """
     Logs the state of the community for a single turn.
@@ -131,53 +182,3 @@ def export_csv(filename="simulation_data.csv"):
         writer = csv.DictWriter(file, fieldnames=["Turn", "Tasks Completed", "Median Energy", "Exhausted Players"])
         writer.writeheader()
         writer.writerows(tracking_data)
-
-"""
-Retired Helper Functions 
-"""
-
-
-def get_best_partner(preferences, tasks, task_index, player, community):
-    """
-    Volunteer for every task with the minimum penalty partner.
-    """
-
-    # Returns a list of [task_index, partner_id]
-    preferences = []
-    sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
-
-    # Iterate over all tasks
-    for task_index, task in sorted_tasks:
-
-        # Find a partner with complementary skills and sufficient energy
-        best_partner = None
-        min_energy_cost = float('inf')
-
-        for partner in community.members:
-            # Skip invalid partners
-            if partner.id == player.id or partner.energy < 0:
-                continue
-
-            # Compute combined abilities
-            combined_abilities = [
-                max(player.abilities[i], partner.abilities[i]) for i in range(len(task))
-            ]
-
-            # Compute energy cost per partner for the task
-            energy_cost = sum(
-                max(task[i] - combined_abilities[i], 0) for i in range(len(task))
-            ) / 2
-
-            # Finding best partner for the task.
-            if (
-                    energy_cost < min_energy_cost
-                    and energy_cost <= player.energy
-                    and energy_cost <= partner.energy
-            ):
-                min_energy_cost = energy_cost
-                best_partner = partner.id
-
-        if best_partner is not None:
-            preferences.append([task_index, best_partner])
-
-    return preferences
