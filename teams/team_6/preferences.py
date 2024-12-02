@@ -204,10 +204,13 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
             if best_task is None:
                 return []
 
-            best_task_cost = loss_phase2(
-                community.tasks[best_task], player.abilities, player.energy
+            energy_used = sum(
+                [
+                    max(community.tasks[best_task][k] - player.abilities[k], 0)
+                    for k in range(len(player.abilities))
+                ]
             )
-            if player.energy - best_task_cost < wait_energy_threshold:
+            if player.energy - energy_used < wait_energy_threshold:
                 return []
 
             return [best_task]
@@ -251,7 +254,7 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
 
     except Exception as e:
         print(e)
-        return bids
+        return []
 
 
 def assign_phase1(tasks, members):
