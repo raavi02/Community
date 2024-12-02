@@ -9,6 +9,7 @@ import importlib.util
 import sys
 import functools
 import io
+import os
 
 # group 2 needs this package, and if only imported in our file, the simulator will catch the exception and play default
 # therefore, we import it here to ensure a ModuleNotFound crash, so that the error won't go unnoticed
@@ -416,8 +417,15 @@ def run_simulation(
         )
         tasks_completed.append(community.completed_tasks)
 
+    files = os.listdir("teams/team_6/data")
+    file_index = 0
+
+    for file in files:
+        if file.startswith(f"{ability_team}_{args.abilities_distribution_difficulty}_{task_difficulty_distribution_team}_{task_difficulty}_{community.num_abilities}_{len(community.members)}_"):
+            file_index += 1
+
     with open(
-        f"teams/team_6/data/{ability_team}_{args.abilities_distribution_difficulty}_{task_difficulty_distribution_team}_{task_difficulty}_{community.num_abilities}_{len(community.members)}.npy",
+        f"teams/team_6/data/{ability_team}_{args.abilities_distribution_difficulty}_{task_difficulty_distribution_team}_{task_difficulty}_{community.num_abilities}_{len(community.members)}_{file_index}.npy",
         "wb",
     ) as f:
         np.save(f, np.array(tasks_completed))
