@@ -161,7 +161,7 @@ def phaseIIpreferences(player, community, global_random):
         )
 
         player_suitability = (
-            sum(abs(player.abilities[i] - task[i]) for i in range(num_abilities)) * 0.5
+            sum(abs(player.abilities[i] - task[i]) for i in range(num_abilities)) * 0.25
         )
 
         if player_cost <= player.energy * 0.7:
