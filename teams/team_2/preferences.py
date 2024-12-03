@@ -274,16 +274,15 @@ def create_tasks_feature_vector(player, community):
         )
         # if player.energy - energy_cost >= 0:
         player_cost_array.append(energy_cost)
+
+        dot_product = np.dot(player.abilities, task)
         player_magnitude = np.linalg.norm(player.abilities)
-        task_magnitude = np.linalg.norm(task)
+        task_magnitude = np.linalg.norm(task) 
         if player_magnitude == 0 or task_magnitude == 0:
             similarity = 0  # Handle cases where the magnitude is zero
         else:
             similarity = dot_product / (player_magnitude * task_magnitude)
         cosine_similarities.append(similarity)
-
-
-        dot_product = np.dot(player.abilities, task)
 
 
     combined_cost_matrix = create_combined_cost_matrix(community)
