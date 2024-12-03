@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+import pickle
 from itertools import combinations
 
 
@@ -20,21 +21,35 @@ logging.basicConfig(
 )
 
 
+# @profile
 def phaseIpreferences(player, community, global_random):
     '''Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
     list_choices = []
 
-
-    # Calculate cost matrices
-    cost_matrix_individual, cost_matrix_pairs = calculate_cost_matrix(community)
-
-    # Rank assignment options by task
-    list_of_ranked_assignments = get_ranked_assignments(community, cost_matrix_individual,
-                                                        cost_matrix_pairs)
+    if community.completed_tasks % (len(community.members) * 2) == 0:
+        # Calculate cost matrices
+        cost_matrix_individual, cost_matrix_pairs = calculate_cost_matrix(community)
+        # Rank assignment options by task
+        list_of_ranked_assignments = get_ranked_assignments(community, cost_matrix_individual,
+                                                            cost_matrix_pairs)
+        with open("cost_matrix_individual.pkl", "wb") as f:
+            pickle.dump(cost_matrix_individual, f)
+        with open("cost_matrix_pairs.pkl", "wb") as f:
+            pickle.dump(cost_matrix_pairs, f)
+        with open("list_of_ranked_assignments.pkl", "wb") as f:
+            pickle.dump(list_of_ranked_assignments, f)
+    else:
+        with open("cost_matrix_individual.pkl", "rb") as f:
+            cost_matrix_individual = pickle.load(f)
+        with open("cost_matrix_pairs.pkl", "rb") as f:
+            cost_matrix_pairs = pickle.load(f)
+        with open("list_of_ranked_assignments.pkl", "rb") as f:
+            list_of_ranked_assignments = pickle.load(f)
 
     # If time is scarcer than energy, use simple strategy
     if average_difficulty(community) < average_ability(community) * DIFFICULTY_ABILITY_RATIO:
+        # print("Simple strategy...")
         for t in range(len(list_of_ranked_assignments)):
             individual_cost = cost_matrix_individual[(player.id, t)]
             for assignment in list_of_ranked_assignments[t]:
@@ -43,6 +58,7 @@ def phaseIpreferences(player, community, global_random):
                     if player.energy >= assignment[1] and partner.energy >= assignment[1]:
                         if individual_cost + PAIRING_ADVANTAGE > assignment[1]:
                             list_choices.append([t, partner.id])
+        return list_choices
 
     for t in range(len(list_of_ranked_assignments)):
         # Exhausting tasks (energy required >= 20)
@@ -82,7 +98,7 @@ def phaseIpreferences(player, community, global_random):
 
     return list_choices
 
-
+# @profile
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
     bids = []
@@ -160,7 +176,7 @@ def get_ranked_assignments(community, cost_matrix_individual, cost_matrix_pairs)
 
     return list_of_ranked_assignments
 
-# @profile
+
 def is_weakest_player(player, community):
     sum_of_abilities = []
     
@@ -172,8 +188,10 @@ def is_weakest_player(player, community):
     
     return sum(player.abilities) < threshold
 
+
 def average_difficulty(community):
     return sum([sum(task) for task in community.tasks]) / len(community.tasks)
+
 
 def average_ability(community):
     return sum([sum(member.abilities) for member in community.members]) / len(community.members)
