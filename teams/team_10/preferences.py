@@ -14,7 +14,7 @@ def phaseIpreferences(player, community: Community, global_random):
     if not hasattr(player, "data_store"): # Start tracking data
         player.data_store = {
             "turn": 1,  # Tracks the current turn number
-            "tasks_at_turn": [], # Tracks the number of tasks on the board at each turn
+            "tasks_at_turn": [], # Tracks the number of tasks on the board at each phase
             "acceptable_energy_level_at_turn": [], # Tracks the acceptable energy level at each turn
         }
     else:
@@ -38,32 +38,18 @@ def phaseIpreferences(player, community: Community, global_random):
     return task_pairs
 
 
-def phaseIIpreferences(player: Member, community, global_random):
+def phaseIIpreferences(player: Member, community: Community, global_random):
     """Return a list of tasks for the particular player to do individually"""
-    # if player.data_store is not None: 
-        # print("YAY")
         
     if player.incapacitated:
         return []
     
     tasks_at_turn = player.data_store['tasks_at_turn']
     acceptable_energy_level_at_turn = player.data_store['acceptable_energy_level_at_turn']
-    
-    NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING = 5
-
-    sacrifices = sacrifice(community.members, community.tasks)
-    SACRIFICE_TIME = len(community.members) // 2
-
-    if len(community.tasks) < SACRIFICE_TIME and sacrifices:
-        to_be_sacrificed = find_weakest_agents(community.members, len(sacrifices))
-        if player.id in to_be_sacrificed: 
-            return sacrifices 
-    START_SACRIFICING_YEAR = 20
+    members = community.members
     
     if len(tasks_at_turn) >= START_SACRIFICING_YEAR and all(
-        x == LOW_ENERGY_LEVEL for x in acceptable_energy_level_at_turn[-NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING:]
-    ):
-        # SACRIFICE THE ELDERS / CHILDREN
+        x == LOW_ENERGY_LEVEL for x in acceptable_energy_level_at_turn[-NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING:]):
         num_weakest_players = 2
         weakest_players_id = find_weakest_agents(community.members, num_weakest_players)
         if player.id in weakest_players_id:
@@ -76,10 +62,7 @@ def phaseIIpreferences(player: Member, community, global_random):
 
 def get_acceptable_energy_level(tasks_at_turn: list[int]) -> int:
     
-    TURNS_TO_LOOK_BACK = 3
-    if len(tasks_at_turn) >= 3 and all(
-        x == tasks_at_turn[-1] for x in tasks_at_turn[-TURNS_TO_LOOK_BACK:]
-    ):
+    if stayed_constant(tasks_at_turn=tasks_at_turn):
         acceptable_energy_level = LOW_ENERGY_LEVEL
     else:
         acceptable_energy_level = NORMAL_ENERGY_LEVEL
@@ -136,38 +119,20 @@ def find_pairs(player: Member, tasks, members, acceptable_energy_level) -> list[
             pairs.append([task, least_energy_pairs[i][1]])
     return pairs
 
-# For example, suppose n=4 and that an individual has skill levels (8,6,4,2), and that the task has difficulty vector (5,5,5,5). Then the individual would use up 1+3=4 units of energy to perform the task.
-"""
-sacrifice(members, tasks)
-- identifies if there are tasks that require sacrificing members
-- returns a list of tasks that require sacrifices
-"""
-def sacrifice(members: List[Member], tasks: List) -> List[int]:
-    exhausting_tasks = []
-    for i in range(len(tasks)):
-        task = tasks[i]
-        task_np = np.array(task)
-        not_exhausting = False
-        for member in members:
-            abilities_np = np.array(member.abilities)
-            diff = abilities_np - task_np
-            # if one member can complete it themselves without being sacrificed
-            if np.sum(diff[diff < 0]) < (MAX_ENERGY_LEVEL - EXHAUSTED_ENERGY_LEVEL):
-                not_exhausting = True
-            # else, check pairs 
-            else:
-                for other in members:
-                    other_np = np.array(other.abilities)
-                    combined_np = np.maximum(abilities_np, other_np)
-                    diff = combined_np - task_np
-                    if np.sum(diff[diff < 0]) < (MAX_ENERGY_LEVEL - EXHAUSTED_ENERGY_LEVEL) * 2:
-                        not_exhausting = True
-                        break
-            if not_exhausting:
-                break
-        if not not_exhausting:
-            exhausting_tasks.append(i)
-    return exhausting_tasks
+def find_weakest_agents(members, num_weakest) -> list[int]:
+    """Return the id of the weakest agents in the community"""
+    agents = [(member.id, sum(member.abilities)) for member in members if not member.incapacitated]
+
+    three_weakest_agents = sorted(agents, key=lambda x: x[1])[:num_weakest]
+    weakest_agent_ids = [agent[0] for agent in three_weakest_agents]
+    return weakest_agent_ids
+
+def stayed_constant(tasks_at_turn: List[int]):
+    if len(tasks_at_turn) >= TURNS_TO_LOOK_BACK and all(
+        x == tasks_at_turn[-1] for x in tasks_at_turn[-TURNS_TO_LOOK_BACK:]
+    ):
+        return True
+    return False
 
 """
 non_solo_tasks(community: Community)
@@ -182,27 +147,3 @@ non_solo_tasks(community: Community)
 #         if not member.incapacitated and member.energy < MAX_ENERGY_LEVEL:
 #             return False
 #     return True
-
-    
-"""
-original sacrificing strategy in phase II:
-if len(tasks_at_turn) >= START_SACRIFICING_YEAR and all(
-        x == LOW_ENERGY_LEVEL for x in acceptable_energy_level_at_turn[-NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING:]
-    ):
-        # SACRIFICE THE ELDERS / CHILDREN
-        elders_or_children = find_weakest_agents(community.members, 3)
-        print(f"elders_or_children: {elders_or_children}")
-        if player.id in elders_or_children:
-            return [task_id for (task_id, _) in community.tasks]
-        else:
-            return []
-"""
-
-
-def find_weakest_agents(members, num_weakest) -> list[int]:
-    """Return the id of the weakest agents in the community"""
-    agents = [(member.id, sum(member.abilities)) for member in members if not member.incapacitated]
-
-    three_weakest_agents = sorted(agents, key=lambda x: x[1])[:num_weakest]
-    weakest_agent_ids = [agent[0] for agent in three_weakest_agents]
-    return weakest_agent_ids
