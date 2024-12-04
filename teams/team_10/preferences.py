@@ -45,64 +45,46 @@ def phaseIpreferences(player, community: Community, global_random):
     The output format should be a list of lists such that each element
     in the list has the first index task [index in the community.tasks list]
     and the second index as the partner id"""
-    # global tasks_at_turn
-    # global acceptable_energy_level_at_turn
     
-    csv_file = "teams/team_10/player_data.csv"
-    columns = ["turn", "player_id", "tasks_at_turn", "acceptable_energy_level_at_turn"]
-    player_data = pd.read_csv(csv_file)
+    if not hasattr(player, "data_store"): # Start tracking data
+        player.data_store = {
+            "turn": 1,  # Tracks the current turn number
+            "tasks_at_turn": [], # Tracks the number of tasks on the board at each turn
+            "acceptable_energy_level_at_turn": [], # Tracks the acceptable energy level at each turn
+        }
+    else:
+        # Increment the turn
+        player.data_store["turn"] += 1
     
-    most_recent_turn = player_data["turn"].max()
     
-    # THIS IS A HACK TO CLEAR THE DATA IF WE START A NEW ROUND... THIS IS A TERRIBLE IDEA>>>
-    if community.completed_tasks == 0 and most_recent_turn > 20:
-        player_data = pd.DataFrame(columns=columns)
-
-    
-    # ONLY KEEP THE LAST 20 TURNS!
-    player_data = player_data[player_data["turn"] > most_recent_turn - 20]
-    if len(player_data) == 0:
-        player_data = pd.DataFrame(columns=columns)
-        
-    tasks_at_turn = player_data[player_data["player_id"] == player.id]['tasks_at_turn'].tolist()
-
-    # player.tasks_at_turn.append(len(community.tasks))
-    
+    tasks_at_turn = player.data_store['tasks_at_turn']
     acceptable_energy_level = get_acceptable_energy_level(tasks_at_turn)
-    # player.acceptable_energy_level_at_turn.append(acceptable_energy_level)
-    new_data = pd.DataFrame([{
-        "turn": len(tasks_at_turn),
-        "player_id": player.id, 
-        "tasks_at_turn": len(community.tasks), 
-        "acceptable_energy_level_at_turn": acceptable_energy_level
-    }])
     
-    player_data = pd.concat([player_data, new_data], ignore_index=True)
-    
-    player_data.to_csv(csv_file, index=False)
+    # Update the data store
+    player.data_store["tasks_at_turn"].append(len(community.tasks))
+    player.data_store["acceptable_energy_level_at_turn"].append(acceptable_energy_level)
 
     task_pairs = find_pairs(
         player, community.tasks, community.members, acceptable_energy_level
     )
+    
+    if player.incapacitated:
+        return []
     return task_pairs
 
 
 def phaseIIpreferences(player: Member, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
-    
-    csv_file = "teams/team_10/player_data.csv"
-    columns = ["turn", "player_id", "tasks_at_turn", "acceptable_energy_level_at_turn"]
-    all_player_data = pd.read_csv(csv_file, usecols=columns) # Data for all players
-    
-    player_data = all_player_data[all_player_data["player_id"] == player.id] # Data for this specific player
-    
-    tasks_at_turn = player_data['tasks_at_turn'].tolist()
-    acceptable_energy_level_at_turn = player_data['acceptable_energy_level_at_turn'].tolist()
-    
-    NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING = 5
-    
+    # if player.data_store is not None: 
+        # print("YAY")
+        
     if player.incapacitated:
         return []
+    
+    tasks_at_turn = player.data_store['tasks_at_turn']
+    acceptable_energy_level_at_turn = player.data_store['acceptable_energy_level_at_turn']
+    
+    NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING = 5
 
     sacrifices = sacrifice(community.members, community.tasks)
     SACRIFICE_TIME = len(community.members) // 2
@@ -128,6 +110,7 @@ def phaseIIpreferences(player: Member, community, global_random):
     
 
 def get_acceptable_energy_level(tasks_at_turn: list[int]) -> int:
+    
     TURNS_TO_LOOK_BACK = 3
     if len(tasks_at_turn) >= 3 and all(
         x == tasks_at_turn[-1] for x in tasks_at_turn[-TURNS_TO_LOOK_BACK:]
