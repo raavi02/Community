@@ -24,19 +24,19 @@ def get_context_bounds(player, community, phase):
     stats = get_stats(player, community)
 
     if phase == 'partner':
-        task_to_abilitity_ratio = stats['community']['med_task_difficulty'] / stats['community']['avg_member_ability']
+        task_to_ability_ratio = stats['community']['med_task_difficulty'] / stats['community']['avg_member_ability']
     else:
         # Make sure the player has at least sooooome abilities (plus avoid zero div error)
         if stats['player']['avg_player_ability'] > 0:
-            task_to_abilitity_ratio = stats['community']['med_task_difficulty'] / stats['player']['avg_player_ability']
+            task_to_ability_ratio = stats['community']['med_task_difficulty'] / stats['player']['avg_player_ability']
         else:
-            task_to_abilitity_ratio = 99
+            task_to_ability_ratio = 99
 
     # Extreme: High Energy-bound gameplay (must partner)
-    if task_to_abilitity_ratio > 10:
+    if task_to_ability_ratio > 10:
         min_energy_threshold = -9.9
     # Extreme: Time-bound gameplay (skip partnering)
-    elif task_to_abilitity_ratio < 0.75 and phase == 'partner':
+    elif task_to_ability_ratio < 0.75 and phase == 'partner':
         min_energy_threshold = 11
     # Time-bound gameplay
     else:
