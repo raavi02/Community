@@ -93,7 +93,7 @@ def phaseIpreferences(player, community, global_random):
         # If a compatible partner is found, assign the task to the player and partner
         if best_partner:
             best_choice = [task_id, best_partner, min_cost]
-            print(f"Worker {player.id} has chosen Worker {best_choice[1]} for {best_choice[0]}")
+            # print(f"Worker {player.id} has chosen Worker {best_choice[1]} for {best_choice[0]}")
 
         if best_choice:
             list_choices.append(best_choice[:-1])
