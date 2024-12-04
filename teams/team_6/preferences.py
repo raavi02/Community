@@ -203,8 +203,13 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
                 )
 
             volunteer_list = []
-            for task in doable:
-                volunteer_list.append(task)
+
+            groups_playing = set()
+            for member in community.members:
+                groups_playing.add(member.group)
+            if len(groups_playing) > 1:
+                for task in doable:
+                    volunteer_list.append(task)
 
             # Use cost matrix to assign tasks
             wait_energy_threshold = -9
