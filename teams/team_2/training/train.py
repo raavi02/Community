@@ -14,10 +14,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-MAX_GENERATIONS = 100
-POP_SIZE = 50
-TURNS = 100
-CIVILIANS = 20
+MAX_GENERATIONS = 10
+POP_SIZE = 100
+TURNS = 500
+CIVILIANS = 40
 HIDDEN_SIZE = 40
 TASK_FEATURE_SIZE = 7
 PLAYER_STATE_SIZE = 11
@@ -210,33 +210,39 @@ Generations: {MAX_GENERATIONS}
         # save the current best population
         signal.signal(signal.SIGINT, handle_signal(spop[0]))
 
-        # Select parents
+        elitism_proportion = 0.2  # Adjust this proportion as needed
+        elitism_count = max(1, int(elitism_proportion * len(population)))
+
+        # Select parents based on fitness
         parents = select_parents(population, fitness_scores)
+
+        # Retain top individuals as elites
+        elites = parents[:elitism_count]
 
         # Generate offspring
         offspring = []
         # for now, only create offspring from TaskScorerNN
-        for _ in range(len(parents) // 2):
+        for _ in range((len(population) - elitism_count) // 2):
             parent1, parent2 = random.sample(parents, 2)
             child_task = crossover(parent1[0], parent2[0], is_task=True)
             child_rest = crossover(parent1[1], parent2[1], is_task=False)
-            mutate(child_task, 0.2, 0.2)
-            mutate(child_rest, 0.2, 0.2)
+            mutate(child_task, 0.2, 0.05)
+            mutate(child_rest, 0.2, 0.05)
             offspring.append((child_task, child_rest))
 
             parent1, parent2 = random.sample(parents, 2)
             child_task = crossover(parent1[0], parent2[0], is_task=True)
             child_rest = crossover(parent1[1], parent2[1], is_task=False)
-            mutate(child_task, 0.2, 0.2)
-            mutate(child_rest, 0.2, 0.2)
+            mutate(child_task, 0.2, 0.05)
+            mutate(child_rest, 0.2, 0.05)
             offspring.append((child_task, child_rest))
 
         # Replace population
         [
-            (mutate(ptask, 0.1, 0.05), mutate(prest, 0.1, 0.05))
+            (mutate(ptask, 0.1, 0.02), mutate(prest, 0.1, 0.02))
             for ptask, prest in parents[1:]
         ]
-        population = parents + offspring
+        population = elites + offspring
 
         plot(avg_scores, max_scores)
         print(
@@ -247,11 +253,11 @@ Generations: {MAX_GENERATIONS}
 
     torch.save(
         best_model[0].state_dict(),
-        f"best_task_weigths-{max(fitness_scores)}.pth",
+        f"task_weights.pth",
     )
     torch.save(
         best_model[1].state_dict(),
-        f"best_rest_weigths-{max(fitness_scores)}.pth",
+        f"rest_weights.pth",
     )
     print(
         'best model weights saved in "best_task_weights.pth" and "best_rest_weights.pth"'
