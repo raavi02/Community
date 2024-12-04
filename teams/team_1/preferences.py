@@ -90,21 +90,17 @@ def getAvgEnergy(community):
     
 def phaseIIpreferences(player, community, global_random):
     '''Return a list of tasks for the particular player to do individually'''
-    
     bids = []
 
     # Handle impossible tasks with sacrifice
     impossible_tasks = findImpossibleTasks(community)
     if impossible_tasks:
-        print("Impossible tasks:", len(impossible_tasks))
+        sacrificee_id = getWeakestMember(community)
         for task_id in impossible_tasks:
             # Execute a sacrifice if member is the weakest
-            sacrificee_id = getWeakestMember(community)
-            print(f"Sacrificed player {sacrificee_id} to complete task {task_id}.")
-            bids.append(task_id)
             if player.id == sacrificee_id:
                 bids.append(task_id)
-                return bids
+        return bids
     
     # Don't volunteer if tired
     if player.energy < 0:
@@ -129,17 +125,26 @@ def findImpossibleTasks(community):
 
     for task_id, task in enumerate(community.tasks):
         # Check whether any individual player can complete the task without incapacitation on full energy
-        individual_fail = 10 - sum(task[j] for j in range(num_abilities)) <= -10
+        individual_fail = True
+        for player in community.members:
+            if player.incapacitated:
+                continue
+            energy_cost = sum(max(task[j] - player.abilities[j], 0) for j in range(num_abilities))
+            if 10 - energy_cost > -10:
+                individual_fail = False
+                break
 
         # Check whether any partnership can complete the task without incapacitation on full energy
         partnership_fail = True
         for i, player1 in enumerate(community.members):
+            if player1.incapacitated:
+                continue
             for j, player2 in enumerate(community.members):
-                if i >= j:  # Avoid self-pairing
+                if i >= j or player2.incapacitated:  # Avoid self-pairing
                     continue
 
                 joint_abilities = [max(player1.abilities[k], player2.abilities[k]) for k in range(num_abilities)]
-                energy_cost = sum([max(task[l] - joint_abilities[l], 0) for l in range(num_abilities)]) / 2
+                energy_cost = sum(max(task[l] - joint_abilities[l], 0) for l in range(num_abilities)) / 2
 
                 if 10 - energy_cost > -10:
                     partnership_fail = False
@@ -158,10 +163,16 @@ def getWeakestMember(community):
     """
     Finds the weakest member of the community for sacrifice on an impossible task.
     """
-    # Sort members by (total ability, energy), ascending
-    sorted_members = sorted(
-        community.members,
+    # Find valid members who are not incapacitated
+    valid_members = []
+    for member in community.members:
+        if not member.incapacitated:
+            valid_members.append(member)
+
+    # Sort valid members by (total ability, energy), ascending
+    sorted_valid_members = sorted(
+        valid_members,
         key=lambda member: (sum(member.abilities), member.energy)
     )
 
-    return sorted_members[0]
+    return sorted_valid_members[0].id
