@@ -49,6 +49,23 @@ def exists_good_match(
         # print("TASKS: ", returned_tasks)
         return True, penalty_suffered, current_index, returned_tasks
 
+def hardest_task_to_do(community):
+    hardest_tasks = []
+    energy_it_leaves = 11
+    for task in community.tasks:
+        highest_energy = -9
+        for member in community.members:
+            energy_required = sum(max(0, task[i] - member.abilities[i]) for i in range(len(task)))
+            energy_left = member.energy - energy_required
+            highest_energy = max(highest_energy, energy_left)
+        if highest_energy < energy_it_leaves:
+            hardest_tasks = [task]
+            energy_it_leaves = highest_energy
+        elif highest_energy == energy_it_leaves:
+            hardest_tasks.append(task)
+    return hardest_tasks, energy_it_leaves
+            
+
 
 def doable_tasks(player, community, allow_negative=True, max_allowed_loss=20):
     if allow_negative:
@@ -64,6 +81,11 @@ def doable_tasks(player, community, allow_negative=True, max_allowed_loss=20):
             doable.append(j)
     return doable
 
+def playing_ourselves(community):
+    for member in community.members:
+        if member.group != 6:
+            return False
+    return True
 
 def phaseIpreferences(player, community, global_random):
     """Return a list of task index and the partner id for the particular player. The output format should be a list of lists such that each element
@@ -101,16 +123,6 @@ def phaseIpreferences(player, community, global_random):
                 if len(doable) > 0:
                     return []
 
-            # perfect_match, _, _, _ = exists_good_match(
-            # community.tasks,
-            # player.abilities,
-            # each_difference=1,
-            # penalty_tolerance=2,
-            # )
-            # if perfect_match:
-            #     # print("PERFECT MATCH")
-            #     return []
-            # else:
 
             for member in community.members:
                 if (
@@ -144,25 +156,6 @@ def phaseIpreferences(player, community, global_random):
                         [community.tasks.index(matching_task), member.id]
                     )
 
-            # threshold = 3
-            # if len(list_choices) < threshold:
-            #     for member in community.members:
-            #         max_abilities = [
-            #             max(player.abilities[i], member.abilities[i])
-            #             for i in range(len(player.abilities))
-            #         ]
-            #         _, _, _, matching_tasks = exists_good_match(
-            #             community.tasks,
-            #             max_abilities,
-            #             each_difference=4,
-            #             penalty_tolerance=8,
-            #             return_multiple_tasks=True,
-            #         )
-            #         for matching_task in matching_tasks:
-            #             list_choices.append(
-            #                 [community.tasks.index(matching_task), member.id]
-            #             )
-
     except Exception as e:
         print(e)
 
@@ -189,9 +182,33 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
             print("Sacrifice Tasks: ", returned_tasks)
             return returned_tasks
 
-    try:
-        if PHASE_2_ASSIGNMENTS:
-            # Use cost matrix to assign tasks
+    if PHASE_2_ASSIGNMENTS:
+        if playing_ourselves(community) == False:
+            doable = []
+            if (player.energy < 0):  # If player has negative energy but can do at least one task with no energy loss
+                doable = doable_tasks(player, community, allow_negative=False)
+            else:  # If player has positive energy but can do at least one task with at most 50% energy loss, then don't partner up
+                doable = doable_tasks(player, community, max_allowed_loss=int(0.5 * player.energy))
+
+            volunteer_list = []
+            for task in doable:
+                volunteer_list.append(task)
+            
+            hardest_tasks, energy_it_leaves = hardest_task_to_do(community)
+            for task in hardest_tasks:
+                # the energy it takes for our player to do this task
+                energy_required = sum(
+                    max(0, task[i] - player.abilities[i])
+                    for i in range(len(task))
+                )
+                energy_left = player.energy - energy_required 
+                if energy_left > -10 and energy_left < 5 and energy_left >= energy_it_leaves - 2:
+                    volunteer_list.append(community.tasks.index(task))
+
+            return volunteer_list
+        
+        else:
+
             wait_energy_threshold = -9
             player_index = community.members.index(player)
             assignments, total_cost = assign_phase2(community.tasks, community.members)
@@ -199,7 +216,6 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
             best_task = assignments.get(player_index)
             if best_task is None:
                 return []
-
             energy_used = sum(
                 [
                     max(community.tasks[best_task][k] - player.abilities[k], 0)
@@ -208,49 +224,46 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
             )
             if player.energy - energy_used < wait_energy_threshold:
                 return []
+            
+            return [best_task]
+    
+    else:
+        min_loss = float("inf")
+        best_task = None
+
+        for task in community.tasks:
+            loss = loss_phase2(task, player.abilities, player.energy)
+            resting_loss = (
+                loss_resting(task, player.abilities, player.energy)
+                * resting_loss_scale
+            )
+
+            better_loss = min(loss, resting_loss)
+
+            if better_loss < min_loss:
+                min_loss = better_loss
+
+                if loss < resting_loss:
+                    best_task = community.tasks.index(task)
+                else:
+                    best_task = None
+
+        if best_task is not None:
+            if (
+                player.energy
+                - sum(
+                    [
+                        max(task[k] - player.abilities[k], 0)
+                        for k in range(len(player.abilities))
+                    ]
+                )
+                < -9
+            ):
+                return []
 
             return [best_task]
         else:
-            min_loss = float("inf")
-            best_task = None
-
-            for task in community.tasks:
-                loss = loss_phase2(task, player.abilities, player.energy)
-                resting_loss = (
-                    loss_resting(task, player.abilities, player.energy)
-                    * resting_loss_scale
-                )
-
-                better_loss = min(loss, resting_loss)
-
-                if better_loss < min_loss:
-                    min_loss = better_loss
-
-                    if loss < resting_loss:
-                        best_task = community.tasks.index(task)
-                    else:
-                        best_task = None
-
-            if best_task is not None:
-                if (
-                    player.energy
-                    - sum(
-                        [
-                            max(task[k] - player.abilities[k], 0)
-                            for k in range(len(player.abilities))
-                        ]
-                    )
-                    < -9
-                ):
-                    return []
-
-                return [best_task]
-            else:
-                return []
-
-    except Exception as e:
-        print(e)
-        return []
+            return []
 
 
 def assign_phase1(tasks, members):
