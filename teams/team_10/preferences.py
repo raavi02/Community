@@ -40,6 +40,14 @@ from teams.team_10.constants import *
 # - Reduces the complexity of the situation.
 
 
+# Hyper Parameters: 
+# START_SACRIFICING_YEAR
+# NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING
+# TURNS_TO_LOOK_BACK
+# SACRIFICE_TIME
+# num_weakest_players
+
+
 def phaseIpreferences(player, community: Community, global_random):
     """Return a list of task index and the partner id for the particular player.
     The output format should be a list of lists such that each element
@@ -99,8 +107,8 @@ def phaseIIpreferences(player: Member, community, global_random):
         x == LOW_ENERGY_LEVEL for x in acceptable_energy_level_at_turn[-NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING:]
     ):
         # SACRIFICE THE ELDERS / CHILDREN
-        num_weakest_palayers = 2
-        weakest_players_id = find_weakest_agents(community.members, num_weakest_palayers)
+        num_weakest_players = 2
+        weakest_players_id = find_weakest_agents(community.members, num_weakest_players)
         if player.id in weakest_players_id:
             return [task_id for task_id, _ in enumerate(community.tasks)]
         else:
