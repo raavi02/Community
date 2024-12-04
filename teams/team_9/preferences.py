@@ -21,7 +21,7 @@ def phaseIpreferences(player, community, global_random):
         secondary_energy_limit = primary_energy_limit - (10 * (1 - math.exp(-(difficulty_ratio - 1))))
         secondary_energy_limit = max(secondary_energy_limit, -10)  # Ensure it doesn't drop below -10
 
-    # print(difficulty_ratio, secondary_energy_limit)
+    print(difficulty_ratio, secondary_energy_limit)
 
     # Sort tasks by total difficulty (descending)
     sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
@@ -59,8 +59,16 @@ def phaseIpreferences(player, community, global_random):
         # Sort potential partners by their effectiveness (descending by energy)
         potential_partners.sort(key=lambda x: -x[1])  # Sort by remaining energy (descending)
 
+        num_partners = 1
+
+        #If tasks are hard give more options
+        if difficulty_ratio>1 and difficulty_ratio<=3:
+                num_partners = 3
+        elif difficulty_ratio>3:
+                num_partners = 5
+
         # Append top 3 partners for the task to preferences
-        for partner_id, _ in potential_partners[:1]:  # Take at most the top 3 partners
+        for partner_id, _ in potential_partners[:num_partners]:  # Take at most the top 3 partners
             preferences.append([task_id, partner_id])
 
     return preferences
@@ -106,7 +114,7 @@ def phaseIIpreferences(player, community, global_random):
     # Sort tasks by a combination of low energy cost and high remaining energy
     preferences.sort(key=lambda x: (x[1], -x[2]))  # Sort by energy cost, then remaining energy
 
-    if impossible_tasks and sacrificee_ids:
+    if impossible_tasks and sacrificee_ids and (len(impossible_tasks) == len(community.tasks) or len(preferences)==0):
         for task_id in impossible_tasks:
             if player.id in sacrificee_ids:
                 preferences.append((task_id, float('inf'), -10))
