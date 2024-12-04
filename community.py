@@ -129,6 +129,7 @@ class CommunityActions:
             CommunityActions.generate_tasks(community, task_distribution)
 
         # Phase 1: Partnerships
+        available_players = sorted(available_players, key=lambda x: x.id)
         partnerships = CommunityActions.form_partnerships(community, available_players)
         # print("Partnerships")
         for task_id in partnerships:
@@ -151,7 +152,7 @@ class CommunityActions:
 
         # del partnerships
         # Phase 2: Individual tasks
-        available_players = sorted(available_players, key=lambda x: x.id)
+        # available_players = sorted(available_players, key=lambda x: x.id)
         individual_tasks, available_players = CommunityActions.assign_individual_tasks(community, available_players)
         # print("Individual tasks")
         for task, player in individual_tasks:
