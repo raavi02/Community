@@ -3,32 +3,30 @@ import csv
 
 tracking_data = []
 
-
 # Partnership Round
 def phaseIpreferences(player, community, global_random):
-    partnered_abilities = get_possible_partnerships(player, community)
-    penalty_matrix = calculate_penalty_matrix(partnered_abilities, community.tasks)
-    min_energy_threshold = get_context_bounds(penalty_matrix, player, community, 'partner')
+    min_energy_threshold = get_context_bounds(player, community, 'partner')
+
+    if min_energy_threshold > 10:
+        return []
 
     return get_best_partner(player, community, min_energy_threshold)
 
-
 # Individual Round
 def phaseIIpreferences(player, community, global_random):
-    partnered_abilities = get_possible_partnerships(player, community)
-    penalty_matrix = calculate_penalty_matrix(partnered_abilities, community.tasks)
-    min_energy_threshold = get_context_bounds(penalty_matrix, player, community, 'solo')
+    min_energy_threshold = get_context_bounds(player, community, 'solo')
 
     solo_bids = get_all_possible_tasks(community, player, min_energy_threshold)
     return solo_bids
 
-def get_context_bounds(penalty_matrix, player, community, phase):
+def get_context_bounds(player, community, phase):
     # This returns a dictionary with all stats about task difficulties / player abilities
-    stats = get_stats(penalty_matrix, player, community)
+    stats = get_stats(player, community)
 
     if phase == 'partner':
         task_to_abilitity_ratio = stats['community']['med_task_difficulty'] / stats['community']['avg_member_ability']
     else:
+        # Make sure the player has at least sooooome abilities (plus avoid zero div error)
         if stats['player']['avg_player_ability'] > 0:
             task_to_abilitity_ratio = stats['community']['med_task_difficulty'] / stats['player']['avg_player_ability']
         else:
@@ -46,8 +44,8 @@ def get_context_bounds(penalty_matrix, player, community, phase):
 
     return min_energy_threshold
 
-def get_stats(penalty_matrix, player, community):
-    med_player_task_penalty, avg_player_task_penalty = np.median(penalty_matrix[0]), np.mean(penalty_matrix[0])
+def get_stats(player, community):
+    # med_player_task_penalty, avg_player_task_penalty = np.median(penalty_matrix[0]), np.mean(penalty_matrix[0])
     med_player_ability, avg_player_ability = np.median(player.abilities), np.mean(player.abilities)
 
     avg_task_difficulty = np.mean([t for task in community.tasks for t in task])
@@ -63,8 +61,8 @@ def get_stats(penalty_matrix, player, community):
             'avg_member_ability': avg_member_ability,
             'med_member_ability': med_member_ability
         },
-        'player': {'avg_player_task_penalty': avg_player_task_penalty,
-                   'med_player_task_penalty': med_player_task_penalty,
+        'player': {# 'avg_player_task_penalty': avg_player_task_penalty,
+                   # 'med_player_task_penalty': med_player_task_penalty,
                    'avg_player_ability': avg_player_ability,
                    'med_player_ability': med_player_ability}
     }
