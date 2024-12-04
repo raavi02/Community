@@ -151,8 +151,8 @@ def calculate_cost_matrix(community):
     # Pair costs
     cost_matrix_pairs = {}
     for member1, member2 in combinations(members, 2):
+        combined_abilities = np.maximum(member1.abilities, member2.abilities)
         for t, task in enumerate(tasks):
-            combined_abilities = np.maximum(member1.abilities, member2.abilities)
             cost = sum([max(0, task[i] - combined_abilities[i])
                         for i in range(len(combined_abilities))]) / 2  # Half cost for shared work
             cost_matrix_pairs[(member1.id, member2.id, t)] = cost
