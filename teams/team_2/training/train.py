@@ -15,12 +15,12 @@ import torch.nn.functional as F
 
 
 MAX_GENERATIONS = 10
-POP_SIZE = 24
-TURNS = 80
-CIVILIANS = 20
-HIDDEN_SIZE = 64
-TASK_FEATURE_SIZE = 5
-PLAYER_STATE_SIZE = 9
+POP_SIZE = 100
+TURNS = 500
+CIVILIANS = 40
+HIDDEN_SIZE = 40
+TASK_FEATURE_SIZE = 7
+PLAYER_STATE_SIZE = 11
 
 
 if __name__ == "__main__" or __name__ == "__mp_main__":
@@ -49,11 +49,11 @@ def handle_signal(best_model):
 
 
 class TaskScorerNN(nn.Module):
-    def __init__(self, task_feature_size, player_state_size, HIDDEN_SIZE):
+    def __init__(self, task_feature_size, player_state_size, hidden_size):
         super(TaskScorerNN, self).__init__()
-        self.fc1 = nn.Linear(task_feature_size + player_state_size, HIDDEN_SIZE)
-        self.fc2 = nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE)
-        self.fc3 = nn.Linear(HIDDEN_SIZE, 1)  # Outputs a single score for a task
+        self.fc1 = nn.Linear(task_feature_size + player_state_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size // 2)
+        self.fc3 = nn.Linear(hidden_size // 2, 1)  # Outputs a single score for a task
 
     def forward(self, task_features: torch.Tensor, player_state: torch.Tensor):
         # Concatenate task features and player state
@@ -74,11 +74,13 @@ class RestDecisionNN(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(RestDecisionNN, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, 1)  # Single output for rest score
+        self.fc2 = nn.Linear(hidden_size, hidden_size // 2)
+        self.fc3 = nn.Linear(hidden_size // 2, 1)  # Single output for rest score
 
     def forward(self, features):
         x = F.relu(self.fc1(features))
-        score = self.fc2(x)
+        x = self.fc2(x)
+        score = self.fc3(x)
         return score
 
 
@@ -176,8 +178,8 @@ if __name__ == "__main__":
     ]
 
     # create models/ dir for storing training models
-    if not os.path.exists("models"):
-        os.makedirs("models")
+    if not os.path.exists("teams/team_2/models"):
+        os.makedirs("teams/team_2/models")
 
     print(
         f"""Training with:
@@ -208,30 +210,39 @@ Generations: {MAX_GENERATIONS}
         # save the current best population
         signal.signal(signal.SIGINT, handle_signal(spop[0]))
 
-        # Select parents
+        elitism_proportion = 0.2  # Adjust this proportion as needed
+        elitism_count = max(1, int(elitism_proportion * len(population)))
+
+        # Select parents based on fitness
         parents = select_parents(population, fitness_scores)
+
+        # Retain top individuals as elites
+        elites = parents[:elitism_count]
 
         # Generate offspring
         offspring = []
         # for now, only create offspring from TaskScorerNN
-        for _ in range(len(parents) // 2):
+        for _ in range((len(population) - elitism_count) // 2):
             parent1, parent2 = random.sample(parents, 2)
             child_task = crossover(parent1[0], parent2[0], is_task=True)
             child_rest = crossover(parent1[1], parent2[1], is_task=False)
-            mutate(child_task, 0.1, 0.05)
-            mutate(child_rest, 0.1, 0.05)
+            mutate(child_task, 0.2, 0.05)
+            mutate(child_rest, 0.2, 0.05)
             offspring.append((child_task, child_rest))
 
             parent1, parent2 = random.sample(parents, 2)
             child_task = crossover(parent1[0], parent2[0], is_task=True)
             child_rest = crossover(parent1[1], parent2[1], is_task=False)
-            mutate(child_task, 0.1, 0.05)
-            mutate(child_rest, 0.1, 0.05)
+            mutate(child_task, 0.2, 0.05)
+            mutate(child_rest, 0.2, 0.05)
             offspring.append((child_task, child_rest))
 
         # Replace population
-        [(mutate(ptask), mutate(prest)) for ptask, prest in parents]
-        population = parents + offspring
+        [
+            (mutate(ptask, 0.1, 0.02), mutate(prest, 0.1, 0.02))
+            for ptask, prest in parents[1:]
+        ]
+        population = elites + offspring
 
         plot(avg_scores, max_scores)
         print(
@@ -240,8 +251,14 @@ Generations: {MAX_GENERATIONS}
 
     best_model = select_parents(population, fitness_scores)[0]
 
-    torch.save(best_model[0].state_dict(), "best_task_weigths.pth")
-    torch.save(best_model[1].state_dict(), "best_rest_weigths.pth")
+    torch.save(
+        best_model[0].state_dict(),
+        f"task_weights.pth",
+    )
+    torch.save(
+        best_model[1].state_dict(),
+        f"rest_weights.pth",
+    )
     print(
         'best model weights saved in "best_task_weights.pth" and "best_rest_weights.pth"'
     )

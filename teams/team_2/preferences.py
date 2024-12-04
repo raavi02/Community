@@ -20,8 +20,8 @@ class TaskScorerNN(nn.Module):
     def __init__(self, task_feature_size, player_state_size, hidden_size):
         super(TaskScorerNN, self).__init__()
         self.fc1 = nn.Linear(task_feature_size + player_state_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, 1)  # Outputs a single score for a task
+        self.fc2 = nn.Linear(hidden_size, hidden_size // 2)
+        self.fc3 = nn.Linear(hidden_size // 2, 1)  # Outputs a single score for a task
 
     def forward(self, task_features, player_state):
         # Concatenate task features and player state
@@ -42,11 +42,13 @@ class RestDecisionNN(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(RestDecisionNN, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, 1)  # Single output for rest score
+        self.fc2 = nn.Linear(hidden_size, hidden_size // 2)
+        self.fc3 = nn.Linear(hidden_size // 2, 1)  # Single output for rest score
 
     def forward(self, features):
         x = F.relu(self.fc1(features))
-        score = self.fc2(x)
+        x = self.fc2(x)
+        score = self.fc3(x)
         return score
 
 
@@ -149,55 +151,85 @@ def create_cost_matrix(player, community):
     return cost_matrix
 
 
-def create_cost_matrix_raw(community):
-    cost_matrix = []
-    for task in community.tasks:
-        task_costs = []
-        for member in community.members:
-            # Compute the delta and absolute values
+# def create_cost_matrix_raw(community):
+#     cost_matrix = []
+#     for task in community.tasks:
+#         task_costs = []
+#         for member in community.members:
+#             # Compute the delta and absolute values
+#             delta = [max(val - req, 0) for val, req in zip(member.abilities, task)]
+#             # Total cost is the sum of deltas
+#             total_cost = sum(delta)
+#             if member.energy <= -10:
+#                 total_cost = float("inf")
+#             task_costs.append(total_cost)
+#         cost_matrix.append(task_costs)
+#     cost_matrix = np.array(cost_matrix)
+#     return cost_matrix
+
+
+# def create_cost_matrix_would_exhaust(community):
+#     cost_matrix = []
+#     for task in community.tasks:
+#         task_costs = []
+#         for member in community.members:
+#             # Compute the delta and absolute values
+#             delta = [max(val - req, 0) for val, req in zip(member.abilities, task)]
+#             # Total cost is the sum of deltas
+#             total_cost = sum(delta)
+#             if member.energy - total_cost <= -10:
+#                 total_cost = float("inf")
+#             task_costs.append(total_cost)
+#         cost_matrix.append(task_costs)
+#     cost_matrix = np.array(cost_matrix)
+#     return cost_matrix
+
+
+# def create_cost_matrix_would_tire(community):
+#     cost_matrix = []
+#     for task in community.tasks:
+#         task_costs = []
+#         for member in community.members:
+#             # Compute the delta and absolute values
+#             delta = [max(val - req, 0) for val, req in zip(member.abilities, task)]
+#             # Total cost is the sum of deltas
+#             total_cost = sum(delta)
+#             if member.energy - total_cost < 0:
+#                 total_cost = float("inf")
+#             task_costs.append(total_cost)
+#         cost_matrix.append(task_costs)
+#     cost_matrix = np.array(cost_matrix)
+#     return cost_matrix
+
+
+def create_combined_cost_matrix(community):
+    num_tasks = len(community.tasks)
+    num_members = len(community.members)
+
+    # Initialize a single matrix with an extra dimension for raw, exhaust, and tire
+    cost_matrix = np.zeros((num_tasks, num_members, 3))
+
+    for task_idx, task in enumerate(community.tasks):
+        for member_idx, member in enumerate(community.members):
+            # Compute the delta and total cost
             delta = [max(val - req, 0) for val, req in zip(member.abilities, task)]
-            # Total cost is the sum of deltas
             total_cost = sum(delta)
-            if member.energy <= -10:
-                total_cost = float("inf")
-            task_costs.append(total_cost)
-        cost_matrix.append(task_costs)
-    cost_matrix = np.array(cost_matrix)
+
+            # Raw cost
+            cost_matrix[task_idx, member_idx, 0] = (
+                total_cost if member.energy > -10 else float("inf")
+            )
+            # Tire cost
+            cost_matrix[task_idx, member_idx, 1] = (
+                total_cost if member.energy - total_cost >= 0 else float("inf")
+            )
+            # Exhaust cost
+            cost_matrix[task_idx, member_idx, 2] = (
+                total_cost if member.energy - total_cost > -10 else float("inf")
+            )
+
     return cost_matrix
 
-
-def create_cost_matrix_would_exhaust(community):
-    cost_matrix = []
-    for task in community.tasks:
-        task_costs = []
-        for member in community.members:
-            # Compute the delta and absolute values
-            delta = [max(val - req, 0) for val, req in zip(member.abilities, task)]
-            # Total cost is the sum of deltas
-            total_cost = sum(delta)
-            if member.energy - total_cost <= -10:
-                total_cost = float("inf")
-            task_costs.append(total_cost)
-        cost_matrix.append(task_costs)
-    cost_matrix = np.array(cost_matrix)
-    return cost_matrix
-
-
-def create_cost_matrix_would_tire(community):
-    cost_matrix = []
-    for task in community.tasks:
-        task_costs = []
-        for member in community.members:
-            # Compute the delta and absolute values
-            delta = [max(val - req, 0) for val, req in zip(member.abilities, task)]
-            # Total cost is the sum of deltas
-            total_cost = sum(delta)
-            if member.energy - total_cost < 0:
-                total_cost = float("inf")
-            task_costs.append(total_cost)
-        cost_matrix.append(task_costs)
-    cost_matrix = np.array(cost_matrix)
-    return cost_matrix
 
 
 def count_lower_cost_players(player_cost_array, cost_matrix):
@@ -228,9 +260,12 @@ def best_partner(task: np.ndarray):
     raise Exception("All arrays have a minimum value")
 
 
+
+
 def create_tasks_feature_vector(player, community):
 
     player_cost_array = []
+    cosine_similarities = []
 
     num_abilities = len(player.abilities)
     for i, task in enumerate(community.tasks):
@@ -240,9 +275,27 @@ def create_tasks_feature_vector(player, community):
         # if player.energy - energy_cost >= 0:
         player_cost_array.append(energy_cost)
 
-    mat_raw = create_cost_matrix_raw(community)
-    mat_tire = create_cost_matrix_would_tire(community)
-    mat_exhaust = create_cost_matrix_would_exhaust(community)
+        dot_product = np.dot(player.abilities, task)
+        player_magnitude = np.linalg.norm(player.abilities)
+        task_magnitude = np.linalg.norm(task) 
+        if player_magnitude == 0 or task_magnitude == 0:
+            similarity = 0  # Handle cases where the magnitude is zero
+        else:
+            similarity = dot_product / (player_magnitude * task_magnitude)
+        cosine_similarities.append(similarity)
+
+
+    combined_cost_matrix = create_combined_cost_matrix(community)
+
+    mat_raw = combined_cost_matrix[:, :, 0]
+
+    mat_tire = combined_cost_matrix[:, :, 1]
+
+    mat_exhaust = combined_cost_matrix[:, :, 2]
+
+    # mat_raw = create_cost_matrix_raw(community)
+    # mat_tire = create_cost_matrix_would_tire(community)
+    # mat_exhaust = create_cost_matrix_would_exhaust(community)
 
     tasks_lower_raw = count_lower_cost_players(player_cost_array, mat_raw)
     tasks_lower_tire = count_lower_cost_players(player_cost_array, mat_tire)
@@ -253,7 +306,10 @@ def create_tasks_feature_vector(player, community):
         subvector = []
         task_difficulty = sum(task) / len(task)
         subvector.append(task_difficulty)
+        subvector.append(cosine_similarities[i])
         subvector.append(player_cost_array[i])
+        subvector.append(player.energy - player_cost_array[i])
+
         subvector.append(tasks_lower_raw[i] / len(community.members))
         subvector.append(tasks_lower_tire[i] / len(community.members))
         subvector.append(tasks_lower_exhaust[i] / len(community.members))
@@ -302,6 +358,9 @@ def phaseIpreferences(player, community, global_random):
 
     return requested_partners
 
+TASK_FEATURE_SIZE = 7
+PLAYER_PARAM_SIZE = 11
+HIDDEN_SIZE = 40
 
 def phaseIIpreferences(player, community, global_random):
     """Return a list of tasks for the particular player to do individually"""
@@ -311,29 +370,27 @@ def phaseIIpreferences(player, community, global_random):
         # Initialize
 
         # Hardcoded as 1, to be only the cost of the task - this can be changed.
-        task_feature_size = 5
-        player_params_size = 9
-        hidden_size = 64
+        
 
         if not hasattr(player, "turn"):
             prefix = "teams/team_2/"
             for arg in sys.argv:
                 if arg.startswith("prefix="):
-                    prefix = "models/" + arg[len("prefix=") :] + "_"
+                    prefix += "models/" + arg[len("prefix=") :] + "_"
                     break
 
             player.taskNN = TaskScorerNN(
-                task_feature_size=task_feature_size,
-                player_state_size=player_params_size,
-                hidden_size=hidden_size,
+                task_feature_size=TASK_FEATURE_SIZE,
+                player_state_size=PLAYER_PARAM_SIZE,
+                hidden_size=HIDDEN_SIZE,
             )
             player.taskNN.load_state_dict(
                 torch.load(prefix + "task_weights.pth", weights_only=True)
             )
             player.restNN = RestDecisionNN(
                 # The 1 here is hardcoded because we get a mean of the task scores
-                input_size=player_params_size + 1,
-                hidden_size=hidden_size,
+                input_size=PLAYER_PARAM_SIZE + 1,
+                hidden_size=HIDDEN_SIZE,
             )
             player.restNN.load_state_dict(
                 torch.load(prefix + "rest_weights.pth", weights_only=True)
@@ -344,11 +401,13 @@ def phaseIIpreferences(player, community, global_random):
             # This should contain the params for decision, such as player.energy, etc
             player.params = [
                 len(community.members),
-                len(community.tasks),
+                len(community.tasks) / player.num_tasks,
+                (1 - len(community.tasks) / player.num_tasks) ** 2,
                 len(community.members) / (len(community.tasks) + 1),
                 player.turn,
                 player.energy,
                 min(player.energy, 0) ** 2,
+                player.energy**3,
                 0,  # Energy to gain from resting
                 0,  # Num tired
                 0,  # Num exhausted
@@ -358,11 +417,13 @@ def phaseIIpreferences(player, community, global_random):
             tired, exh = count_tired_exhausted(community)
             player.params = [
                 len(community.members),
-                len(community.tasks),
+                len(community.tasks) / player.num_tasks,
+                (1 - len(community.tasks) / player.num_tasks) ** 2,
                 len(community.members) / (len(community.tasks) + 1),
                 player.turn,
                 player.energy,
                 min(player.energy, 0) ** 2,
+                player.energy**3,
                 rest_energy_gain(player.energy),
                 tired,
                 exh,
