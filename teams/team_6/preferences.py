@@ -3,7 +3,7 @@ import numpy as np
 
 
 PHASE_1_ASSIGNMENTS = False
-PHASE_2_ASSIGNMENTS = False
+PHASE_2_ASSIGNMENTS = True
 
 
 def exists_good_match(
@@ -56,12 +56,12 @@ def doable_tasks(player, community, allow_negative=True, max_allowed_loss=20):
     else:
         remaining_energy = max(player.energy, 0)
     doable = []
-    for task in community.tasks:
+    for j, task in enumerate(community.tasks):
         energy_required = sum(
             max(0, task[i] - player.abilities[i]) for i in range(len(task))
         )
         if energy_required < remaining_energy or energy_required == 0:
-            doable.append(task)
+            doable.append(j)
     return doable
 
 
@@ -173,30 +173,20 @@ def phaseIpreferences(player, community, global_random):
 def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7):
     """Return a list of tasks for the particular player to do individually"""
 
-    total_difficulty = sum([np.mean(task) for task in community.tasks])
-    total_ability = sum([np.mean(member.abilities) for member in community.members])
-    difficulty = (total_difficulty - total_ability) / len(community.tasks)
-
-    # print("DIFFICULTY: ", difficulty)
-
-    weakest_player = weakest_member(player, community)
-    # print("WEAKEST PLAYER: ", weakest_player)
-
     hard_tasks, impossible_tasks = find_impossible_tasks(community)
-
-    # print("HARD TASKS: ", hard_tasks)
-    # print("IMPOSSIBLE TASKS: ", impossible_tasks)
+    weakest_player = weakest_member(player, community, len(impossible_tasks))
 
     if weakest_player == True and len(impossible_tasks) > 0:
         doable = doable_tasks(player, community)
         returned_tasks = []
         if len(doable) > 0:
             for task in doable:
-                returned_tasks.append(community.tasks.index(task))
+                returned_tasks.append(task)
             return returned_tasks
         else:
             for task in impossible_tasks:
-                returned_tasks.append(community.tasks.index(task))
+                returned_tasks.append(task)
+            print("Sacrifice Tasks: ", returned_tasks)
             return returned_tasks
 
     try:
@@ -210,10 +200,13 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
             if best_task is None:
                 return []
 
-            best_task_cost = loss_phase2(
-                community.tasks[best_task], player.abilities, player.energy
+            energy_used = sum(
+                [
+                    max(community.tasks[best_task][k] - player.abilities[k], 0)
+                    for k in range(len(player.abilities))
+                ]
             )
-            if player.energy - best_task_cost < wait_energy_threshold:
+            if player.energy - energy_used < wait_energy_threshold:
                 return []
 
             return [best_task]
@@ -257,7 +250,7 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
 
     except Exception as e:
         print(e)
-        return bids
+        return []
 
 
 def assign_phase1(tasks, members):
@@ -415,11 +408,13 @@ def loss_phase2(task, abilities, current_energy):
 
 def loss_resting(task, abilities, current_energy):
     energy_used = sum([max(task[k] - abilities[k], 0) for k in range(len(abilities))])
-    cost = energy_used + max(0, current_energy)
+    current_energy = (
+        current_energy + 20 if current_energy >= 0 else abs(current_energy) * 2
+    )
 
-    scaling_factor = len(abilities) * 10 + 10
+    scaling_factor = 30
 
-    return cost / scaling_factor
+    return current_energy / scaling_factor
 
 
 def weakest_member(player, community, top_n=1):
@@ -435,7 +430,7 @@ def weakest_member(player, community, top_n=1):
 def find_impossible_tasks(community):
     impossible_tasks = []
     hard_tasks = []
-    for task in community.tasks:
+    for j, task in enumerate(community.tasks):
         best_case = 10**9
         for member in community.members:
             energy_deficit = sum(
@@ -445,8 +440,8 @@ def find_impossible_tasks(community):
             if best_case <= 0:
                 break
         if best_case >= 20:
-            impossible_tasks.append(task)
+            impossible_tasks.append(j)
         elif best_case >= 10:
-            hard_tasks.append(task)
+            hard_tasks.append(j)
 
     return hard_tasks, impossible_tasks
