@@ -34,7 +34,7 @@ def get_context_bounds(player, community, phase):
 
     # Extreme: High Energy-bound gameplay (must partner)
     if task_to_abilitity_ratio > 10:
-        min_energy_threshold = -9
+        min_energy_threshold = -9.9
     # Extreme: Time-bound gameplay (skip partnering)
     elif task_to_abilitity_ratio < 0.75 and phase == 'partner':
         min_energy_threshold = 11
