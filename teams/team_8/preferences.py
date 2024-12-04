@@ -1,181 +1,195 @@
 def phaseIpreferences(player, community, global_random):
     """
     Phase I Preferences: Determine task and partner preferences for the player.
-    Returns a list of [task_index, partner_id] pairs, indicating tasks the player
-    is willing to collaborate on with specific partners.
+    Returns a list of [task_index, partner_id] pairs.
+    Also stores the list of available players after Phase I in player.available_players.
     """
 
-    # If the player is too tired, pass
-    if player.energy < 0:
+    # If the player is incapacitated or has zero or negative energy, pass
+    if player.incapacitated or player.energy <= 0:
+        player.available_players = []
         return []
 
-    preferences = []
+    # All players have the same data and code, so we can simulate the optimal assignment
+    # Initialize active players (not incapacitated and with energy > 0)
+    active_players = [
+        p for p in community.members if not p.incapacitated and p.energy > 0
+    ]
 
-    # Sort tasks by descending difficulty (sum of task difficulty values)
-    sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
+    # **Sort active players from least to most useful**
+    active_players.sort(key=lambda p: sum(p.abilities))
 
+    # Sort tasks from hardest to easiest
+    sorted_tasks = sorted(
+        enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True
+    )
+
+    # Keep track of assigned players
+    assigned_players = set()
+    paired_players = set()
+
+    # Assignment results: task_index -> (single_player_id) or (player1_id, player2_id)
+    task_assignments = {}
+
+    # Simulate the assignment
     for task_index, task in sorted_tasks:
-        # solo energy cost
-        W_solo = sum(max(task[i] - player.abilities[i], 0) for i in range(len(task)))
+        min_energy_cost_single = float("inf")
+        min_energy_cost_pair = float("inf")
+        best_single = None
+        best_pair = None
 
-        # Evaluate potential teamwork options
-        best_partner = None
-        min_W_team = float('inf')  # Initialize with a very high value
-
-        for partner in community.members:
-            # Skip invalid partners (the player themselves or exhausted partners)
-            if partner.id == player.id or partner.energy < 0:
+        # **Find the best single player for the task, prioritizing less useful players**
+        for p in active_players:
+            if p.id in assigned_players:
                 continue
 
-            # Calculate the teamwork energy cost with this partner
-            combined_abilities = [
-                max(player.abilities[i], partner.abilities[i]) for i in range(len(task))
-            ]
-            W_team = sum(max(task[i] - combined_abilities[i], 0) for i in range(len(task))) / 2
+            # Calculate solo energy cost
+            energy_cost = sum(
+                max(task[i] - p.abilities[i], 0) for i in range(len(task))
+            )
 
-            # Update best partner if teamwork is more efficient
-            if W_team < min_W_team and player.energy >= W_team and partner.energy >= W_team:
-                min_W_team = W_team
-                best_partner = partner.id
+            # Check if the player has enough energy
+            if p.energy - energy_cost >= 0:
+                # **In case of tie in energy cost, prioritize less useful player**
+                if energy_cost < min_energy_cost_single or (
+                    energy_cost == min_energy_cost_single
+                    and sum(p.abilities) < sum(best_single.abilities)
+                ):
+                    min_energy_cost_single = energy_cost
+                    best_single = p
 
-        # Choose the team work option if:
-        # The solo energy cost is at least 1.5 times the teamwork energy cost,
-        # which means solo work is prohibitively expensive, meaing teamwork is more favorable.
-        if (
-            W_solo >= 1.5 * min_W_team
-            # and player.energy - min_W_team >= 0
-            # and partner.energy - min_W_team >= 0
-            ):
-            preferences.append([task_index, best_partner])
+        # **Find the best pair for the task, prioritizing pairs with less total usefulness**
+        for i, p1 in enumerate(active_players):
+            if p1.id in assigned_players:
+                continue
+            for p2 in active_players[i + 1 :]:
+                if p2.id in assigned_players or p1.id == p2.id:
+                    continue
 
-        
-    print("Player ", player.id, "'s preference is: ", preferences)
-    return preferences
+                # Calculate pair energy cost
+                combined_abilities = [
+                    max(p1.abilities[j], p2.abilities[j]) for j in range(len(task))
+                ]
+                energy_cost = (
+                    sum(
+                        max(task[j] - combined_abilities[j], 0)
+                        for j in range(len(task))
+                    )
+                    / 2
+                )
 
+                # Check if both players have enough energy
+                if p1.energy - energy_cost >= 0 and p2.energy - energy_cost >= 0:
+                    total_usefulness = sum(p1.abilities) + sum(p2.abilities)
+                    # **In case of tie in energy cost, prioritize pair with less total usefulness**
+                    if energy_cost < min_energy_cost_pair or (
+                        energy_cost == min_energy_cost_pair
+                        and total_usefulness
+                        < sum(best_pair[0].abilities) + sum(best_pair[1].abilities)
+                    ):
+                        min_energy_cost_pair = energy_cost
+                        best_pair = (p1, p2)
 
+        # Decide whether to assign to single or pair
+        if best_single and (
+            min_energy_cost_single <= 1.5 * min_energy_cost_pair or not best_pair
+        ):
+            # Assign to single
+            task_assignments[task_index] = (best_single,)
+            assigned_players.add(best_single.id)
+        elif best_pair:
+            # Assign to pair
+            task_assignments[task_index] = (best_pair[0], best_pair[1])
+            assigned_players.add(best_pair[0].id)
+            assigned_players.add(best_pair[1].id)
+            paired_players.add(best_pair[0].id)
+            paired_players.add(best_pair[1].id)
+        else:
+            # No valid assignment for this task
+            continue
 
-def phaseIIpreferences(player, community, global_random):
-    """
-    Phase II Preferences: Determine task preferences for solo work.
-    Returns a list of task indices the player is willing to complete individually.
-    """
-
-    # If the player is too tired, pass
-    if player.energy < 0:
-        return [] 
-
-    bids = []
-
-    # Sort tasks by descending difficulty (sum of task difficulty values); greedy approach
-    sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
-
-    for task_index, task in sorted_tasks:
-        # Calculate the solo energy cost for the player to complete this task
-        W_solo = sum(max(task[i] - player.abilities[i], 0) for i in range(len(task)))
-
-        if W_solo <= player.energy:
-            bids.append(task_index)
-            #break
-
-    return bids
-
-
-'''# Considers all partner pairs at once, rather than comparing the best partner for a particular player
-# Aims to tackle hardest tasks first
-# Attempts to find single best partner pair given lowest energy cost and remaining energy
-def create_connections(community):
-
-    connections = {}
-    
-    partnerships = []
-    for i in range(len(community.members)):
-        for j in range(i+1, len(community.members)):
-            partnerships.append((community.members[i], community.members[j]))
-
-    members = list(community.members)
-    member_energy = {}
-    for member in members:
-        member_energy[member.id] = member.energy
-    print(member_energy)
-    tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
-    for task in tasks:
-
-        partnerships = []
-        for i in range(len(members)):
-            for j in range(i+1, len(members)):
-                partnerships.append((members[i], members[j]))
-        options = []
-        energy_left = []
-
-        for member in members:
-            cost = [max(0, req - max_val) for max_val, req in zip(member.abilities, task[1])]
-            energy_left.append(member.energy - sum(cost))
-            options.append(member.id)
-
-        for partner in partnerships:
-            abilities = [max(i, j) for i, j in zip(partner[0].abilities, partner[1].abilities)]
-            energy = (partner[0].energy + partner[1].energy) / 2
-            cost = [max(0, req - max_val) for max_val, req in zip(abilities, task[1])]
-            energy_left.append(energy - sum(cost))
-            options.append(partner)
-
-        if energy_left:
-            #print(options)
-            best_idx = energy_left.index(max(energy_left))
-            connections[task[0]] = options[best_idx]
-            if type(options[best_idx]) == tuple:
-                for member in options[best_idx]:
-                    members.remove(member)
-
-    return connections
-
-
-
-def phaseIpreferences(player, community, global_random):
-    """
-    Phase I Preferences: Determine task and partner preferences for the player.
-    Returns a list of [task_index, partner_id] pairs, indicating tasks the player
-    is willing to collaborate on with specific partners.
-    """
+    # Generate preferences for this player based on the assignments
     preferences = []
-    
-    connects = create_connections(community)
-    for key, value in connects.items():
-        if player in value:
-            for v in value:
-                if player != v:
-                    preferences.append([key, v.id])
 
+    for task_index, assignees in task_assignments.items():
+        if player.id in [p.id for p in assignees]:
+            if len(assignees) == 2:
+                # It's a partnership
+                partner_id = [p.id for p in assignees if p.id != player.id][0]
+                preferences.append([task_index, partner_id])
+            else:
+                # Single assignment, will be handled in Phase II
+                pass  # Do nothing here
+
+    # Store the available players for Phase II
+    player.available_players = [p for p in active_players if p.id not in paired_players]
     return preferences
-
-
-
-
-
 
 
 def phaseIIpreferences(player, community, global_random):
     """
     Phase II Preferences: Determine task preferences for solo work.
-    Returns a list of task indices the player is willing to complete individually.
+    Returns a list of task indices.
     """
-     # If the player is too tired, pass
-    if player.energy < 0:
-        return [] 
 
-    bids = []
+    # If the player is incapacitated or has zero or negative energy, pass
+    if player.incapacitated or player.energy <= 0:
+        return []
 
-    # Sort tasks by descending difficulty (sum of task difficulty values); greedy approach
-    sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
+    # Get the list of available players from Phase I
+    if hasattr(player, "available_players"):
+        active_players = player.available_players
+    else:
+        # This should not happen, but in case it does, assume all players are available
+        active_players = [
+            p for p in community.members if not p.incapacitated and p.energy > 0
+        ]
+
+    # **Sort active players from least to most useful**
+    active_players.sort(key=lambda p: sum(p.abilities))
+
+    # Sort tasks from hardest to easiest
+    sorted_tasks = sorted(
+        enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True
+    )
+
+    # Keep track of assigned players in Phase II
+    assigned_players = set()
+
+    preferences = []
 
     for task_index, task in sorted_tasks:
-        # Calculate the solo energy cost for the player to complete this task
-        W_solo = sum(max(task[i] - player.abilities[i], 0) for i in range(len(task)))
+        min_energy_cost = float("inf")
+        best_player = None
 
-        if W_solo <= player.energy:
-            bids.append(task_index)
-            #break
+        # **Iterate over active players, prioritizing less useful players**
+        for p in active_players:
+            if p.id in assigned_players:
+                continue
 
-    return bids
-'''
+            # Calculate solo energy cost
+            energy_cost = sum(
+                max(task[i] - p.abilities[i], 0) for i in range(len(task))
+            )
 
+            # Check if the player has enough energy
+            if p.energy - energy_cost >= 0:
+                # **In case of tie in energy cost, prioritize less useful player**
+                if energy_cost < min_energy_cost or (
+                    energy_cost == min_energy_cost
+                    and sum(p.abilities) < sum(best_player.abilities)
+                ):
+                    min_energy_cost = energy_cost
+                    best_player = p
+
+        if best_player:
+            assigned_players.add(best_player.id)
+            if best_player.id == player.id:
+                # Assign the task to this player
+                preferences.append(task_index)
+            # Remove the player from active_players
+            active_players = [p for p in active_players if p.id != best_player.id]
+        else:
+            continue  # No valid assignment for this task
+
+    return preferences
