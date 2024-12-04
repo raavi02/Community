@@ -3,50 +3,7 @@ from typing import List
 import numpy as np
 from community import Community, Member
 import pandas as pd
-import os
 from teams.team_10.constants import *
-
-# Task 1: Figure out global variables...
-# Nicky 
-
-# Task 2: NEW SACRIFICING STRATEGY -- IMPLEMENTED 
-# Julianna 
-
-# Task 3: Check if any player is capable of doing certains tasks... (Open ended) -- THINKING ON THIS
-# Julianna
-
-# Task 4:
-# We want to make sure we don't voluenteer for tasks that an individual can complete (IN PROGRESS)
-# Julianna 
-
-# Task 5: 
-# Only volenteering the best 5 or 10 tasks (Max)
-# 1. We'll probably get a speed up from early returning
-# 2. Don't really want to step on other peoples
-# Akhil
-
-# Task 6: Variable lower bounds.. Would be cool to adjust lower bounds gradually? 
-# Akhil
-
-
-# USE best pairs instead of just the first 8.
-
-
-# Task 7: (Do later...)
-# We could just play submissive.... 
-# We see if we are playing with a bunch of other teams.
-# Just volenteer for every task with every player from every other team
-# - We don't something weird / worse than them. 
-# - Reduces the complexity of the situation.
-
-
-# Hyper Parameters: 
-# START_SACRIFICING_YEAR
-# NUM_TURNS_TO_WAIT_BEFORE_SACRIFICING
-# TURNS_TO_LOOK_BACK
-# SACRIFICE_TIME
-# num_weakest_players
-
 
 def phaseIpreferences(player, community: Community, global_random):
     """Return a list of task index and the partner id for the particular player.
@@ -240,13 +197,6 @@ if len(tasks_at_turn) >= START_SACRIFICING_YEAR and all(
         else:
             return []
 """
-
-# Task 7: (Do later...)
-# We could just play submissive.... 
-# We see if we are playing with a bunch of other teams.
-# Just volenteer for every task with every player from every other team
-# - We don't something weird / worse than them. 
-# - Reduces the complexity of the situation.
 
 
 def find_weakest_agents(members, num_weakest) -> list[int]:
