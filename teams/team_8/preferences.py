@@ -128,68 +128,117 @@ def phaseIpreferences(player, community, global_random):
 
 def phaseIIpreferences(player, community, global_random):
     """
-    Phase II Preferences: Determine task preferences for solo work.
+    Phase II Preferences: Determine solo task preferences for the player.
     Returns a list of task indices.
     """
-
-    # If the player is incapacitated or has zero or negative energy, pass
-    if player.incapacitated or player.energy <= 0:
+    if player.incapacitated:
         return []
 
-    # Get the list of available players from Phase I
-    if hasattr(player, "available_players"):
-        active_players = player.available_players
-    else:
-        # This should not happen, but in case it does, assume all players are available
-        active_players = [
-            p for p in community.members if not p.incapacitated and p.energy > 0
-        ]
+    # Retrieve the list of available players from Phase I
+    active_players = getattr(player, "available_players", [])
+    if not active_players:
+        active_players = [p for p in community.members if not p.incapacitated]
 
-    # **Sort active players from least to most useful**
+    # Sort active players from least to most useful (sum of abilities)
     active_players.sort(key=lambda p: sum(p.abilities))
 
-    # Sort tasks from hardest to easiest
-    sorted_tasks = sorted(
+    # Tasks not assigned in Phase I
+    tasks_ordered = sorted(
         enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True
     )
 
-    # Keep track of assigned players in Phase II
-    assigned_players = set()
-
+    assigned_tasks = set()
     preferences = []
 
-    for task_index, task in sorted_tasks:
+    # First, assign tasks that players can complete without dropping below zero energy
+    for task_index, task in tasks_ordered:
         min_energy_cost = float("inf")
         best_player = None
 
-        # **Iterate over active players, prioritizing less useful players**
         for p in active_players:
-            if p.id in assigned_players:
+            if p.id in assigned_tasks:
                 continue
 
-            # Calculate solo energy cost
-            energy_cost = sum(
+            energy_needed = sum(
                 max(task[i] - p.abilities[i], 0) for i in range(len(task))
             )
 
-            # Check if the player has enough energy
-            if p.energy - energy_cost >= 0:
-                # **In case of tie in energy cost, prioritize less useful player**
-                if energy_cost < min_energy_cost or (
-                    energy_cost == min_energy_cost
+            if p.energy - energy_needed >= 0:
+                if energy_needed < min_energy_cost or (
+                    energy_needed == min_energy_cost
                     and sum(p.abilities) < sum(best_player.abilities)
                 ):
-                    min_energy_cost = energy_cost
+                    min_energy_cost = energy_needed
                     best_player = p
 
         if best_player:
-            assigned_players.add(best_player.id)
+            assigned_tasks.add(task_index)
             if best_player.id == player.id:
-                # Assign the task to this player
                 preferences.append(task_index)
-            # Remove the player from active_players
+            # Remove assigned player from active players
             active_players = [p for p in active_players if p.id != best_player.id]
-        else:
-            continue  # No valid assignment for this task
+
+    # Identify impossible tasks (no individual can complete without dropping below -10 energy)
+    impossible_tasks = identify_impossible_tasks(community)
+
+    # If there are impossible tasks, sacrifice the weakest player
+    if impossible_tasks:
+        if is_weakest_player(player, community):
+            for task_index in impossible_tasks:
+                if task_index in assigned_tasks:
+                    continue
+
+                task = community.tasks[task_index]
+                energy_needed = sum(
+                    max(task[i] - player.abilities[i], 0) for i in range(len(task))
+                )
+
+                # Allow energy to drop below -10 for impossible tasks
+                # Assuming the game allows energy to drop to some minimum value (e.g., -20)
+                if player.energy - energy_needed >= -20:
+                    preferences.append(task_index)
+                    assigned_tasks.add(task_index)
+                    break  # Assign only one impossible task
 
     return preferences
+
+
+def identify_impossible_tasks(community):
+    """
+    Identifies tasks that cannot be completed by any individual without their energy dropping below -10.
+    Returns a list of indices of impossible tasks.
+    """
+    impossible_tasks = []
+
+    for task_index, task in enumerate(community.tasks):
+        task_possible = False
+
+        # Check if any individual can perform the task without dropping below -10 energy
+        for p in community.members:
+            if p.incapacitated:
+                continue
+
+            energy_needed = sum(
+                max(task[i] - p.abilities[i], 0) for i in range(len(task))
+            )
+
+            if p.energy - energy_needed >= -10:
+                task_possible = True
+                break  # Task is possible for an individual
+
+        if not task_possible:
+            impossible_tasks.append(task_index)
+
+    return impossible_tasks
+
+
+def is_weakest_player(player, community):
+    """
+    Determines if the player is the weakest based on the sum of their abilities.
+    Returns True if the player is the weakest, False otherwise.
+    """
+    total_abilities = [
+        sum(p.abilities) for p in community.members if not p.incapacitated
+    ]
+    player_total = sum(player.abilities)
+    return player_total == min(total_abilities)
