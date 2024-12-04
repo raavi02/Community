@@ -21,7 +21,7 @@ def phaseIpreferences(player, community, global_random):
         secondary_energy_limit = primary_energy_limit - (10 * (1 - math.exp(-(difficulty_ratio - 1))))
         secondary_energy_limit = max(secondary_energy_limit, -10)  # Ensure it doesn't drop below -10
 
-    print(difficulty_ratio, secondary_energy_limit)
+    # print(difficulty_ratio, secondary_energy_limit)
 
     # Sort tasks by total difficulty (descending)
     sorted_tasks = sorted(enumerate(community.tasks), key=lambda x: sum(x[1]), reverse=True)
@@ -86,10 +86,16 @@ def phaseIIpreferences(player, community, global_random):
         secondary_energy_limit = primary_energy_limit - (10 * (1 - math.exp(-(difficulty_ratio - 1))))
         secondary_energy_limit = max(secondary_energy_limit, -10)  # Ensure it doesn't drop below -10
 
-    print(difficulty_ratio, secondary_energy_limit)
+    # print(difficulty_ratio, secondary_energy_limit)
+
+    impossible_tasks = findImpossibleTasks(community)
+    sacrificee_ids = getWeakestMembers(community, len(impossible_tasks))
 
     # Evaluate tasks for individual completion
     for task_id, task in enumerate(community.tasks):
+        if task_id in impossible_tasks:
+            continue  # Skip impossible tasks
+
         energy_cost = sum(max(task[i] - player.abilities[i], 0) for i in range(len(task)))
         remaining_energy = player.energy - energy_cost
 
@@ -100,17 +106,16 @@ def phaseIIpreferences(player, community, global_random):
     # Sort tasks by a combination of low energy cost and high remaining energy
     preferences.sort(key=lambda x: (x[1], -x[2]))  # Sort by energy cost, then remaining energy
 
-    impossible_tasks = findImpossibleTasks(community)
-    sacrificee_ids = getWeakestMembers(community, len(impossible_tasks))
-
     if impossible_tasks and sacrificee_ids:
         for task_id in impossible_tasks:
             if player.id in sacrificee_ids:
-                preferences.append(task_id)
+                preferences.append((task_id, float('inf'), -10))
 
     # Return task IDs in preferred order
     return [task_id for task_id, _, _ in preferences]
 
+
+### Inspired by Group 1's Implementation
 def findImpossibleTasks(community):
     """
     Identifies difficult tasks that cannot be completed by any individual player
@@ -155,6 +160,7 @@ def findImpossibleTasks(community):
 
     return impossible_tasks
 
+### Inspired by Group 1's Implementation
 def getWeakestMembers(community, num_sacrifices):
     """
     Finds the weakest members of the community for sacrifice on impossible tasks.
