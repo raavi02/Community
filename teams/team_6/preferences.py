@@ -224,7 +224,7 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
             if player.energy - energy_used < wait_energy_threshold:
                 return volunteer_list
 
-            if best_task in impossible_tasks:
+            if best_task in volunteer_list:
                 return volunteer_list
             else:
                 return [best_task] + volunteer_list
