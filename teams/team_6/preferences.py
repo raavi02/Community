@@ -193,15 +193,18 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
         if PHASE_2_ASSIGNMENTS:
 
             doable = []
-            if (player.energy < 0):  # If player has negative energy but can do at least one task with no energy loss
+            if (
+                player.energy < 0
+            ):  # If player has negative energy but can do at least one task with no energy loss
                 doable = doable_tasks(player, community, allow_negative=False)
             else:  # If player has positive energy but can do at least one task with at most 50% energy loss, then don't partner up
-                doable = doable_tasks(player, community, max_allowed_loss=int(0.5 * player.energy))
+                doable = doable_tasks(
+                    player, community, max_allowed_loss=int(0.5 * player.energy)
+                )
 
             volunteer_list = []
             for task in doable:
                 volunteer_list.append(task)
-            
 
             # Use cost matrix to assign tasks
             wait_energy_threshold = -9
@@ -225,7 +228,7 @@ def phaseIIpreferences(player, community, global_random, resting_loss_scale=0.7)
                 return volunteer_list
             else:
                 return [best_task] + volunteer_list
-        
+
         else:
             min_loss = float("inf")
             best_task = None
