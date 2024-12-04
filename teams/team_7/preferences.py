@@ -6,24 +6,45 @@ tracking_data = []
 
 # Partnership Round
 def phaseIpreferences(player, community, global_random):
-    if player.energy <= 0:
-        return []
-
     partnered_abilities = get_possible_partnerships(player, community)
     penalty_matrix = calculate_penalty_matrix(partnered_abilities, community.tasks)
+    min_energy_threshold = get_context_bounds(penalty_matrix, player, community, 'partner')
 
-    # This returns a dictionary with all stats about task difficulties / player abilities
-    stats = get_stats(penalty_matrix, player, community)
-
-    partner_bids = get_best_partner(player, community)
-    return partner_bids
+    return get_best_partner(player, community, min_energy_threshold)
 
 
 # Individual Round
 def phaseIIpreferences(player, community, global_random):
-    solo_bids = get_all_possible_tasks(community, player)
+    partnered_abilities = get_possible_partnerships(player, community)
+    penalty_matrix = calculate_penalty_matrix(partnered_abilities, community.tasks)
+    min_energy_threshold = get_context_bounds(penalty_matrix, player, community, 'solo')
+
+    solo_bids = get_all_possible_tasks(community, player, min_energy_threshold)
     return solo_bids
 
+def get_context_bounds(penalty_matrix, player, community, phase):
+    # This returns a dictionary with all stats about task difficulties / player abilities
+    stats = get_stats(penalty_matrix, player, community)
+
+    if phase == 'partner':
+        task_to_abilitity_ratio = stats['community']['med_task_difficulty'] / stats['community']['avg_member_ability']
+    else:
+        if stats['player']['avg_player_ability'] > 0:
+            task_to_abilitity_ratio = stats['community']['med_task_difficulty'] / stats['player']['avg_player_ability']
+        else:
+            task_to_abilitity_ratio = 99
+
+    # Extreme: High Energy-bound gameplay (must partner)
+    if task_to_abilitity_ratio > 10:
+        min_energy_threshold = -9
+    # Extreme: Time-bound gameplay (skip partnering)
+    elif task_to_abilitity_ratio < 0.75 and phase == 'partner':
+        min_energy_threshold = 11
+    # Time-bound gameplay
+    else:
+        min_energy_threshold = 0
+
+    return min_energy_threshold
 
 def get_stats(penalty_matrix, player, community):
     med_player_task_penalty, avg_player_task_penalty = np.median(penalty_matrix[0]), np.mean(penalty_matrix[0])
@@ -89,7 +110,7 @@ def calculate_penalty_matrix(partnered_abilities, tasks):
     return np.array(penalty_matrix)
 
 
-def get_all_possible_tasks(community, player):
+def get_all_possible_tasks(community, player, min_energy_threshold):
     """
     Volunteer for all tasks that keep your energy level above 0.
     """
@@ -99,13 +120,13 @@ def get_all_possible_tasks(community, player):
     for task_index, task in sorted_tasks:
         # Volunteer for all tasks that will keep your energy above 0.
         energy_cost = sum(max(task[i] - player.abilities[i], 0) for i in range(len(task)))
-        if energy_cost <= player.energy:
+        if player.energy - energy_cost >= min_energy_threshold:
             solo_bids.append(task_index)
 
     return solo_bids
 
 
-def get_best_partner(player, community):
+def get_best_partner(player, community, min_energy_threshold):
     """
     Volunteer for every task with the minimum penalty partner.
     """
@@ -128,7 +149,7 @@ def get_best_partner(player, community):
             # if player.abilities[i] == partner.abilities[i]:
 
             # Skip invalid partners
-            if partner.id == player.id or partner.energy < 0:
+            if partner.id == player.id or partner.energy < -9:
                 continue
 
             # Compute combined abilities
@@ -144,13 +165,14 @@ def get_best_partner(player, community):
             # Finding best partner for the task.
             if (
                     energy_cost < min_energy_cost
-                    and energy_cost <= player.energy
-                    and energy_cost <= partner.energy
+                    and (player.energy - energy_cost) >= min_energy_threshold
+                    and (partner.energy - energy_cost) >= min_energy_threshold
             ):
                 min_energy_cost = energy_cost
                 best_partner = partner.id
 
         if best_partner is not None and (solo_energy_cost >= 1.5 * min_energy_cost):
+        # if best_partner is not None:
             preferences.append([task_index, best_partner])
     return preferences
 
