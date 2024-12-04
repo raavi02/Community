@@ -132,19 +132,23 @@ class CommunityActions:
         available_players = sorted(available_players, key=lambda x: x.id)
         partnerships = CommunityActions.form_partnerships(community, available_players)
         # print("Partnerships")
-        for task in partnerships:
-            player1ID = partnerships[task][0]
-            player2ID = partnerships[task][1]
+        for task_id in partnerships:
+            player1ID = partnerships[task_id][0]
+            player2ID = partnerships[task_id][1]
             # print(player1ID, player2ID)
             player1 = next(member for member in community.members if member.id == player1ID)
             player2 = next(member for member in community.members if member.id == player2ID)
+            task = community.tasks[task_id]
             MemberActions.perform_task(player1, task, player2)
             MemberActions.perform_task(player2, task, player1)
-            community.tasks.remove(list(task))
+            community.tasks[task_id] = []
             available_players.remove(player1)
             available_players.remove(player2)
             # print(player1.id, player2.id, task, sum(task), player1.abilities, player2.abilities, player1.energy, player2.energy)
             community.completed_tasks += 1
+
+        while [] in community.tasks:
+            community.tasks.remove([])
 
         # del partnerships
         # Phase 2: Individual tasks
@@ -193,29 +197,29 @@ class CommunityActions:
             if player_id in bids:
                 for task_id, partner_id in bids[player_id]:
                     assert task_id < len(community.tasks), "Index should be within range while assigning partnership tasks"
-                    task = community.tasks[task_id]
-                    assert task in community.tasks, "The preferred task is not a community task, select valid tasks"
+                    # task = community.tasks[task_id]
+                    # assert task in community.tasks, "The preferred task is not a community task, select valid tasks"
                     if partner_id == player_id:
                         continue
                     if partner_id in bids and [task_id, player_id] in bids[partner_id]:
                         pair = tuple(sorted([player_id, partner_id]))
-                        if pair not in all_partnerships[tuple(task)]:
-                            all_partnerships[tuple(task)].append(pair)
+                        if pair not in all_partnerships[task_id]:
+                            all_partnerships[task_id].append(pair)
 
         # Randomly select one partnership per task and maximize overall partnerships
         final_partnerships = {}
         used_ids = set()
 
         # Sort tasks by number of partnerships (descending) to maximize overall partnerships
-        sorted_tasks = sorted(all_partnerships.keys(), key=lambda t: sum(t), reverse=True)
+        sorted_tasks = sorted(all_partnerships.keys(), key=lambda t: sum(community.tasks[t]), reverse=True)
 
-        for task in sorted_tasks:
-            partnerships = all_partnerships[task]
+        for task_id in sorted_tasks:
+            partnerships = all_partnerships[task_id]
             partnerships.sort()
             global_random.shuffle(partnerships)  # Randomize partnerships for this task
             for partnership in partnerships:
                 if all(id not in used_ids for id in partnership):
-                    final_partnerships[task] = list(partnership)
+                    final_partnerships[task_id] = list(partnership)
                     used_ids.update(partnership)
                     break  # Move to next task after finding a valid partnership
         # print(final_partnerships)
@@ -239,26 +243,27 @@ class CommunityActions:
                 print(f"Error getting individual preferences for player {player.id} from group {player.group}. Assuming no preferences.")
                 num_calls_prefII += 1
             # if tasksVolunteered:
-                # print(player.id, tasksVolunteered)
+            # print(player.id, tasksVolunteered)
             if tasksVolunteered is not None:
                 for tasks_id in tasksVolunteered:
                     assert tasks_id < len(community.tasks), "Index should be within range while assigning individual tasks"
-                    tasks = community.tasks[tasks_id]
-                    assert tasks in community.tasks, "The preferred task is not a community task, select valid tasks"
-                    assignments[tuple(tasks)].append(player)
-        sorted_tasks = sorted(assignments.keys(), key=lambda t: sum(t), reverse=True)
+                    # tasks = community.tasks[tasks_id]
+                    # assert tasks in community.tasks, "The preferred task is not a community task, select valid tasks"
+                    assignments[tasks_id].append(player)
+        sorted_tasks = sorted(assignments.keys(), key=lambda t: sum(community.tasks[t]), reverse=True)
         final_assignments = []
-        for task in sorted_tasks:
+        for task_id in sorted_tasks:
             if not available_players:
                 break
-            player = global_random.choice(assignments[task])
-            while (player not in available_players and len(assignments[task]) > 1):
-                assignments[task].remove(player)
-                player = global_random.choice(assignments[task])
+            player = global_random.choice(assignments[task_id])
+            while (player not in available_players and len(assignments[task_id]) > 1):
+                assignments[task_id].remove(player)
+                player = global_random.choice(assignments[task_id])
             if player in available_players:
                 available_players.remove(player)
-                final_assignments.append((task, player))
+                final_assignments.append((community.tasks[task_id], player))
         return [final_assignments, available_players]
+
 
 def getPairPreferencesPhaseI(player, community):
     group = player.group
