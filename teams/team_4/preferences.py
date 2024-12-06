@@ -25,7 +25,9 @@ def phaseIpreferences(player, community, global_random):
     in the list has the first index task [index in the community.tasks list] and the second index as the partner id'''
     list_choices = []
 
-    if player.id == 0:
+    lowest_id = min([member.id for member in community.members if member.group == player.group])
+
+    if player.id == lowest_id:
         # Calculate cost matrices
         cost_matrix_individual, cost_matrix_pairs = calculate_cost_matrix(community)
         # Rank assignment options by task
